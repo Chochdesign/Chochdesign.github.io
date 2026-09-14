@@ -76,7 +76,7 @@ const PORTFOLIO_DATA = {
     { label: "LinkedIn", url: "https://www.linkedin.com/in/morganchochinov/" }
   ],
 
-  bio: "I'm an extremely passionate designer who wants to change the way the world see's design! I get my inspiration by looking at other art forms such as (music, film, fashion, architecture, etc). I find this is the best way to maximize my creativity, and always leads to the best most original ideas.",
+  bio: "I'm an extremely passionate designer who wants to change the way the world sees design! I get my inspiration by looking at other art forms such as music, film, fashion, architecture, etc. I find this is the best way to maximize my creativity, and it always leads to the best, most original ideas.",
 
   projects: [
     {
@@ -89,11 +89,11 @@ const PORTFOLIO_DATA = {
 
       credits: "New York City launch party hosted by Paul Stuart. Sponsored by Mount Gay Rum & Dirty Water Seltzers. Product placement by L.L. Bean, G.H. Bass, and Sperry. Posted in The New York Times & WSJ.",
 
-      challenge: "Launching a definitive print issue for a traditional, historically exclusive fashion archetype while deliberately subverting its predominantly white culture through diverse casting and modern art direction — all while meeting strict commercial print standards for a 1,000+ copy run.",
+      challenge: "Throughout its history, \u2018prep fashion\u2019 has always had a predominantly caucasian community base which dominated the culture. This traditionally exclusive demographic was challenged through modern art direction and diverse casting practices, in an attempt to make the prep style more accessible and inclusive to everyone and not just one defined group. Although achieved, this proved to be quite difficult, as breaking and expanding barriers while simultaneously respecting and honouring style traditions can become a difficult needle to thread. All the while having to meet strict commercial print standards for an 1,000+ copy run, you can say we had our work cut out for us.",
 
-      process: "From a design and art direction standpoint, we chose to feature models of different ethnicities and backgrounds, while placing the focus on a man named \u201cPreppy Pete\u201d who became known as the new face of prep below the magazine. This was a significant success, as prep has historically been predominantly white culture.",
+      process: "We chose to feature models of different ethnicities, cultures and backgrounds while simultaneously placing focus on the new face of prep, \u201cPreppy Pete\u201d. Our friend Pete became known as the new face of prep below the magazine. The effort to diversify our cast of models ultimately resulted in success, as we opened the door to prep fashion to everyone and anyone who identified with the style.",
 
-      outcome: "Issue 01 sold over 1,000 copies and earned placement at Casa Magazines and Rare Magazines, plus a limited J.Crew collaboration run that sold out in under 10 minutes. The reception carried straight into a second issue nearly double the length (84 \u2192 164 pages), with continued sponsor support and national press coverage in The New York Times and The Wall Street Journal.",
+      outcome: "Issue 01 sold over a resounding 1,000 copies on debut release, and earned its placement at multiple store locations, such as Casa Magazines and Rare Magazines. A limited J.Crew collaboration run also took place, successfully selling out stock in under 10 minutes! Sales aside, the positive reception carried straight into the second issue, encouraging us to double the length (84\u2013164 pages), and continue to amass sponsor support and national press coverage in The Wall Street Journal and The New York Times.",
 
       dimensions: "Issue 01: 84 pages (2025) \u00b7 Issue 02: 164 pages (2026)",
 
@@ -124,9 +124,9 @@ const PORTFOLIO_DATA = {
 
       credits: "Volume 01: Maya Civilization. A one-of-one hand-bound edition, self-published as a personal experiment in production: laser-cut acrylic casing, custom InDesign layouts, and a hand-glued binding process built entirely in-house.",
 
-      challenge: "Making dense academic material on Maya art and archaeology feel discovered rather than assigned, without flattening the scholarship into a listicle — while solving a production problem with no existing template: laser-cutting acrylic to the right tolerance, bonding it into a durable case with acrylic solvent, and hand-binding paper pages into a material that was never meant to be bound.",
+      challenge: "Translating information dense academic material on Maya art and archaeology into an engaging and exciting reading and visual experience can be quite the daunting task. On top of that, how can one condense all of the curated scholarly material into easily readable paragraphs without mashing them into a listicle format? These challenges had to be tackled with precision, alongside having to solve production problems with no pre-existing templates. The deliberate effort to laser cut acrylic to the right tolerance, bond it into a durable case with appropriate acrylic solvent, and hard binding paper pages into unconventional material not normally meant to be bound can prove difficult, but once efficiently executed and tackled, made the sweat and elbow grease well worth it.",
 
-      process: "The issue is structured like a museum visit rather than a magazine: Prologue, Foundation, Stone, Ceramics, Figure, Glyphs, Epilogue, each a chapter built around one class of object. The manifesto that opens the issue \u2014 ars longa, vita brevis, \u201cart is long, life is short\u201d \u2014 sets the premise that carries through every section: these are objects built to outlast their makers. Scholarly essays run in a disciplined serif column, broken up by oversized type treatments used as punctuation rather than decoration, and a spec-sheet catalogue treats each artifact with the same clinical precision as an auction listing. The acrylic housing extends that idea into the object itself: a vitrine you hold in your hands.",
+      process: "We\u2019ve all read your average magazine. We know the story, we understand the formula. It\u2019s predictable, for the most part. So in the spirit of ancient civilizations and the once lost artifacts and ancient archaeological history that accompanies them, why not turn that typical reading experience into that of a page-bound museum tour?! Prologue, Foundation, Stone, Ceramics, Figure, Glyphs, Epilogue. All chapters built around one class of object. \u201cArs Longa, Vita Brevis\u201d (translated: Art Is Long, Life Is Short), is the title of the manifesto which opens the issue. The premise of objects and works of art long outlasting their original creators runs course through the metaphorical veins of each page. Scholarly essays are ran in disciplined serif columns, broken up by oversized type treatments used as effective punctuation rather than average decoration. A spec-sheet catalogue treats each artifact with the exact clinical precision as your typical auction listing. The acrylic housing extends the idea into the object itself: a vitrine you hold in your hands. The reading experience is designed to pull you into the history itself, instead of just feeling like you\u2019re reading an essay for your high school history class.",
 
       dimensions: "46 pages \u00b7 hand-bound, laser-cut acrylic case \u00b7 one-of-one edition",
 
@@ -163,9 +163,9 @@ const PORTFOLIO_DATA = {
 
       credits: "Issue One: The Unrefined. A branding and editorial project \u2014 identity, layout system, and five bird profiles \u2014 built to spread awareness of overlooked species and the environmental pressures they're up against.",
 
-      challenge: "Bridging two registers that usually don't share a page: field-guide precision (height, wingspan, range, IUCN status) and articles on ecology, extinction, and what it means for a species to thrive because of human damage rather than in spite of it \u2014 without the magazine feeling like two different publications stapled together.",
+      challenge: "Combining field-guide styled information (such as height, wingspans, range, IUCN status) and articles on ecology, extinction and sustainability can sometimes prove difficult. Having information that usually is reserved for separate pages suddenly mashed together requires deliberate design choices and aesthetic workarounds to make sure the two registers complement instead of clash. The end goal was to ultimately include these vastly different information pieces and combine them effectively without making it feel like two entirely separate publications were stapled together.",
 
-      process: "Each bird gets a spec sheet \u2014 the same clinical data format used for the King Vulture, Shoebill, and Marabou Stork \u2014 set against a single saturated yellow that unifies photography pulled from very different sources into one visual system. A high-contrast black-and-white duotone treatment keeps the imagery documentary rather than pretty, appropriate for birds most people are taught to find ugly. Long-form essays interrupt the field-guide rhythm with oversized italic pull-quotes, giving the writing room to argue for what the data can't: that \u201cleast concern\u201d is not the same as beautiful.",
+      process: "Each bird is meant to be displayed with a spec sheet, showing data displayed against a single saturated yellow, unifying photography pulled from a vast array of sources, all compiled into one visually cohesive system. A high contrast black and white duotone treatment is used to preserve the academic, documentary style of the imagery as a means of properly representing and reflecting the spirit of the birds that most people are convinced to find ugly. Various long form essays interrupt the organized field guide rhythm with oversized italic pull-quotes, effectively giving the writing room to argue for what some of the data can\u2019t; that species of \u201cleast concern\u201d is not the same as \u201cbeautiful\u201d.",
 
       dimensions: "Branding + editorial system \u00b7 in progress, started 2026",
 
@@ -182,7 +182,7 @@ const PORTFOLIO_DATA = {
 
       logoBreakdown: {
         full: "images/logo-full.png",
-        description: "Designed for familiarity and brand recognition — something approachable, not intimidating. The imperfections are intentional: rough edges make it feel personable rather than polished, which matters given the subject matter inside."
+        description: "Designed to be instantly recognizable \u2014 a mark people connect with, not just look at. The rough, hand-cut edges are deliberate: they soften the entry point into subject matter that can otherwise feel dense or daunting, from scientific detail to tougher reads on extinction and habitat loss, so the magazine feels like something to pick up rather than brace for."
       },
 
       birdPicker: [
