@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Morgan Chochinov — Graphic & Editorial Designer</title>
+<meta name="description" content="Portfolio of Morgan Chochinov, a graphic and editorial designer based in Toronto specializing in magazine design, identity systems, and print production.">
+<meta name="theme-color" content="#F0EFE9">
+
+<meta property="og:title" content="Morgan Chochinov — Graphic & Editorial Designer">
+<meta property="og:description" content="Editorial design portfolio: magazine systems, identity, and print production.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="images/dozer-01-main.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Morgan Chochinov — Graphic & Editorial Designer">
+<meta name="twitter:description" content="Editorial design portfolio: magazine systems, identity, and print production.">
+<meta name="twitter:image" content="images/dozer-01-main.jpg">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23F0EFE9'/%3E%3Ctext x='50' y='69' font-family='Arial, sans-serif' font-weight='900' font-size='52' text-anchor='middle' fill='%23121212'%3EMC%3C/text%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- running index strip, mimics a book's running head -->
+<div class="runhead" aria-hidden="true">
+  <span id="runhead-name"></span>
+  <span class="runhead-mid">·</span>
+  <span id="runhead-section">portfolio</span>
+  <span class="runhead-progress-track"><span id="scroll-progress" class="runhead-progress-fill"></span></span>
+</div>
+
+<header class="hero" id="top">
+  <nav class="hero-nav">
+    <a href="#work">work</a>
+    <a href="#about">about</a>
+    <a href="#contact">contact</a>
+  </nav>
+
+  <div class="hero-main">
+    <h1 id="hero-name" class="hero-name"></h1>
+    <div class="hero-side">
+      <p id="hero-role" class="hero-role"></p>
+      <p id="hero-tagline" class="hero-tagline"></p>
+    </div>
+  </div>
+
+  <div class="hero-foot">
+    <span id="hero-location"></span>
+    <span class="hero-scroll">scroll — 01 / 02 / 03</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- CONTENTS: literalizes the book's S/M/L/XL organizing device as a real index -->
+  <section class="contents" aria-label="Contents">
+    <div class="contents-label">
+      <span class="contents-number">00</span>
+      <h2>Contents</h2>
+    </div>
+    <ol id="contents-list" class="contents-list"></ol>
+  </section>
+
+  <section id="work" class="work">
+    <div id="work-sections"></div>
+  </section>
+
+  <section id="about" class="about">
+    <div class="about-number">
+      <span>04</span>
+    </div>
+    <div class="about-grid">
+      <h2 class="about-heading">About</h2>
+      <p id="about-bio" class="about-bio"></p>
+      <div class="about-contactline">
+        <p>Based in <span id="about-location"></span>. </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="contact">
+    <div class="contact-number"><span>05</span></div>
+    <div class="contact-main">
+      <h2>Get in touch</h2>
+      <p id="contact-status" class="contact-status"></p>
+      <a id="contact-email" class="contact-email" href="#"></a>
+      <ul id="contact-social" class="contact-social"></ul>
+    </div>
+  </section>
+
+</main>
+
+<footer class="backtotop">
+  <a href="#top">Back to top ↑</a>
+</footer>
+
+<script src="data.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
