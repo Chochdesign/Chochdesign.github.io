@@ -302,6 +302,263 @@
     });
   });
 
+  // ────────────────────────────────────────────────────────────
+  // GENERAL WORK \u2014 unlabeled strip between Work and About, images
+  // and/or video clips, auto-detected by file extension so the array
+  // in data.js stays just a flat list of paths either way. The set
+  // is rendered twice back to back so translateX(-50%) loops
+  // seamlessly no matter how many items end up in the array; the
+  // duplicate is aria-hidden so it isn't announced twice. Speed is
+  // derived from the rendered width of one set rather than a fixed
+  // loop duration, so the pace feels the same whether there are 6
+  // items or 60.
+  // ────────────────────────────────────────────────────────────
+  function initGeneralWork(){
+    const section = document.getElementById("general-work");
+    const track = document.getElementById("ticker-track");
+    const items = d.generalWork || [];
+    if (!section || !track) return;
+    if (!items.length) { section.hidden = true; return; }
+
+    const VIDEO_EXT = /\.(mp4|webm|m4v|mov)$/i;
+    function isVideoSrc(src){ return VIDEO_EXT.test(src); }
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // ────────────────────────────────────────────────────────────
+    // LIGHTBOX \u2014 click any item to see it full-size, with
+    // prev/next to page through the whole collection without
+    // closing. Built once, reused for every open.
+    // ────────────────────────────────────────────────────────────
+    const lightbox = document.createElement("div");
+    lightbox.className = "ticker-lightbox";
+    lightbox.hidden = true;
+    lightbox.setAttribute("role", "dialog");
+    lightbox.setAttribute("aria-modal", "true");
+    lightbox.setAttribute("aria-label", "Enlarged view");
+
+    const closeBtn = document.createElement("button");
+    closeBtn.type = "button";
+    closeBtn.className = "ticker-lightbox-close";
+    closeBtn.textContent = "Close";
+
+    const prevBtn = document.createElement("button");
+    prevBtn.type = "button";
+    prevBtn.className = "ticker-lightbox-nav ticker-lightbox-prev";
+    prevBtn.setAttribute("aria-label", "Previous");
+    prevBtn.innerHTML = "&#8249;";
+
+    const nextBtn = document.createElement("button");
+    nextBtn.type = "button";
+    nextBtn.className = "ticker-lightbox-nav ticker-lightbox-next";
+    nextBtn.setAttribute("aria-label", "Next");
+    nextBtn.innerHTML = "&#8250;";
+
+    if (items.length <= 1) { prevBtn.hidden = true; nextBtn.hidden = true; }
+
+    const stage = document.createElement("div");
+    stage.className = "ticker-lightbox-stage";
+    const mediaSlot = document.createElement("div");
+    mediaSlot.className = "ticker-lightbox-media";
+    stage.appendChild(mediaSlot);
+
+    lightbox.append(closeBtn, prevBtn, nextBtn, stage);
+    document.body.appendChild(lightbox);
+
+    let currentIndex = 0;
+    let lastFocused = null;
+    let closeTimer = null;
+
+    function renderSlot(src, animate){
+      const finish = () => {
+        mediaSlot.innerHTML = "";
+        if (isVideoSrc(src)) {
+          const v = document.createElement("video");
+          v.src = src;
+          v.controls = true;
+          v.autoplay = true;
+          v.playsInline = true;
+          mediaSlot.appendChild(v);
+        } else {
+          const img = document.createElement("img");
+          img.src = src;
+          img.alt = "";
+          mediaSlot.appendChild(img);
+        }
+        if (animate) requestAnimationFrame(() => { mediaSlot.style.opacity = "1"; });
+      };
+      if (animate) {
+        mediaSlot.style.opacity = "0";
+        setTimeout(finish, 160); // matches the CSS opacity transition below
+      } else {
+        mediaSlot.style.opacity = "1";
+        finish();
+      }
+    }
+
+    function showAt(index, animate){
+      currentIndex = ((index % items.length) + items.length) % items.length; // wraps both directions
+      renderSlot(items[currentIndex], animate);
+    }
+
+    function openLightbox(index, triggerEl){
+      if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+      lastFocused = triggerEl || document.activeElement;
+      showAt(index, false);
+      lightbox.hidden = false;
+      document.body.style.overflow = "hidden";
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        lightbox.classList.add("is-open");
+        closeBtn.focus();
+      }));
+    }
+
+    function closeLightbox(){
+      if (lightbox.hidden) return;
+      lightbox.classList.remove("is-open");
+      document.body.style.overflow = "";
+      closeTimer = setTimeout(() => {
+        lightbox.hidden = true;
+        const vid = mediaSlot.querySelector("video");
+        if (vid) vid.pause();
+        mediaSlot.innerHTML = "";
+        if (lastFocused && typeof lastFocused.focus === "function") lastFocused.focus();
+      }, 320); // matches the CSS transform/opacity transition on .ticker-lightbox-stage
+    }
+
+    closeBtn.addEventListener("click", closeLightbox);
+    prevBtn.addEventListener("click", () => showAt(currentIndex - 1, true));
+    nextBtn.addEventListener("click", () => showAt(currentIndex + 1, true));
+    lightbox.addEventListener("click", (e) => { if (e.target === lightbox) closeLightbox(); });
+    document.addEventListener("keydown", (e) => {
+      if (lightbox.hidden) return;
+      if (e.key === "Escape") closeLightbox();
+      else if (e.key === "ArrowRight") showAt(currentIndex + 1, true);
+      else if (e.key === "ArrowLeft") showAt(currentIndex - 1, true);
+    });
+
+    // ────────────────────────────────────────────────────────────
+    // MEDIA + SETS \u2014 the real set's items are real <button>s (so
+    // they're keyboard-reachable and get a proper accessible name);
+    // the duplicate set stays plain, non-focusable <div>s under its
+    // aria-hidden parent, but still clickable for a mouse since
+    // visually it's an identical tile.
+    // ────────────────────────────────────────────────────────────
+    function buildMediaEl(src){
+      if (isVideoSrc(src)) {
+        const video = document.createElement("video");
+        video.src = src;
+        video.muted = true;
+        video.setAttribute("muted", ""); // some browsers check the attribute, not just the property, before allowing autoplay
+        video.playsInline = true;
+        video.disablePictureInPicture = true;
+        video.setAttribute("aria-hidden", "true"); // decorative \u2014 the wrapping button (or aria-hidden parent) carries the semantics
+        if (reduced) {
+          // no forced motion \u2014 sits on its first frame; people can
+          // opt in with native controls instead of it looping on its
+          // own, the same idea as the flipbook going static above
+          video.controls = true;
+        } else {
+          video.loop = true;
+          video.autoplay = true;
+          video.preload = "auto";
+        }
+        return video;
+      }
+      const img = document.createElement("img");
+      img.src = src;
+      img.alt = "";
+      return img;
+    }
+
+    function buildSet(hideFromAT){
+      const set = document.createElement("div");
+      set.className = "ticker-set";
+      if (hideFromAT) set.setAttribute("aria-hidden", "true");
+      items.forEach((src, i) => {
+        // not loading="lazy" on purpose: this strip lays every item
+        // out in a track wider than the viewport, so items far to
+        // the right would only ever scroll into lazy-load range once
+        // the animation moves them there \u2014 but the animation below
+        // waits on every item to finish loading first. Lazy-loading
+        // here would deadlock a longer set.
+        const item = document.createElement(hideFromAT ? "div" : "button");
+        item.className = "ticker-item";
+        if (!hideFromAT) {
+          item.type = "button";
+          const kind = isVideoSrc(src) ? "video" : "image";
+          item.setAttribute("aria-label", "Open general work " + kind + " " + (i + 1) + " full size");
+        }
+        item.appendChild(buildMediaEl(src));
+        item.addEventListener("click", () => openLightbox(i, item));
+        set.appendChild(item);
+      });
+      return set;
+    }
+
+    const setA = buildSet(false);
+    track.appendChild(setA);
+    if (reduced) return; // one static, manually-scrollable set is enough \u2014 see style.css
+
+    const setB = buildSet(true); // duplicate for the seamless loop; aria-hidden so AT doesn't hear it twice
+    track.appendChild(setB);
+
+    const TICKER_SPEED = 55; // px/sec \u2014 constant pace regardless of item count
+    function sizeTicker(){
+      const distance = setA.scrollWidth;
+      if (!distance) return;
+      const duration = Math.max(distance / TICKER_SPEED, 10);
+      track.style.setProperty("--ticker-duration", duration + "s");
+      track.classList.add("is-ready"); // only starts the animation once the pace is known \u2014 see style.css
+    }
+
+    // wait for this set's own items specifically (not the whole
+    // page) so the strip starts at the right pace immediately,
+    // instead of guessing and then visibly jumping speed later.
+    // Images signal readiness via complete/load; video via
+    // readyState/loadedmetadata, the earliest point its real
+    // dimensions are known.
+    function waitFor(el, cb){
+      if (el.tagName === "VIDEO") {
+        if (el.readyState >= 1) { cb(); return; } // HAVE_METADATA
+        el.addEventListener("loadedmetadata", cb, { once: true });
+        el.addEventListener("error", cb, { once: true });
+      } else {
+        if (el.complete) { cb(); return; }
+        el.addEventListener("load", cb, { once: true });
+        el.addEventListener("error", cb, { once: true }); // a bad path shouldn't hang the strip forever
+      }
+    }
+    const mediaEls = Array.from(setA.querySelectorAll("img, video"));
+    let pending = mediaEls.length;
+    function settle(){
+      pending--;
+      if (pending <= 0) sizeTicker();
+    }
+    if (!mediaEls.length) {
+      sizeTicker();
+    } else {
+      mediaEls.forEach(el => waitFor(el, settle));
+    }
+    window.addEventListener("resize", sizeTicker);
+
+    // pause video decoding while the strip is scrolled out of view
+    // instead of letting it run in the background forever \u2014 same
+    // idea as the flipbook's own visibility-based auto-play above
+    const videos = Array.from(track.querySelectorAll("video"));
+    if (videos.length) {
+      if ("IntersectionObserver" in window) {
+        new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            videos.forEach(v => entry.isIntersecting ? v.play().catch(() => {}) : v.pause());
+          });
+        }, { threshold: 0.1 }).observe(section);
+      } else {
+        videos.forEach(v => v.play().catch(() => {}));
+      }
+    }
+  }
+  initGeneralWork();
+
   // ---- about ----
   document.getElementById("about-bio").textContent = d.bio;
   document.getElementById("about-location").textContent = d.location;

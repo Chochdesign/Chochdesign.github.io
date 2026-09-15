@@ -814,6 +814,155 @@ h1,h2,h3,p,ol,ul{ margin: 0; }
 }
 
 /* ────────────────────────────────────────────────────────────
+   GENERAL WORK — a loose, unlabeled strip of images and/or video
+   clips that scrolls itself continuously, ticker-tape style.
+   Deliberately un-numbered and uncaptioned (unlike the chapters
+   above): this isn't a sequence, it's a loose reel, closer to a
+   printed insert than a chapter. The item set is rendered twice
+   back to back in script.js so translateX(-50%) loops seamlessly
+   at any item count; the second copy is aria-hidden so it isn't
+   announced twice.
+   ──────────────────────────────────────────────────────────── */
+.general-work{
+  overflow: hidden;
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+  padding-block: clamp(1rem, 3vw, 2rem);
+}
+.ticker-track{
+  display: flex;
+  gap: 4px;
+  width: max-content;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 4%, #000 96%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 4%, #000 96%, transparent 100%);
+}
+/* animation only starts once script.js knows the real width of one
+   set and has set --ticker-duration — starting immediately on a
+   guessed duration would mean visibly jumping speed once the real
+   images finish loading and the correct pace is known */
+.ticker-track.is-ready{
+  animation: ticker-scroll var(--ticker-duration, 42s) linear infinite;
+}
+.ticker-set{
+  display: flex;
+  flex-shrink: 0;
+  gap: 4px;
+}
+.ticker-item{
+  flex-shrink: 0;
+  height: clamp(130px, 20vw, 280px);
+  cursor: pointer;
+}
+button.ticker-item{
+  display: block;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+}
+.ticker-item img,
+.ticker-item video{
+  display: block;
+  height: 100%;
+  width: auto;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.ticker-item:hover img,
+.ticker-item:hover video,
+.ticker-item:focus-visible img,
+.ticker-item:focus-visible video{
+  transform: scale(1.035);
+}
+
+/* ---- lightbox: click any item to see it full-size ---- */
+.ticker-lightbox{
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 4vw, 3rem);
+  background: rgba(18, 18, 18, 0.92);
+  opacity: 0;
+  transition: opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.ticker-lightbox[hidden]{ display: none; }
+.ticker-lightbox.is-open{ opacity: 1; }
+
+.ticker-lightbox-close,
+.ticker-lightbox-nav{
+  position: fixed;
+  background: none;
+  border: none;
+  color: var(--paper);
+  cursor: pointer;
+  z-index: 101;
+}
+.ticker-lightbox-close:focus-visible,
+.ticker-lightbox-nav:focus-visible{
+  outline-color: var(--paper);
+}
+.ticker-lightbox-close{
+  top: 1.25rem;
+  right: clamp(1rem, 4vw, 2rem);
+  padding: 0.35rem 0;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  border-bottom: 1px solid var(--paper);
+}
+.ticker-lightbox-close:hover{ opacity: 0.75; }
+.ticker-lightbox-nav{
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 2.4rem;
+  line-height: 1;
+  padding: 0.5rem 0.75rem;
+}
+.ticker-lightbox-nav:hover{ opacity: 0.7; }
+.ticker-lightbox-prev{ left: clamp(0.5rem, 3vw, 1.5rem); }
+.ticker-lightbox-next{ right: clamp(0.5rem, 3vw, 1.5rem); }
+.ticker-lightbox-nav[hidden]{ display: none; }
+
+.ticker-lightbox-stage{
+  max-width: 92vw;
+  max-height: 88vh;
+  transform: scale(0.94);
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.ticker-lightbox.is-open .ticker-lightbox-stage{
+  transform: scale(1);
+}
+.ticker-lightbox-media{
+  transition: opacity 0.16s ease;
+}
+.ticker-lightbox-media img,
+.ticker-lightbox-media video{
+  display: block;
+  max-width: 92vw;
+  max-height: 88vh;
+  width: auto;
+  height: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+}
+@keyframes ticker-scroll{
+  from{ transform: translateX(0); }
+  to{ transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce){
+  .general-work{ overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .ticker-track.is-ready{ animation: none; } /* matches .is-ready's own specificity so this reliably wins */
+  .ticker-set[aria-hidden]{ display: none; }
+  .ticker-item img,
+  .ticker-item video,
+  .ticker-lightbox,
+  .ticker-lightbox-stage,
+  .ticker-lightbox-media{
+    transition: none;
+  }
+}
+/* ────────────────────────────────────────────────────────────
    ABOUT — pull quote treatment via yellow block
    ──────────────────────────────────────────────────────────── */
 .about{

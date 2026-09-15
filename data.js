@@ -60,6 +60,16 @@
     Without it, the thumbnail defaults to a cover-cropped first image.
   - Top-level "status" is a one-line availability note shown near
     your contact info — edit this any time your availability changes.
+  - Top-level "generalWork" is a flat array of image AND/OR video
+    paths for the auto-scrolling strip that sits between Work and
+    About \u2014 no title, no writeup, just a loose reel. Video is
+    detected automatically by file extension (.mp4, .webm, .m4v,
+    .mov \u2014 mp4/webm are the safest bet for playback everywhere),
+    so you don't need any special syntax, just mix paths freely.
+    Video plays muted and looped automatically; add as many items as
+    you want, in whatever order, and it paces itself to a constant
+    speed no matter how many you add. Leave it empty to hide the
+    section entirely.
   ────────────────────────────────────────────────────────────
 */
 
@@ -77,6 +87,22 @@ const PORTFOLIO_DATA = {
   ],
 
   bio: "I'm an extremely passionate designer who wants to change the way the world sees design! I get my inspiration by looking at other art forms such as music, film, fashion, architecture, etc. I find this is the best way to maximize my creativity, and it always leads to the best, most original ideas.",
+
+  // Loose collection, no writeups \u2014 renders as the auto-scrolling
+  // strip between Work and About. Mix image and video paths freely
+  // (video is detected by file extension and plays muted + looped).
+  // Add as many as you want, in any order. Leave empty to hide the
+  // section.
+  generalWork: [
+    "images/gnack.jpg",
+    "images/scepultura.jpg",
+    "images/oblivara.jpg",
+    "images/CONTIGUA.jpg",
+    "images/8E2422A8-FB1C-4F86-BF44-6DFA792DAACE.jpg",
+    "images/IMG_9769.png",
+    // "images/next-one.jpg",
+    // "images/a-video.mp4",
+  ],
 
   projects: [
     {
