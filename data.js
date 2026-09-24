@@ -46,6 +46,12 @@
     normal hero image \u2014 use this for a project that's literally a
     printed book (used by Arsvita). Set "images" to just the cover
     for the contents-index thumbnail; "spreads" carries the full set.
+  - "model3d" (optional) puts a 3D model of the finished object in
+    front of the "spreads" viewer. Visitors drag it around to see every
+    side, switch the stand on or off, and click it to open the
+    page-flip spreads underneath. It needs arsvita-3d.js next to
+    script.js, plus {src: the model file, poster: a still image shown
+    while the model loads}. Used by Arsvita.
   - "birdPicker" (optional) shows a grid of clickable thumbnails
     instead of a single hero image \u2014 clicking one reveals that
     entry's own drag-to-flip spreads. Each entry is {id, name,
@@ -60,16 +66,6 @@
     Without it, the thumbnail defaults to a cover-cropped first image.
   - Top-level "status" is a one-line availability note shown near
     your contact info — edit this any time your availability changes.
-  - Top-level "generalWork" is a flat array of image AND/OR video
-    paths for the auto-scrolling strip that sits between Work and
-    About \u2014 no title, no writeup, just a loose reel. Video is
-    detected automatically by file extension (.mp4, .webm, .m4v,
-    .mov \u2014 mp4/webm are the safest bet for playback everywhere),
-    so you don't need any special syntax, just mix paths freely.
-    Video plays muted and looped automatically; add as many items as
-    you want, in whatever order, and it paces itself to a constant
-    speed no matter how many you add. Leave it empty to hide the
-    section entirely.
   ────────────────────────────────────────────────────────────
 */
 
@@ -87,22 +83,6 @@ const PORTFOLIO_DATA = {
   ],
 
   bio: "I'm an extremely passionate designer who wants to change the way the world sees design! I get my inspiration by looking at other art forms such as music, film, fashion, architecture, etc. I find this is the best way to maximize my creativity, and it always leads to the best, most original ideas.",
-
-  // Loose collection, no writeups \u2014 renders as the auto-scrolling
-  // strip between Work and About. Mix image and video paths freely
-  // (video is detected by file extension and plays muted + looped).
-  // Add as many as you want, in any order. Leave empty to hide the
-  // section.
-  generalWork: [
-    "images/gnack.jpg",
-    "images/scepultura.jpg",
-    "images/oblivara.jpg",
-    "images/CONTIGUA.jpg",
-    "images/8E2422A8-FB1C-4F86-BF44-6DFA792DAACE.jpg",
-    "images/IMG_9769.png",
-    // "images/next-one.jpg",
-    // "images/a-video.mp4",
-  ],
 
   projects: [
     {
@@ -168,6 +148,10 @@ const PORTFOLIO_DATA = {
 
       images: ["images/arsvita/spread-01.jpg"],
       processImages: [],
+      model3d: {
+        src: "models/arsvita-3d-model.js",
+        poster: "images/arsvita/3d-poster.png"
+      },
       spreads: [
         "images/arsvita/spread-01.jpg","images/arsvita/spread-02.jpg","images/arsvita/spread-03.jpg",
         "images/arsvita/spread-04.jpg","images/arsvita/spread-05.jpg","images/arsvita/spread-06.jpg",

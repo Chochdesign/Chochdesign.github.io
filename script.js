@@ -164,6 +164,7 @@
       const hasImages = p.images && p.images.length > 0;
       const hasSpreads = p.spreads && p.spreads.length > 1;
       const hasBirdPicker = p.birdPicker && p.birdPicker.length > 0;
+      const hasModel3d = hasSpreads && p.model3d && p.model3d.src;
 
       function buildFlipbookMarkup(spreads, title, aspectClass){
         return `<div class="flipbook ${aspectClass}" role="img" aria-label="${escapeAttr(title)} \u2014 page-flip preview of ${spreads.length} spreads">
@@ -178,6 +179,33 @@
            </div>
            <input type="range" class="flipbook-slider" min="0" max="${spreads.length - 1}" value="0"
                   step="1" aria-label="Spread position, ${spreads.length} total">`;
+      }
+
+      // 3D model shown first; clicking it swaps in the page-flip spreads
+      function buildModel3dMarkup(){
+        const clickWord = canHoverPreview ? "Click" : "Tap";
+        const poster = p.model3d.poster
+          ? `<img class="model3d-poster" src="${p.model3d.poster}" alt="" loading="lazy">`
+          : "";
+        return `<div class="model3d" data-model3d="${p.id}">
+             <div class="model3d-stage" tabindex="0" role="button"
+                  aria-label="${escapeAttr(p.title)} in 3D. Drag to turn it around. ${clickWord} or press Enter to open the book.">
+               ${poster}
+               <span class="model3d-loading" aria-hidden="true">Loading 3D model\u2026</span>
+               <span class="model3d-open-label" aria-hidden="true">${clickWord} to open the book</span>
+               <span class="model3d-hint" aria-hidden="true">Drag to turn \u2194</span>
+             </div>
+             <div class="model3d-controls">
+               <div class="model3d-toggle" role="group" aria-label="Acrylic stand">
+                 <button type="button" data-stand="on" aria-pressed="true">With stand</button>
+                 <button type="button" data-stand="off" aria-pressed="false">Without stand</button>
+               </div>
+             </div>
+           </div>
+           <div class="model3d-book" hidden>
+             <button type="button" class="bird-viewer-back model3d-back">\u2190 Back to 3D model</button>
+             ${buildFlipbookMarkup(p.spreads, p.title, 'flipbook--wide')}
+           </div>`;
       }
 
       const heroBlock = hasBirdPicker
@@ -201,6 +229,8 @@
                </div>
              `).join("")}
            </div>`
+        : hasModel3d
+        ? buildModel3dMarkup()
         : hasSpreads
         ? buildFlipbookMarkup(p.spreads, p.title, 'flipbook--wide')
         : hasImages
@@ -301,263 +331,6 @@
       }
     });
   });
-
-  // ────────────────────────────────────────────────────────────
-  // GENERAL WORK \u2014 unlabeled strip between Work and About, images
-  // and/or video clips, auto-detected by file extension so the array
-  // in data.js stays just a flat list of paths either way. The set
-  // is rendered twice back to back so translateX(-50%) loops
-  // seamlessly no matter how many items end up in the array; the
-  // duplicate is aria-hidden so it isn't announced twice. Speed is
-  // derived from the rendered width of one set rather than a fixed
-  // loop duration, so the pace feels the same whether there are 6
-  // items or 60.
-  // ────────────────────────────────────────────────────────────
-  function initGeneralWork(){
-    const section = document.getElementById("general-work");
-    const track = document.getElementById("ticker-track");
-    const items = d.generalWork || [];
-    if (!section || !track) return;
-    if (!items.length) { section.hidden = true; return; }
-
-    const VIDEO_EXT = /\.(mp4|webm|m4v|mov)$/i;
-    function isVideoSrc(src){ return VIDEO_EXT.test(src); }
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    // ────────────────────────────────────────────────────────────
-    // LIGHTBOX \u2014 click any item to see it full-size, with
-    // prev/next to page through the whole collection without
-    // closing. Built once, reused for every open.
-    // ────────────────────────────────────────────────────────────
-    const lightbox = document.createElement("div");
-    lightbox.className = "ticker-lightbox";
-    lightbox.hidden = true;
-    lightbox.setAttribute("role", "dialog");
-    lightbox.setAttribute("aria-modal", "true");
-    lightbox.setAttribute("aria-label", "Enlarged view");
-
-    const closeBtn = document.createElement("button");
-    closeBtn.type = "button";
-    closeBtn.className = "ticker-lightbox-close";
-    closeBtn.textContent = "Close";
-
-    const prevBtn = document.createElement("button");
-    prevBtn.type = "button";
-    prevBtn.className = "ticker-lightbox-nav ticker-lightbox-prev";
-    prevBtn.setAttribute("aria-label", "Previous");
-    prevBtn.innerHTML = "&#8249;";
-
-    const nextBtn = document.createElement("button");
-    nextBtn.type = "button";
-    nextBtn.className = "ticker-lightbox-nav ticker-lightbox-next";
-    nextBtn.setAttribute("aria-label", "Next");
-    nextBtn.innerHTML = "&#8250;";
-
-    if (items.length <= 1) { prevBtn.hidden = true; nextBtn.hidden = true; }
-
-    const stage = document.createElement("div");
-    stage.className = "ticker-lightbox-stage";
-    const mediaSlot = document.createElement("div");
-    mediaSlot.className = "ticker-lightbox-media";
-    stage.appendChild(mediaSlot);
-
-    lightbox.append(closeBtn, prevBtn, nextBtn, stage);
-    document.body.appendChild(lightbox);
-
-    let currentIndex = 0;
-    let lastFocused = null;
-    let closeTimer = null;
-
-    function renderSlot(src, animate){
-      const finish = () => {
-        mediaSlot.innerHTML = "";
-        if (isVideoSrc(src)) {
-          const v = document.createElement("video");
-          v.src = src;
-          v.controls = true;
-          v.autoplay = true;
-          v.playsInline = true;
-          mediaSlot.appendChild(v);
-        } else {
-          const img = document.createElement("img");
-          img.src = src;
-          img.alt = "";
-          mediaSlot.appendChild(img);
-        }
-        if (animate) requestAnimationFrame(() => { mediaSlot.style.opacity = "1"; });
-      };
-      if (animate) {
-        mediaSlot.style.opacity = "0";
-        setTimeout(finish, 160); // matches the CSS opacity transition below
-      } else {
-        mediaSlot.style.opacity = "1";
-        finish();
-      }
-    }
-
-    function showAt(index, animate){
-      currentIndex = ((index % items.length) + items.length) % items.length; // wraps both directions
-      renderSlot(items[currentIndex], animate);
-    }
-
-    function openLightbox(index, triggerEl){
-      if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
-      lastFocused = triggerEl || document.activeElement;
-      showAt(index, false);
-      lightbox.hidden = false;
-      document.body.style.overflow = "hidden";
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        lightbox.classList.add("is-open");
-        closeBtn.focus();
-      }));
-    }
-
-    function closeLightbox(){
-      if (lightbox.hidden) return;
-      lightbox.classList.remove("is-open");
-      document.body.style.overflow = "";
-      closeTimer = setTimeout(() => {
-        lightbox.hidden = true;
-        const vid = mediaSlot.querySelector("video");
-        if (vid) vid.pause();
-        mediaSlot.innerHTML = "";
-        if (lastFocused && typeof lastFocused.focus === "function") lastFocused.focus();
-      }, 320); // matches the CSS transform/opacity transition on .ticker-lightbox-stage
-    }
-
-    closeBtn.addEventListener("click", closeLightbox);
-    prevBtn.addEventListener("click", () => showAt(currentIndex - 1, true));
-    nextBtn.addEventListener("click", () => showAt(currentIndex + 1, true));
-    lightbox.addEventListener("click", (e) => { if (e.target === lightbox) closeLightbox(); });
-    document.addEventListener("keydown", (e) => {
-      if (lightbox.hidden) return;
-      if (e.key === "Escape") closeLightbox();
-      else if (e.key === "ArrowRight") showAt(currentIndex + 1, true);
-      else if (e.key === "ArrowLeft") showAt(currentIndex - 1, true);
-    });
-
-    // ────────────────────────────────────────────────────────────
-    // MEDIA + SETS \u2014 the real set's items are real <button>s (so
-    // they're keyboard-reachable and get a proper accessible name);
-    // the duplicate set stays plain, non-focusable <div>s under its
-    // aria-hidden parent, but still clickable for a mouse since
-    // visually it's an identical tile.
-    // ────────────────────────────────────────────────────────────
-    function buildMediaEl(src){
-      if (isVideoSrc(src)) {
-        const video = document.createElement("video");
-        video.src = src;
-        video.muted = true;
-        video.setAttribute("muted", ""); // some browsers check the attribute, not just the property, before allowing autoplay
-        video.playsInline = true;
-        video.disablePictureInPicture = true;
-        video.setAttribute("aria-hidden", "true"); // decorative \u2014 the wrapping button (or aria-hidden parent) carries the semantics
-        if (reduced) {
-          // no forced motion \u2014 sits on its first frame; people can
-          // opt in with native controls instead of it looping on its
-          // own, the same idea as the flipbook going static above
-          video.controls = true;
-        } else {
-          video.loop = true;
-          video.autoplay = true;
-          video.preload = "auto";
-        }
-        return video;
-      }
-      const img = document.createElement("img");
-      img.src = src;
-      img.alt = "";
-      return img;
-    }
-
-    function buildSet(hideFromAT){
-      const set = document.createElement("div");
-      set.className = "ticker-set";
-      if (hideFromAT) set.setAttribute("aria-hidden", "true");
-      items.forEach((src, i) => {
-        // not loading="lazy" on purpose: this strip lays every item
-        // out in a track wider than the viewport, so items far to
-        // the right would only ever scroll into lazy-load range once
-        // the animation moves them there \u2014 but the animation below
-        // waits on every item to finish loading first. Lazy-loading
-        // here would deadlock a longer set.
-        const item = document.createElement(hideFromAT ? "div" : "button");
-        item.className = "ticker-item";
-        if (!hideFromAT) {
-          item.type = "button";
-          const kind = isVideoSrc(src) ? "video" : "image";
-          item.setAttribute("aria-label", "Open general work " + kind + " " + (i + 1) + " full size");
-        }
-        item.appendChild(buildMediaEl(src));
-        item.addEventListener("click", () => openLightbox(i, item));
-        set.appendChild(item);
-      });
-      return set;
-    }
-
-    const setA = buildSet(false);
-    track.appendChild(setA);
-    if (reduced) return; // one static, manually-scrollable set is enough \u2014 see style.css
-
-    const setB = buildSet(true); // duplicate for the seamless loop; aria-hidden so AT doesn't hear it twice
-    track.appendChild(setB);
-
-    const TICKER_SPEED = 55; // px/sec \u2014 constant pace regardless of item count
-    function sizeTicker(){
-      const distance = setA.scrollWidth;
-      if (!distance) return;
-      const duration = Math.max(distance / TICKER_SPEED, 10);
-      track.style.setProperty("--ticker-duration", duration + "s");
-      track.classList.add("is-ready"); // only starts the animation once the pace is known \u2014 see style.css
-    }
-
-    // wait for this set's own items specifically (not the whole
-    // page) so the strip starts at the right pace immediately,
-    // instead of guessing and then visibly jumping speed later.
-    // Images signal readiness via complete/load; video via
-    // readyState/loadedmetadata, the earliest point its real
-    // dimensions are known.
-    function waitFor(el, cb){
-      if (el.tagName === "VIDEO") {
-        if (el.readyState >= 1) { cb(); return; } // HAVE_METADATA
-        el.addEventListener("loadedmetadata", cb, { once: true });
-        el.addEventListener("error", cb, { once: true });
-      } else {
-        if (el.complete) { cb(); return; }
-        el.addEventListener("load", cb, { once: true });
-        el.addEventListener("error", cb, { once: true }); // a bad path shouldn't hang the strip forever
-      }
-    }
-    const mediaEls = Array.from(setA.querySelectorAll("img, video"));
-    let pending = mediaEls.length;
-    function settle(){
-      pending--;
-      if (pending <= 0) sizeTicker();
-    }
-    if (!mediaEls.length) {
-      sizeTicker();
-    } else {
-      mediaEls.forEach(el => waitFor(el, settle));
-    }
-    window.addEventListener("resize", sizeTicker);
-
-    // pause video decoding while the strip is scrolled out of view
-    // instead of letting it run in the background forever \u2014 same
-    // idea as the flipbook's own visibility-based auto-play above
-    const videos = Array.from(track.querySelectorAll("video"));
-    if (videos.length) {
-      if ("IntersectionObserver" in window) {
-        new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
-            videos.forEach(v => entry.isIntersecting ? v.play().catch(() => {}) : v.pause());
-          });
-        }, { threshold: 0.1 }).observe(section);
-      } else {
-        videos.forEach(v => v.play().catch(() => {}));
-      }
-    }
-  }
-  initGeneralWork();
 
   // ---- about ----
   document.getElementById("about-bio").textContent = d.bio;
@@ -785,6 +558,72 @@
       backBtn.addEventListener("click", () => {
         picker.querySelectorAll(".bird-viewer").forEach(v => { v.hidden = true; });
         grid.hidden = false;
+      });
+    });
+  });
+
+  // ────────────────────────────────────────────────────────────
+  // 3D MODEL — drag to turn it and see every side, switch the stand
+  // on or off, click (or tap) to open the page-flip spreads, and
+  // "Back to 3D model" to return. The model file is a few MB, so it
+  // only starts loading when the project is about to scroll into view.
+  // If a browser can't show 3D, the poster image stands in and a
+  // click still opens the book.
+  // ────────────────────────────────────────────────────────────
+  document.querySelectorAll("[data-model3d]").forEach(wrap => {
+    const project = d.projects.find(p => p.id === wrap.dataset.model3d);
+    const stage = wrap.querySelector(".model3d-stage");
+    const bookView = wrap.nextElementSibling;
+    const backBtn = bookView.querySelector(".model3d-back");
+    const toggles = wrap.querySelectorAll("[data-stand]");
+    let viewer = null;
+
+    function openBook(){
+      wrap.hidden = true;
+      bookView.hidden = false;
+      backBtn.focus({ preventScroll: true });
+    }
+    function closeBook(){
+      bookView.hidden = true;
+      wrap.hidden = false;
+      stage.focus({ preventScroll: true });
+    }
+    backBtn.addEventListener("click", closeBook);
+
+    function useFallback(){
+      stage.classList.add("is-fallback");
+      stage.addEventListener("click", openBook);
+      stage.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openBook(); }
+      });
+    }
+
+    function start(){
+      if (!window.Arsvita3D) {
+        // arsvita-3d.js didn't load: show the poster and say what's missing
+        useFallback();
+        stage.classList.add("is-missing");
+        const msg = stage.querySelector(".model3d-loading");
+        if (msg) msg.textContent = "3D viewer file not found. Put arsvita-3d.js next to index.html.";
+        return;
+      }
+      viewer = window.Arsvita3D.mount(stage, { src: project.model3d.src, onOpen: openBook });
+      if (!viewer.ok) useFallback();
+    }
+
+    if ("IntersectionObserver" in window) {
+      const io = new IntersectionObserver((entries) => {
+        if (entries.some(en => en.isIntersecting)) { io.disconnect(); start(); }
+      }, { rootMargin: "600px 0px" });
+      io.observe(stage);
+    } else {
+      start();
+    }
+
+    toggles.forEach(btn => {
+      btn.addEventListener("click", () => {
+        toggles.forEach(b => b.setAttribute("aria-pressed", String(b === btn)));
+        if (viewer) viewer.setStand(btn.dataset.stand === "on");
       });
     });
   });
