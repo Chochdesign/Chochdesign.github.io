@@ -13,7 +13,11 @@
   giving up, and then says on the stage which file is missing.
 
   Used by script.js:
-    Arsvita3D.mount(stageEl, { src, onOpen })  ->  { setStand(bool) }
+    Arsvita3D.mount(stageEl, { src, autoStand, paused })  ->  { setPaused(bool) }
+  The model turns slowly on its own and, with autoStand on, its stand
+  fades away and comes back every few seconds. Dragging turns it by
+  hand and holds both movements until it's left alone for a moment.
+  There's no floor or shadow: the book floats on the page itself.
   ────────────────────────────────────────────────────────────
 */
 (function(){
@@ -104,7 +108,7 @@ vec3 toSRGB(vec3 c){return mix(c*12.92,1.055*pow(c,vec3(1./2.4))-.055,step(vec3(
   const FS = `#version 300 es
 precision highp float;
 in vec3 vPos;in vec3 vNrm;in vec2 vUV;in vec4 vTan;
-uniform vec3 uCam,uKeyDir,uKeyCol;uniform vec4 uBase;uniform float uRough,uMetal,uOcc,uNScale,uTransl,uClipY;
+uniform vec3 uCam,uKeyDir,uKeyCol;uniform vec4 uBase;uniform float uRough,uMetal,uOcc,uNScale,uTransl,uClipY,uFade;
 uniform sampler2D tBase,tMR,tOccT,tNormal;uniform int uHasBase,uHasMR,uHasOcc,uHasNormal,uBlend;
 out vec4 frag;${COMMON}
 void main(){
@@ -138,30 +142,17 @@ void main(){
    float a=clamp(base.a*.5+fr*.5,0.,.8);
    float back=gl_FrontFacing?1.:.45;
    vec3 c=toSRGB(aces((spec*(.8+fr*1.6)*back+diff*base.a*.5)*uExposure))*back;
-   frag=vec4(c,max(a*back,max(c.r,max(c.g,c.b)))); return;}
- frag=vec4(toSRGB(aces(col*uExposure)),1.);
+   frag=vec4(c,max(a*back,max(c.r,max(c.g,c.b))))*uFade; return;}
+ frag=vec4(toSRGB(aces(col*uExposure))*uFade,uFade);
 }`;
-  const G_VS = `#version 300 es
-layout(location=0) in vec3 aPos;uniform mat4 uVP;out vec3 vPos;
-void main(){vPos=aPos;gl_Position=uVP*vec4(aPos,1.);}`;
-  const G_FS = `#version 300 es
-precision highp float;in vec3 vPos;uniform sampler2D tG0,tG1;uniform float uMix,uStr;uniform vec2 uRes;out vec4 frag;
-void main(){vec2 uv=vPos.xz/.6+.5;float v=mix(texture(tG0,uv).r,texture(tG1,uv).r,uMix);
- float e=smoothstep(.5,.4,max(abs(uv.x-.5),abs(uv.y-.5)));v=mix(1.,v,e);
- float near=1.-smoothstep(.09,.22,length(vPos.xz*vec2(1.,1.6)));          // keep it a compact pool under the book
- vec2 q=gl_FragCoord.xy/uRes;
- float edge=smoothstep(0.,.12,min(q.x,1.-q.x))*smoothstep(0.,.14,min(q.y,1.-q.y));   // never reach the box edges
- frag=vec4(0.,0.,0.,(1.-v)*uStr*near*edge);}`;   // premultiplied black: darkens whatever page colour is behind
-
-  // stage look: no background of its own. The book floats a little above
-  // an invisible floor, and only its soft shadow is drawn, as a
-  // see-through darkening of whatever the page colour is behind it.
-  const FLOAT = 0.028;          // metres the book hovers above its shadow
-  const SHADOW = 0.5;           // shadow strength, 0 = none, 1 = full
+  // stage look: no background, no floor, no shadow. The book floats on
+  // whatever the page colour is behind it.
   const EXPOSURE = 1.06;
   const KEY_DIR = (() => { const a = -28 * Math.PI / 180, e = 42 * Math.PI / 180; return [Math.sin(a) * Math.cos(e), Math.sin(e), Math.cos(a) * Math.cos(e)]; })();
   const KEY_COL = [2.3, 2.3, 2.3];   // neutral white, so the cover blue reads true
-  const STAND_MS = 950;
+  const STAND_MS = 1300;         // stand fade in / out
+  const STAND_EVERY_MS = 5000;   // time between automatic stand changes
+  const IDLE_MS = 4500;          // after a drag, wait this long before moving on its own again
   const HOME = { yaw: -0.52, pitch: 0.2 };
 
   function mount(stage, opts){
@@ -177,11 +168,11 @@ void main(){vec2 uv=vPos.xz/.6+.5;float v=mix(texture(tG0,uv).r,texture(tG1,uv).
     const api = { ok: !!gl, setStand(){}, render(){}, setView(){}, ready: Promise.resolve() };
     if (!gl){ stage.classList.add("is-fallback"); return api; }
 
-    let pbr, gP, envTex, groundVAO, scene = null, dirty = true, visible = false, raf = 0;
-    const gTex = [];
-    const view = { yaw: HOME.yaw, pitch: HOME.pitch, fov: 26 * Math.PI / 180, target: [0, 0.106 + FLOAT * 0.55, 0] };
+    let pbr, envTex, scene = null, dirty = true, visible = false, raf = 0;
+    const view = { yaw: HOME.yaw, pitch: HOME.pitch, fov: 26 * Math.PI / 180, target: [0, 0.108, 0] };
     let standK = 1, standTarget = 1, standFrom = 1, standT0 = 0;
     let vel = 0, lastInteract = performance.now(), drag = null;
+    let paused = !!opts.paused, lastStandSwitch = performance.now(), standHoldUntil = 0;
     let W = 1, H = 1;
 
     function prog(vs, fs){
@@ -213,7 +204,7 @@ void main(){vec2 uv=vPos.xz/.6+.5;float v=mix(texture(tG0,uv).r,texture(tG1,uv).
     const loadImg = url => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error("texture")); i.src = url; });
 
     async function build(DATA){
-      pbr = prog(VS, FS); gP = prog(G_VS, G_FS);
+      pbr = prog(VS, FS);
       // image-based lighting: prefiltered studio environment (half floats)
       envTex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, envTex); gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
       const eb = b64(DATA.env.env), half = new Uint16Array(eb.buffer, eb.byteOffset, eb.byteLength / 2); let off = 0;
@@ -222,13 +213,6 @@ void main(){vec2 uv=vPos.xz/.6+.5;float v=mix(texture(tG0,uv).r,texture(tG1,uv).
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
       gl.pixelStorei(gl.UNPACK_ALIGNMENT, 4);
       DATA.shFlat = DATA.shFlat || new Float32Array(DATA.env.sh.flat());
-      // baked floor shadows: [book on its own, book in its stand]
-      for (const g of DATA.shadows) gTex.push(tex2D(await loadImg("data:image/png;base64," + g), false, false));
-      groundVAO = gl.createVertexArray(); gl.bindVertexArray(groundVAO);
-      gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-      const S = 6, Y = -0.0004;
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-S,Y,-S, S,Y,-S, S,Y,S, -S,Y,-S, S,Y,S, -S,Y,S]), gl.STATIC_DRAW);
-      gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0); gl.bindVertexArray(null);
       scene = await loadGLB(b64(DATA.glb).buffer);
     }
 
@@ -280,7 +264,7 @@ void main(){vec2 uv=vPos.xz/.6+.5;float v=mix(texture(tG0,uv).r,texture(tG1,uv).
     }
     function camera(){
       const asp = W / H, tv = Math.tan(view.fov / 2), th = tv * asp;
-      const d = Math.max(0.168 / tv, 0.114 / th), cp = Math.cos(view.pitch);
+      const d = Math.max(0.148 / tv, 0.108 / th), cp = Math.cos(view.pitch);
       const eye = [view.target[0] + d * Math.sin(view.yaw) * cp, view.target[1] + d * Math.sin(view.pitch), view.target[2] + d * Math.cos(view.yaw) * cp];
       return { eye, vp: M4.mul(M4.persp(view.fov, asp, 0.02, 30), M4.look(eye, view.target, [0, 1, 0])) };
     }
@@ -301,30 +285,33 @@ void main(){vec2 uv=vPos.xz/.6+.5;float v=mix(texture(tG0,uv).r,texture(tG1,uv).
       gl.clearColor(0, 0, 0, 0); gl.depthMask(true);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
       gl.enable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE);
-      gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);   // floor shadow only
-      gl.useProgram(gP.p); gl.uniformMatrix4fv(gP.u.uVP, false, cam.vp);
-      gl.uniform1f(gP.u.uStr, SHADOW); gl.uniform1f(gP.u.uMix, k); gl.uniform2f(gP.u.uRes, W, H);
-      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, gTex[0]); gl.uniform1i(gP.u.tG0, 0);
-      gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, gTex[1]); gl.uniform1i(gP.u.tG1, 1);
-      gl.bindVertexArray(groundVAO); gl.drawArrays(gl.TRIANGLES, 0, 6);
       gl.useProgram(pbr.p); const u = pbr.u;
       gl.uniformMatrix4fv(u.uVP, false, cam.vp); gl.uniform3fv(u.uCam, cam.eye);
       gl.uniform3fv(u.uSH, window.ARSVITA_3D_DATA.shFlat); gl.uniform1f(u.uExposure, EXPOSURE);
       gl.uniform3fv(u.uKeyDir, KEY_DIR); gl.uniform3fv(u.uKeyCol, KEY_COL);
+      gl.uniform1f(u.uClipY, -10);
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, envTex); gl.uniform1i(u.tEnv, 0);
       const book = scene.byName.Book, st = scene.byName.Case;
-      if (book) book.t = [0, FLOAT + 0.004 * k, 0];               // book rests on the stand's base plate
-      if (st) st.t = [0, FLOAT - (0.19 + FLOAT) * (1 - k), 0];   // stand sinks away through the floor when hidden
-      const opaque = [], trans = [];
+      if (book) book.t = [0, 0.004 * k, 0];            // book rests on the stand's base plate
+      if (st) st.t = [0, -0.012 * (1 - k), 0];          // stand drops a little as it fades away
+      const bookPrims = [], standOpaque = [], standClear = [];
       const walk = (i, parent, inStand) => { const n = scene.nodes[i]; const m = M4.mul(parent, M4.trs(n.t, n.r, n.s)); const c = inStand || n === st;
-        if (c && k <= 0.001) return;
-        if (n.mesh !== undefined) scene.meshes[n.mesh].forEach(pr => (pr.mat.blend ? trans : opaque).push([pr, m, c]));
+        if (n.mesh !== undefined) scene.meshes[n.mesh].forEach(pr => (c ? (pr.mat.blend ? standClear : standOpaque) : bookPrims).push([pr, m]));
         n.children.forEach(ch => walk(ch, m, c)); };
       scene.roots.forEach(r => walk(r, M4.ident(), false));
-      gl.disable(gl.BLEND); gl.depthMask(true);
-      for (const [pr, m, c] of opaque){ gl.uniform1f(u.uClipY, c && k < 0.999 ? 0 : -10); drawPrim(pr, m); }
-      gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false);
-      for (const pass of [gl.FRONT, gl.BACK]) for (const [pr, m, c] of trans){ gl.uniform1f(u.uClipY, c && k < 0.999 ? 0 : -10); drawPrim(pr, m, pass); }
+      // the book
+      gl.disable(gl.BLEND); gl.depthMask(true); gl.uniform1f(u.uFade, 1);
+      for (const [pr, m] of bookPrims) drawPrim(pr, m);
+      if (k > 0.002){
+        // the stand: solid when fully there, see-through while it fades
+        const fading = k < 0.998;
+        gl.uniform1f(u.uFade, k);
+        if (fading){ gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); } else gl.disable(gl.BLEND);
+        gl.depthMask(true);
+        for (const [pr, m] of standOpaque) drawPrim(pr, m);
+        gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false);
+        for (const pass of [gl.FRONT, gl.BACK]) for (const [pr, m] of standClear) drawPrim(pr, m, pass);
+      }
       gl.depthMask(true); gl.disable(gl.BLEND); gl.frontFace(gl.CCW); gl.bindVertexArray(null);
     }
 
@@ -337,7 +324,15 @@ void main(){vec2 uv=vPos.xz/.6+.5;float v=mix(texture(tG0,uv).r,texture(tG1,uv).
       if (!scene) return;
       if (standK !== standTarget){ const t = Math.min(1, (now - standT0) / STAND_MS); standK = standFrom + (standTarget - standFrom) * t; if (t >= 1) standK = standTarget; dirty = true; }
       if (!drag && Math.abs(vel) > 1e-4){ view.yaw += vel; vel *= 0.87; dirty = true; }
-      if (!reduced && !drag && !opts.still && now - lastInteract > 4500){ const ramp = Math.min(1, (now - lastInteract - 4500) / 2500); view.yaw += dt * 0.18 * ramp; dirty = true; }
+      const idle = !drag && now - lastInteract > IDLE_MS;
+      if (!reduced && !paused && idle && !opts.still){ const ramp = Math.min(1, (now - lastInteract - IDLE_MS) / 2500); view.yaw += dt * 0.18 * ramp; dirty = true; }
+      // automatic stand on / off
+      if (opts.autoStand && !reduced && !paused && idle && !opts.still && standK === standTarget &&
+          now > standHoldUntil && now - lastStandSwitch > STAND_EVERY_MS){
+        lastStandSwitch = now;
+        startStand(standTarget === 0);
+        if (opts.onStandChange) opts.onStandChange(standTarget === 1);
+      }
       resize(); if (dirty){ render(); dirty = false; }
     }
     function wake(){ if (visible && !raf){ lastT = performance.now(); raf = requestAnimationFrame(frame); } }
@@ -385,11 +380,13 @@ void main(){vec2 uv=vPos.xz/.6+.5;float v=mix(texture(tG0,uv).r,texture(tG1,uv).
       if (used){ e.preventDefault(); touched(); dirty = true; wake(); }
     });
 
-    api.setStand = on => {
+    function startStand(on){
       standTarget = on ? 1 : 0;
       if (reduced || opts.still){ standK = standTarget; standFrom = standTarget; } else { standFrom = standK; standT0 = performance.now(); }
       dirty = true; wake();
-    };
+    }
+    api.setStand = on => startStand(on);
+    api.setPaused = p => { paused = !!p; lastInteract = performance.now() - (p ? 0 : IDLE_MS); dirty = true; wake(); };
     api.render = () => { render(); };
     api.setView = (yaw, pitch) => { view.yaw = yaw; view.pitch = pitch; dirty = true; wake(); };
     api.ready = loadData(opts.src).then(build).then(() => {

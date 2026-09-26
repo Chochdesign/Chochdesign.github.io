@@ -1,6 +1,6 @@
 # Morgan Chochinov — Portfolio Site
 
-A static portfolio website built around a single design concept: the book *S, M, L, XL* by Rem Koolhaas and Bruce Mau. The site treats itself like a printed book — a running head, a contents index with dot leaders, numbered chapters instead of a nav menu, and a spec-sheet rail alongside each project's write-up.
+A static portfolio website built around a single design concept: the book *S, M, L, XL* by Rem Koolhaas and Bruce Mau. The site treats itself like a printed book: a running head, numbered chapters, and one consistent sidebar alongside each project's work. It opens with the name typing itself out, then every photo from every project sliding past underneath, sized so the first project already shows on the first screen.
 
 No build step, no framework, no dependencies beyond two Google Fonts. Everything renders from a single data file.
 
@@ -26,8 +26,8 @@ Open `index.html` in a browser — that's it, it runs locally with no server nee
     ├── dozer-*.jpg              7 photos — Dozer Magazine
     ├── logo-full.png            The Pecking Order logo mark
     ├── arsvita/
-    │   ├── 3d-poster.png                    Still of the 3D model (transparent), shown while it loads
-    │   └── spread-01.jpg … spread-23.jpg    Full page-flip book (23 spreads)
+    │   ├── 3d-poster.webp                   Still of the 3D model (transparent), shown while it loads
+    │   └── spread-01.jpg … spread-23.jpg    All 23 spreads
     └── pecking-order/
         └── marabou-*.jpg (6), shoebill-*.jpg (6),
             kingvulture-*.jpg (5), hoatzin-01.jpg (1)
@@ -36,29 +36,51 @@ Open `index.html` in a browser — that's it, it runs locally with no server nee
 ## Design system quick reference
 
 - **Palette:** paper `#F0EFE9`, ink `#121212`, grey `#6E6D67`, line `#C7C5BB` — all defined as CSS custom properties at the top of `style.css`.
-- **Type:** Archivo (display/body), IBM Plex Mono (labels, data, captions).
+- **Type:** Bricolage Grotesque for everything you read, from the heavy condensed capitals of the name, numbers and project names down to body text. Geist Mono for small labels, info lines and buttons. Every piece of text uses one of six roles, defined once at the top of `style.css`: display, lede, body, label, meta, button.
 - **Chapter numbering:** projects are numbered 01/02/03 in the order they appear in the `projects` array in `data.js`.
-- **Per-project format variation:** each project can opt into different rail formats and hero treatments via optional fields in `data.js` — a plain spec list, a chapter index (`chapters`), a fact-box grid (`statGrid`), a logo breakdown (`logoBreakdown`), a single hero image (`images`), a full page-flip viewer (`spreads`), a draggable 3D model that opens into the page-flip viewer (`model3d`), or a click-to-pick set of mini flipbooks (`birdPicker`). All of these are documented in the comment block at the top of `data.js`.
+- **One grid everywhere:** every project, About and Contact use the same two columns: a sidebar (a quarter of the width) for the text and the work (three quarters) as big as it can be. The opening screen's tagline and index line up with the same columns. On phones everything stacks and the imagery runs edge to edge, and each project runs number and name, then its main visual, then its text, then the rest of the work.
+- **One sidebar format:** number, name, small info (year, role, specs), a one- or two-sentence summary, then Challenge / Approach / Outcome, then an optional detail block. On wide screens the sidebar stays beside the work while you scroll; if it's taller than the window, it scrolls until its last line is showing and stays there.
+- **Imagery is never cropped, boxed or stretched.** Dozer's images stack one under another at the full width of the work column. The spreads show whole. The opening strip shows every image at its own shape.
+- **Motion:** every slide on the site uses the same curve as After Effects' Easy Ease. Nothing fades in. The strip, the 3D model and both sets of spreads move on their own, and each has a Pause button (an accessibility requirement for anything that moves for more than 5 seconds). With "reduce motion" turned on in the device's settings, none of them move by themselves.
+- All of the content options are documented in the comment block at the top of `data.js`.
+
+## The opening screen
+
+Your name types itself out across the full width of the page (it's sized to fit exactly, on any screen). Then the work slides in from the right: every photo from every project, in order (all of Dozer, then Arsvita's spreads, then The Pecking Order's finished birds), each at its own shape, in a gentle rhythm of sizes. It slides along to the next image every 1.5 seconds (change `STRIP_SLIDE_MS` and `STRIP_HOLD_MS` near the top of the strip code in `script.js` to adjust), loops back to the start seamlessly, and can be dragged or swiped. It keeps going round on its own; Pause stops it. Any image that can't be found is simply left out. Each image is captioned with its project and links to it, and the matching project lights up in the index underneath. The whole opening screen is kept shorter than the window so the start of project 01 is always visible below it.
+
+It builds itself from the images in `data.js`, so it stays up to date as you add or remove work. To show a hand-picked set instead, add a `reel` list (see the notes at the top of `data.js`).
 
 ## The 3D model (Arsvita)
 
-Arsvita's project opens on a 3D model of the book in its laser-cut acrylic stand, floating with a soft shadow underneath. The 3D area has a transparent background, so the model sits straight on the page's own background colour (and stays matched if you change `--paper` in `style.css`). The cover is colour-matched to the printed blue, `#7FBFE9`. Visitors drag it to turn it and see every side, switch between **With stand** and **Without stand**, and click it (tap on phones) to open the page-flip spreads; **← Back to 3D model** returns to it.
+Arsvita opens on a 3D model of the book in its laser-cut acrylic stand, floating on the page with no floor or shadow. The 3D area is transparent, so the model sits straight on the page's own background colour (and stays matched if you change `--paper` in `style.css`). The cover is colour-matched to the printed blue, `#7FBFE9`.
+
+The model turns slowly on its own, and every 5 seconds the stand fades away and comes back. There are no stand buttons. Visitors can drag it to turn it themselves (that holds the automatic movement until it's left alone again), and Pause stops all of its movement. The spreads sit directly underneath.
 
 **Where the files go** (paths are relative to `index.html`):
 
 ```
 index.html
-arsvita-3d.js                  next to index.html, not inside images/
-models/arsvita-3d-model.js     in a folder called models
-images/arsvita/3d-poster.png   with the Arsvita spreads
+arsvita-3d.js                   next to index.html, not inside images/
+models/arsvita-3d-model.js      in a folder called models
+images/arsvita/3d-poster.webp   with the Arsvita spreads
 ```
 
-- It's switched on by the `model3d` field on the Arsvita project in `data.js`. Delete that field and the project goes back to opening straight on the spreads. If you move the model or the poster, update the two paths there.
-- If the model file isn't where `data.js` says, the viewer also checks next to `index.html`, `images/`, and `images/arsvita/` before giving up. If it still can't find it, or `arsvita-3d.js` itself is missing, the stage shows the poster plus a short note naming the missing file, so a misplaced file is easy to spot.
-- `arsvita-3d.js` is the viewer: plain WebGL 2, no libraries. `models/arsvita-3d-model.js` holds the model itself (about 4 MB). It only starts downloading when the project is about to scroll into view, so it never slows down the first page load.
-- The model is loaded with a `<script>` tag rather than `fetch()`, so it works when you open `index.html` straight from disk as well as when hosted.
-- On phones, sideways swipes turn the book and up/down swipes still scroll the page. Anyone whose browser can't show 3D sees the poster instead, and clicking it still opens the book. With "reduce motion" turned on, the model doesn't spin by itself.
-- Look settings live near the top of `arsvita-3d.js`: `FLOAT` (how high the book hovers) and `SHADOW` (shadow strength, 0 to 1). The poster is a transparent PNG for the same reason the 3D area is transparent.
+- It's switched on by the `model3d` field on the Arsvita project in `data.js`. Delete that field and the project shows just the spreads. If you move the model or the poster, update the two paths there.
+- If the model file isn't where `data.js` says, the viewer also checks next to `index.html`, `images/` and `images/arsvita/` before giving up. If it still can't find it, or `arsvita-3d.js` itself is missing, the stage shows the poster plus a short note naming the missing file.
+- `arsvita-3d.js` is the viewer: plain WebGL 2, no libraries. `models/arsvita-3d-model.js` holds the model itself, with its textures at full resolution so the cover stays sharp (about 5 MB). It only starts downloading when the project is about to scroll into view.
+- It's loaded with a `<script>` tag rather than `fetch()`, so it works when you open `index.html` straight from disk as well as when hosted.
+- On phones, sideways swipes turn the model and up/down swipes still scroll the page. Anyone whose browser can't show 3D sees the poster instead.
+- Timing settings live near the top of `arsvita-3d.js`: `STAND_EVERY_MS` (time between stand changes) and `STAND_MS` (how long the fade takes).
+
+## The spreads
+
+Arsvita and The Pecking Order show their spreads the same way: one at a time, sliding to the next. There are several ways to move through them, so nobody has to guess: drag or swipe, click the left or right half, use **Previous** / **Next** (or the arrow keys), or drag the bar underneath. The count between the buttons says where you are: "Spread 3 of 23", or for the birds "Shoebill, spread 2 of 6". Left alone, the spreads slide on by themselves (hovering holds them, Pause stops them), and after the last one they carry on to the first without jumping back.
+
+The Pecking Order runs through every bird in a row (the `birds` list in `data.js`). A bird with `status: "in-progress"`, currently the Hoatzin, is greyed out and labelled "Work in progress", and it's left out of the opening strip. When it's finished, change its status to `"complete"` and add its spreads.
+
+## Images
+
+Export images at least 2400px wide (spreads included). Everything is shown much larger now, and on high-resolution screens anything smaller will look soft. Nothing on the site is cropped, so you can export at each image's natural shape.
 
 ## The code
 
@@ -87,73 +109,89 @@ images/arsvita/3d-poster.png   with the Arsvita spreads
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- running index strip, mimics a book's running head -->
+<a class="skip-link" href="#work">Skip to the work</a>
+
+<!-- running head, like a book's: names the section you're in -->
 <div class="runhead" aria-hidden="true">
   <span id="runhead-name"></span>
-  <span class="runhead-mid">·</span>
-  <span id="runhead-section">portfolio</span>
+  <span class="runhead-mid">/</span>
+  <span id="runhead-section">Portfolio</span>
   <span class="runhead-progress-track"><span id="scroll-progress" class="runhead-progress-fill"></span></span>
 </div>
 
+<!-- HERO: your name types itself out across the page, then the work
+     slides in underneath it: every image from every project, in order,
+     each at its own shape and size, sliding along to the next one.
+     Kept shorter than the screen so the first project shows below. -->
 <header class="hero" id="top">
-  <nav class="hero-nav">
-    <a href="#work">work</a>
-    <a href="#about">about</a>
-    <a href="#contact">contact</a>
-  </nav>
-
-  <div class="hero-main">
-    <h1 id="hero-name" class="hero-name"></h1>
-    <div class="hero-side">
-      <p id="hero-role" class="hero-role"></p>
-      <p id="hero-tagline" class="hero-tagline"></p>
-    </div>
+  <div class="hero-top">
+    <nav class="hero-nav" aria-label="Sections">
+      <a href="#work">Work</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <p class="hero-role"><span id="hero-role"></span>, <span id="hero-location"></span></p>
   </div>
 
-  <div class="hero-foot">
-    <span id="hero-location"></span>
-    <span class="hero-scroll">scroll — 01 / 02 / 03</span>
+  <h1 class="hero-name">
+    <span class="sr-only" id="hero-name"></span>
+    <span class="type" aria-hidden="true">
+      <span class="type-ghost" id="type-ghost"></span>
+      <span class="type-live" id="type-live"></span>
+    </span>
+  </h1>
+
+  <div class="strip" id="strip" role="region" aria-roledescription="carousel" aria-label="Work from every project, in order">
+    <div class="strip-track" id="strip-track"></div>
+  </div>
+
+  <div class="hero-sub">
+    <p id="hero-tagline" class="hero-tagline"></p>
+    <div class="hero-index-wrap">
+      <ol id="hero-index" class="hero-index" aria-label="Projects"></ol>
+      <button type="button" class="ctl-btn" id="strip-pause" aria-pressed="false">Pause</button>
+    </div>
   </div>
 </header>
 
 <main>
 
-  <!-- CONTENTS: literalizes the book's S/M/L/XL organizing device as a real index -->
-  <section class="contents" aria-label="Contents">
-    <div class="contents-label">
-      <span class="contents-number">00</span>
-      <h2>Contents</h2>
-    </div>
-    <ol id="contents-list" class="contents-list"></ol>
-  </section>
-
-  <section id="work" class="work">
+  <section id="work" class="work" aria-label="Work">
     <div id="work-sections"></div>
   </section>
 
-  <section id="about" class="about">
-    <div class="about-number">
-      <span>04</span>
-    </div>
-    <div class="about-grid">
-      <h2 class="about-heading">About</h2>
-      <p id="about-bio" class="about-bio"></p>
-      <div class="about-contactline">
-        <p>Based in <span id="about-location"></span>. Available for identity, print, and systems work.</p>
+  <section id="about" class="section section--text" aria-labelledby="about-title">
+    <div class="rail">
+      <div class="rail-head">
+        <span class="rail-num">04</span>
+        <h2 class="rail-name" id="about-title">About</h2>
+        <ul class="rail-facts">
+          <li id="about-location"></li>
+          <li>Identity, print and systems work</li>
+        </ul>
       </div>
+    </div>
+    <div class="section-main">
+      <p id="about-bio" class="section-lede"></p>
     </div>
   </section>
 
-  <section id="contact" class="contact">
-    <div class="contact-number"><span>05</span></div>
-    <div class="contact-main">
-      <h2>Get in touch</h2>
-      <p id="contact-status" class="contact-status"></p>
+  <section id="contact" class="section section--text" aria-labelledby="contact-title">
+    <div class="rail">
+      <div class="rail-head">
+        <span class="rail-num">05</span>
+        <h2 class="rail-name" id="contact-title">Contact</h2>
+        <ul class="rail-facts">
+          <li id="contact-status"></li>
+        </ul>
+      </div>
+    </div>
+    <div class="section-main">
       <a id="contact-email" class="contact-email" href="#"></a>
       <ul id="contact-social" class="contact-social"></ul>
     </div>
@@ -186,1053 +224,495 @@ images/arsvita/3d-poster.png   with the Arsvita spreads
   --line: #C7C5BB;
   --viewer-bg: #121212;
 
-  --sans: "Archivo", Arial, sans-serif;
-  --mono: "IBM Plex Mono", "Courier New", monospace;
+  /* one family for everything you read, one mono for small info */
+  --f-display: "Bricolage Grotesque", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --f-text: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+  --f-mono: "Geist Mono", "IBM Plex Mono", ui-monospace, Menlo, monospace;
 
-  --measure: 62ch;
-  --gutter: clamp(1.25rem, 3vw, 2.5rem);
+  --gutter: clamp(1rem, 2.2vw, 2rem);
+  --runhead-h: 2rem;
+  --tap: 2.75rem;                /* 44px minimum touch target */
+
+  /* motion: the same curve as After Effects' Easy Ease, everywhere */
+  --easy: cubic-bezier(0.33, 0, 0.67, 1);
+
+  /* the grid: sidebar (text) + main (the work) */
+  --col-rail: minmax(17.5rem, 1fr);
+  --col-main: minmax(0, 3fr);
 }
 
 *{ box-sizing: border-box; }
-html{ scroll-behavior: smooth; }
+html{ scroll-behavior: smooth; scroll-padding-top: var(--runhead-h); }
 @media (prefers-reduced-motion: reduce){
   html{ scroll-behavior: auto; }
-  *{ animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  *, *::before, *::after{ animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; transition-delay: 0s !important; }
 }
-
 body{
   margin: 0;
-  padding-bottom: 3rem;
+  padding-bottom: 3.25rem;       /* room for the back-to-top bar */
   background: var(--paper);
   color: var(--ink);
-  font-family: var(--sans);
+  font-family: var(--f-text);
   font-size: 16px;
-  line-height: 1.4;
+  font-weight: 400;
+  line-height: 1.55;
+  font-optical-sizing: auto;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
 }
-
+img{ max-width: 100%; }
 a{ color: inherit; }
-a:focus-visible, button:focus-visible{
+a:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-visible{
   outline: 3px solid var(--ink);
-  outline-offset: 2px;
+  outline-offset: 3px;
 }
-.hero a:focus-visible{
-  outline-color: var(--paper);
+[data-pointer]:focus-visible{ outline: none; }
+h1, h2, h3, p, ol, ul, figure{ margin: 0; }
+.sr-only{
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
-
-h1,h2,h3,p,ol,ul{ margin: 0; }
+.skip-link{
+  position: absolute; left: var(--gutter); top: -4rem; z-index: 100;
+  background: var(--ink); color: var(--paper); padding: 0.6rem 0.9rem;
+}
+.skip-link:focus{ top: 0.5rem; }
 
 /* ────────────────────────────────────────────────────────────
-   RUNNING HEAD — mimics a book's printed running header
+   TYPE ROLES: every piece of text on the site is one of these
+   ──────────────────────────────────────────────────────────── */
+/* 1. display: your name, section numbers, project names */
+.hero-name, .rail-num, .rail-name, .hero-index-num, .switcher{
+  font-family: var(--f-display);
+  font-weight: 800;
+  font-stretch: 75%;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+/* 2. lede: tagline, summaries, about */
+.hero-tagline, .rail-summary, .section-lede, .book-how{
+  font-family: var(--f-text);
+  font-weight: 500;
+  letter-spacing: -0.005em;
+}
+/* 3. body: everything else you read */
+.rail-block p, .rail-detail p{
+  font-family: var(--f-text);
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+/* 4. label: small headings, nav, buttons */
+.rail-label, .book-label, .hero-nav a, .ctl-btn, .wip-badge, .backtotop a, .skip-link{
+  font-family: var(--f-mono);
+  font-weight: 500;
+  font-size: 0.72rem;
+  line-height: 1.2;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+/* 5. meta: small info lines, counters, captions */
+.rail-facts, .hero-role, .hero-index-year, .strip-cap, .book-count, .model3d-note,
+.runhead, .contact-social, .model3d-loading, .slider-hint, .model3d-hint{
+  font-family: var(--f-mono);
+  font-weight: 400;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  letter-spacing: 0;
+}
+
+/* ────────────────────────────────────────────────────────────
+   RUNNING HEAD
    ──────────────────────────────────────────────────────────── */
 .runhead{
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  display: flex;
-  gap: 0.5em;
-  align-items: center;
-  padding: 0.5rem var(--gutter);
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.02em;
+  position: sticky; top: 0; z-index: 20;
+  display: flex; gap: 0.6em; align-items: center;
+  height: var(--runhead-h);
+  padding: 0 var(--gutter);
+  font-size: 0.72rem;
   background: var(--paper);
   color: var(--grey);
+  white-space: nowrap; overflow: hidden;
 }
 .runhead-mid{ opacity: 0.6; }
-.runhead-progress-track{
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 2px;
-  background: var(--line);
-}
-.runhead-progress-fill{
-  display: block;
-  height: 100%;
-  width: 0%;
-  background: var(--ink);
-}
+.runhead-progress-track{ position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--line); }
+.runhead-progress-fill{ display: block; height: 100%; width: 0%; background: var(--ink); }
 
 /* ────────────────────────────────────────────────────────────
-   HERO
+   SHARED CONTROLS
    ──────────────────────────────────────────────────────────── */
-.hero{
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  min-height: 92vh;
-  padding: var(--gutter);
-  background: var(--paper);
+.ctl-btn{
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5em;
+  min-height: var(--tap);
+  padding: 0 1.05rem;
   color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.35s var(--easy), color 0.35s var(--easy);
 }
-
-.hero-nav{
-  display: flex;
-  gap: clamp(1rem, 3vw, 2rem);
-  justify-content: flex-end;
-  font-family: var(--mono);
-  font-size: 0.85rem;
-}
-.hero-nav a{ text-decoration: none; border-bottom: 1px solid transparent; }
-.hero-nav a:hover{ border-bottom-color: var(--ink); }
-
-.hero-main{
-  display: grid;
-  grid-template-columns: 1fr;
-  align-items: end;
-  gap: 1rem;
-  padding-block: 2rem;
-}
-.hero-name{
-  font-weight: 900;
-  font-size: clamp(3.2rem, 13vw, 10.5rem);
-  line-height: 0.86;
-  letter-spacing: -0.02em;
-  text-transform: uppercase;
-}
-.hero-side{
-  max-width: 34ch;
-  border-left: 3px solid var(--ink);
-  padding-left: 1rem;
-}
-.hero-role{
-  font-family: var(--mono);
-  font-size: 0.95rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-.hero-tagline{
-  margin-top: 0.6rem;
-  font-size: 1.05rem;
-  color: var(--grey);
-}
-
-.hero-foot{
-  display: flex;
-  justify-content: space-between;
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  color: var(--grey);
-}
-
-@media (min-width: 780px){
-  .hero-main{
-    grid-template-columns: 3fr 1fr;
-  }
-}
+.ctl-btn:hover:not(:disabled),
+.ctl-btn[aria-pressed="true"]{ background: var(--ink); color: var(--paper); }
+.controls{ display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-top: 0.75rem; }
 
 /* ────────────────────────────────────────────────────────────
-   CONTENTS — literal S / M / L / XL index
+   HERO: your name types itself out, then the work slides in
    ──────────────────────────────────────────────────────────── */
-.contents{
-  padding: var(--gutter);
-  border-bottom: 1px solid var(--line);
+.hero{ padding: 0 var(--gutter); border-bottom: 1px solid var(--line); }
+.hero-top{
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 0 1.5rem;
 }
-.contents-label{
-  display: flex;
-  align-items: baseline;
-  gap: 0.75rem;
-  margin-bottom: 1.25rem;
+.hero-nav{ display: flex; gap: 1.6rem; }
+.hero-nav a{
+  display: inline-block;
+  padding: 0.9rem 0;
+  text-decoration: none;
+  background: linear-gradient(currentColor, currentColor) left calc(100% - 0.65rem) / 0 1px no-repeat;
+  transition: background-size 0.5s var(--easy);
 }
-.contents-number{
-  font-family: var(--mono);
-  color: var(--grey);
+.hero-nav a:hover{ background-size: 100% 1px; }
+.hero-role{ color: var(--grey); padding: 0.2rem 0; }
+
+.hero-name{
+  overflow: hidden;              /* never pushes the page wider */
+  margin-top: 0.3rem;
+  font-size: 12vw;               /* script.js fits it to the full width */
+  line-height: 0.8;
 }
-.contents-label h2{
-  font-size: 1.1rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
+.type{ position: relative; display: block; }
+.type-ghost{ display: block; visibility: hidden; }
+.type-inner{ display: inline-block; }
+.type-live{ position: absolute; left: 0; top: 0; right: 0; }
+.type-line{ white-space: nowrap; }
+.type-space{ white-space: pre; }
+.type-caret{
+  display: inline-block;
+  width: 0.075em;
+  height: 0.72em;
+  margin-left: 0.04em;
+  background: currentColor;
+  animation: caret-blink 1.1s var(--easy) infinite;
+}
+.hero.is-done .type-caret{ animation: none; opacity: 0; transition: opacity 0.8s var(--easy) 1.4s; }
+@keyframes caret-blink{ 0%, 100%{ opacity: 1; } 50%{ opacity: 0; } }
+@media (max-width: 699px){
+  .type-line{ display: block; }
+  .type-space{ display: none; }
 }
 
-.contents-list{
-  list-style: none;
-  padding: 0;
-  border-top: 1px solid var(--line);
+/* the strip of work: images keep their own shape and sizes, never
+   cropped, never boxed; it slides along to the next one by itself */
+.strip{
+  margin: 1rem calc(-1 * var(--gutter)) 0;
+  overflow: hidden;
+  touch-action: pan-y;
+  cursor: grab;
 }
-.contents-row{
+.strip.is-dragging{ cursor: grabbing; }
+.strip-track{
   display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1.15rem 0;
-  border-bottom: 1px solid var(--line);
+  align-items: flex-end;
+  gap: 1.1rem;
+  width: max-content;
+  padding-left: var(--gutter);
+}
+.strip-item{
+  flex: 0 0 auto;
+  display: block;
   text-decoration: none;
   color: inherit;
-  transition: transform 0.25s cubic-bezier(0.45, 0, 0.55, 1);
+  -webkit-user-drag: none;
 }
-.contents-row:hover{
-  transform: translateX(10px);
-}
-.contents-row:hover .toc-title{
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
-}
-
-.toc-num{
-  flex: 0 0 auto;
-  width: 2.4rem;
-  font-weight: 900;
-  font-size: 1.4rem;
-  color: var(--ink);
-}
-
-.contents-thumb{
-  flex: 0 0 auto;
+.strip-frame{
   display: block;
-  width: 4.25rem;
-  height: 2.8rem;
-  overflow: hidden;
+  height: var(--h, 22rem);
+  aspect-ratio: var(--ar, 1.414);
 }
-.contents-thumb img{
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-.contents-thumb.is-empty{
-  background: repeating-linear-gradient(135deg, var(--paper) 0 2px, var(--line) 2px 3px);
-}
-.contents-thumb.is-logo img{
-  object-fit: contain;
-  padding: 0.35rem;
-  box-sizing: border-box;
-}
+.strip-frame img{ display: block; width: 100%; height: 100%; object-fit: contain; -webkit-user-drag: none; user-select: none; }
+.strip-cap{ display: flex; gap: 0.5rem; margin-top: 0.5rem; color: var(--grey); transition: color 0.4s var(--easy); }
+.strip-cap b{ font-weight: 500; color: var(--ink); }
+.strip-item:hover .strip-cap{ color: var(--ink); }
+.strip.is-static{ overflow-x: auto; }
 
-.toc-title{
-  flex: 1 1 auto;
-  min-width: 7rem;
-  font-weight: 800;
-  font-size: clamp(1.2rem, 3.2vw, 2.1rem);
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 62%;
+.hero-sub{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  padding: 1.1rem 0 1.25rem;
 }
-
-.toc-leader{
-  flex: 1 1 0;
-  min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  color: var(--line);
-  font-family: var(--mono);
-  letter-spacing: 0.3em;
+.hero-tagline{ font-size: clamp(1.1rem, 1.5vw, 1.3rem); line-height: 1.3; max-width: 28ch; }
+.hero-index-wrap{ display: flex; align-items: flex-end; gap: var(--gutter); min-width: 0; }
+.hero-index{
+  flex: 1 1 auto; min-width: 0;
+  list-style: none; padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
 }
-.toc-leader::after{
-  content: "......................................................................................................................................................................................................................................................................................";
-}
-
-.toc-year{
-  flex: 0 0 auto;
-  font-family: var(--mono);
-  font-size: 0.8rem;
+.hero-index-row{
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 0.55rem;
+  align-items: baseline;
+  padding-top: 0.55rem;
+  border-top: 2px solid var(--line);
+  text-decoration: none;
   color: var(--grey);
+  transition: color 0.6s var(--easy), border-color 0.6s var(--easy);
 }
+.hero-index-row.is-current,
+.hero-index-row:hover{ color: var(--ink); border-top-color: var(--ink); }
+.hero-index-num{ font-size: 1.6rem; line-height: 0.9; }
+.hero-index-title{ font-weight: 600; font-size: 1rem; line-height: 1.2; }
+.hero-index-year{ grid-column: 2; }
 
-@media (max-width: 500px){
-  .contents-thumb{ display: none; }
-  .contents-row{ gap: 0.6rem; }
-  .toc-title{ max-width: 72%; }
+/* intro: after the name is typed, the work slides in from the right
+   (inside its own frame, so the page never gets wider), and the
+   tagline and index wipe into place. No fades. */
+.js .strip-track{ transform: translateX(100vw); }
+.hero.is-in .strip-track{ transform: none; transition: transform 1.4s var(--easy); }
+.js .hero-role, .js .hero-sub{ clip-path: inset(0 0 100% 0); transform: translateY(0.6rem); }
+.hero.is-in .hero-role,
+.hero.is-in .hero-sub{ clip-path: inset(0 0 0 0); transform: none; transition: clip-path 0.9s var(--easy) 0.3s, transform 0.9s var(--easy) 0.3s; }
+
+@media (min-width: 900px){
+  .hero-sub{ grid-template-columns: var(--col-rail) var(--col-main); column-gap: var(--gutter); align-items: end; }
+  .hero-index{ gap: var(--gutter); }
 }
-/* floating image preview that follows the cursor when hovering
-   a contents row on desktop; hidden entirely on touch devices */
-.cursor-preview{
-  position: fixed;
-  width: 240px;
-  height: 160px;
-  left: 0;
-  top: 0;
-  background: var(--paper);
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 50;
-  opacity: 0;
-  transition: opacity 0.2s ease;
+@media (max-width: 599px){
+  /* phones: Pause sits beside the tagline, the index runs full width under it */
+  .hero-sub{ grid-template-columns: minmax(0, 1fr) auto; column-gap: 1rem; align-items: start; }
+  .hero-index-wrap{ display: contents; }
+  .hero-tagline{ grid-column: 1; grid-row: 1; }
+  .hero-index-wrap .ctl-btn{ grid-column: 2; grid-row: 1; align-self: start; }
+  .hero-index{ grid-column: 1 / -1; grid-row: 2; grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .hero-index-row{ grid-template-columns: 2.1rem minmax(0, 1fr) auto; padding: 0.5rem 0; border-top-width: 1px; }
+  .hero-index-row.is-current, .hero-index-row:hover{ border-top-color: var(--line); }
+  .hero-index-num{ font-size: 1.25rem; }
+  .hero-index-year{ grid-column: 3; }
+  .hero-index li:last-child .hero-index-row{ border-bottom: 1px solid var(--line); }
 }
-.cursor-preview.is-visible{ opacity: 1; }
-.cursor-preview img{
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+@media (max-width: 399px){
+  .hero-index-row{ grid-template-columns: 1.9rem minmax(0, 1fr); }
+  .hero-index-year{ display: none; }
 }
 
 /* ────────────────────────────────────────────────────────────
-   WORK — one entry per project, asymmetric two-column layout
+   SECTIONS: every project, plus About and Contact.
+   Sidebar (a quarter) = the text. Main (three quarters) = the work.
    ──────────────────────────────────────────────────────────── */
-.project{
+.section{
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   border-bottom: 1px solid var(--line);
-  scroll-margin-top: 3rem;
+  scroll-margin-top: var(--runhead-h);
 }
-.project-rail{
-  padding: var(--gutter);
-  border-bottom: 1px solid var(--line);
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-.project-scale-mark{
-  font-weight: 900;
-  font-size: clamp(4rem, 12vw, 7rem);
-  line-height: 0.8;
-  color: var(--ink);
-}
-.project-def{
-  font-size: 0.95rem;
-  max-width: 32ch;
-}
-.project-def .term{
-  font-weight: 700;
-  text-transform: lowercase;
-}
-.project-def .pos{
-  font-family: var(--mono);
-  color: var(--grey);
-  font-size: 0.8rem;
-}
-.project-spec{
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  color: var(--grey);
-  display: grid;
-  gap: 0.35rem;
+.rail{ padding: var(--gutter); }
+.section-main{ padding: var(--gutter); display: flex; flex-direction: column; gap: 3rem; min-width: 0; }
+
+/* phones: number, name and info first, then the main visual, then the
+   text, then the rest of the work. Imagery runs edge to edge. */
+.project{ grid-template-areas: "head" "primary" "body" "secondary"; }
+.project .rail, .project .section-main{ display: contents; }
+.project .rail-head{ grid-area: head; padding: 2.25rem var(--gutter) 1.25rem; }
+.project .media-primary{ grid-area: primary; min-width: 0; }
+.project .rail-body{ grid-area: body; padding: 1.75rem var(--gutter) 2.5rem; }
+.project .media-secondary{ grid-area: secondary; min-width: 0; padding-bottom: 2.5rem; display: flex; flex-direction: column; gap: 2.5rem; }
+.project .book-head, .project .controls, .project .model3d-foot, .project .book-progress{ margin-left: var(--gutter); margin-right: var(--gutter); }
+.project .book-progress{ width: calc(100% - 2 * var(--gutter)); }
+
+@media (min-width: 900px){
+  .section{ grid-template-columns: var(--col-rail) var(--col-main); }
+  .rail{ border-right: 1px solid var(--line); position: sticky; top: var(--runhead-h); align-self: start; }
+  .project{ grid-template-areas: "rail main"; }
+  .project .rail{ display: block; grid-area: rail; }
+  .project .rail-head, .project .rail-body{ padding: 0; }
+  .project .rail-body{ margin-top: 1.75rem; }
+  .project .section-main{ display: flex; grid-area: main; }
+  .project .media-secondary{ padding-bottom: 0; gap: 3rem; }
+  .project .book-head, .project .controls, .project .model3d-foot, .project .book-progress{ margin-left: 0; margin-right: 0; }
+  .project .book-progress{ width: 100%; }
 }
 
-/* ---- alternate rail format: chapter index (Arsvita) ---- */
-.project-chapters{
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-.project-chapters-list{
-  list-style: none;
-  padding: 0;
-  border-top: 1px solid var(--line);
-}
-.project-chapters-list li{
-  display: flex;
-  gap: 0.75rem;
-  align-items: baseline;
-  padding: 0.4rem 0;
-  border-bottom: 1px solid var(--line);
-}
-.ch-num{
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  color: var(--grey);
-  width: 1.5rem;
-  flex-shrink: 0;
-}
-.ch-title{ font-size: 0.95rem; }
-.project-chapters-meta{
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  color: var(--grey);
-}
-
-/* ---- alternate rail format: field-guide stat grid (Pecking Order) ---- */
-.project-statgrid{
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  border-top: 1px solid var(--ink);
-  border-left: 1px solid var(--ink);
-}
-.project-statgrid .stat{
-  padding: 0.6rem 0.7rem;
-  border-right: 1px solid var(--ink);
-  border-bottom: 1px solid var(--ink);
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-.stat-label{
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--grey);
-}
-.stat-value{
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-/* ---- logo breakdown (rail) ---- */
-.project-logobreak{
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--line);
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-.logobreak-full{
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transform: scale(0.97);
-  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.logobreak-full img{
-  max-width: 32%;
-  height: auto;
-  display: block;
-}
-.logobreak-full.is-revealed{
-  opacity: 1;
-  transform: scale(1);
-}
-
-.project-main{
-  padding: var(--gutter);
-}
-.project-image{
-  aspect-ratio: 16 / 10;
-  width: 100%;
-  margin-bottom: 1.5rem;
+/* ---- sidebar: identical for every section ---- */
+.rail-num{ display: block; font-size: clamp(3.75rem, 7vw, 7rem); line-height: 0.78; letter-spacing: -0.02em; }
+.rail-name{ margin-top: 0.8rem; font-size: clamp(1.9rem, 2.7vw, 2.8rem); line-height: 0.92; font-stretch: 78%; }
+.rail-facts{ list-style: none; padding: 0; margin-top: 1rem; display: grid; gap: 0.2rem; color: var(--grey); }
+.rail-body{ max-width: 60ch; }
+.rail-summary{ font-size: clamp(1.1rem, 1.35vw, 1.25rem); line-height: 1.32; }
+.rail-block{ margin-top: 1.4rem; }
+.rail-label{ color: var(--grey); margin-bottom: 0.4rem; }
+.rail-detail{ margin-top: 1.75rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+/* names that switch by themselves (Dozer's "As seen with") */
+.switcher{
   position: relative;
+  height: 2.05em;
+  font-size: clamp(1.6rem, 2vw, 2rem);
+  line-height: 1;
+  font-stretch: 78%;
   overflow: hidden;
-  opacity: 0;
-  transform: scale(0.97);
-  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.project-image.is-revealed{
-  opacity: 1;
-  transform: scale(1);
+.switcher-item{
+  position: absolute; left: 0; top: 0; right: 0;
+  transform: translateY(105%);
+  transition: transform 0.9s var(--easy);
+}
+.switcher-item.is-on{ transform: none; }
+.switcher-item.is-off{ transform: translateY(-105%); }
+.switcher.is-static{ height: auto; font-family: var(--f-text); font-size: 1rem; font-weight: 500; text-transform: none; font-stretch: 100%; line-height: 1.5; }
+.rail-detail-image{ margin: 0.4rem 0 0.9rem; }
+.rail-detail-image img{ display: block; width: 46%; max-width: 12rem; height: auto; }
+
+/* ────────────────────────────────────────────────────────────
+   THE WORK: full width of the main column, stacked, never cropped
+   ──────────────────────────────────────────────────────────── */
+.media-stack{ display: flex; flex-direction: column; gap: 1rem; }
+.section-main.is-stacked{ gap: 1rem; }              /* Dozer: one continuous column of images */
+.project .section-main.is-stacked .media-secondary{ gap: 1rem; }
+.media-stack img{ display: block; width: 100%; height: auto; }
+.media-process .rail-label{ margin-bottom: 0.75rem; }
+.media-placeholder{
+  aspect-ratio: 16 / 10; display: flex; align-items: flex-end; justify-content: flex-end; padding: 0.75rem;
+  font-family: var(--f-mono); font-size: 0.78rem; color: var(--grey);
+  background: repeating-linear-gradient(135deg, var(--paper) 0 2px, var(--line) 2px 3px);
 }
 
-/* ---- flipbook: drag-to-turn page viewer ---- */
-.flipbook{
+/* ---- spreads: one at a time, sliding to the next ---- */
+.book-head{ margin-bottom: 0.8rem; }
+.book-label{ color: var(--grey); }
+.book-how{ margin-top: 0.35rem; font-size: 1.05rem; line-height: 1.35; }
+.slider{
+  position: relative;
   width: 100%;
-  margin-bottom: 1.5rem;
+  aspect-ratio: var(--aspect, 1.414);
+  max-height: calc(100svh - 12rem);
   overflow: hidden;
-  background: var(--viewer-bg);
   cursor: grab;
   touch-action: pan-y;
-  -webkit-user-select: none;
-  user-select: none;
-  position: relative;
+  -webkit-user-select: none; user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
-.flipbook--wide{ aspect-ratio: 1.412 / 1; }
-.flipbook--standard{ aspect-ratio: 1.333 / 1; }
-.flipbook.is-dragging{
-  cursor: grabbing;
-}
-.flipbook-stack{
-  position: relative;
-  width: 100%;
-  height: 100%;
-  perspective: 2600px;
-}
-.flipbook-page{
-  position: absolute;
-  inset: 0;
-  transform-origin: left center;
-  backface-visibility: hidden;
-  box-shadow: -6px 0 18px rgba(0,0,0,0.18);
-}
-.flipbook-page img{
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  pointer-events: none;
-}
-.flipbook-page.is-animating{
-  transition-property: transform;
-  transition-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
-}
-
-.flipbook-hint{
-  position: absolute;
-  right: 0.75rem;
-  bottom: 0.75rem;
-  z-index: 999;
-  font-family: var(--mono);
-  font-size: 0.7rem;
+.slider.is-dragging{ cursor: grabbing; }
+.slider-track{ display: flex; height: 100%; }
+.slide{ position: relative; flex: 0 0 100%; height: 100%; }
+.slide img{ display: block; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+/* unfinished section: greyed out and labelled */
+.slide.is-wip img{ filter: grayscale(1); opacity: 0.4; }
+.wip-badge{
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 0.7rem 1.05rem;
+  font-size: 0.78rem;
   color: var(--paper);
-  background: rgba(0,0,0,0.55);
-  padding: 0.3rem 0.6rem;
-  pointer-events: none;
-  opacity: 1;
-  transition: opacity 0.5s ease;
+  background: var(--ink);
+  white-space: nowrap;
 }
-.flipbook-hint.is-hidden{ opacity: 0; }
-
-.flipbook-slider{
-  -webkit-appearance: none;
-  appearance: none;
-  display: block;
-  width: 100%;
-  height: 1.2rem;
-  margin: 0 0 1.5rem;
+.slider-hint{
+  position: absolute; right: 0.75rem; bottom: 0.75rem;
+  padding: 0.3rem 0.6rem;
+  color: var(--paper);
+  background: rgba(18,18,18,0.72);
+  pointer-events: none;
+  transition: opacity 0.6s var(--easy);
+}
+.slider-hint.is-hidden{ opacity: 0; }
+.book-count{ flex: 1 1 9rem; text-align: center; }
+.book-progress{
+  -webkit-appearance: none; appearance: none;
+  display: block; width: 100%;
+  height: var(--tap);
+  margin-top: 0.15rem;
   background: transparent;
   cursor: pointer;
 }
-.flipbook-slider::-webkit-slider-runnable-track{
-  height: 2px;
-  background: var(--line);
-}
-.flipbook-slider::-moz-range-track{
-  height: 2px;
-  background: var(--line);
-}
-.flipbook-slider::-webkit-slider-thumb{
-  -webkit-appearance: none;
-  appearance: none;
-  width: 3px;
-  height: 1.1rem;
-  margin-top: -0.55rem;
-  background: var(--ink);
-  border-radius: 0;
-  cursor: pointer;
-}
-.flipbook-slider::-moz-range-thumb{
-  width: 3px;
-  height: 1.1rem;
-  background: var(--ink);
-  border: none;
-  border-radius: 0;
-  cursor: pointer;
+.book-progress::-webkit-slider-runnable-track{ height: 2px; background: var(--line); }
+.book-progress::-moz-range-track{ height: 2px; background: var(--line); }
+.book-progress::-webkit-slider-thumb{ -webkit-appearance: none; appearance: none; width: 4px; height: 1.2rem; margin-top: -0.6rem; background: var(--ink); border-radius: 0; }
+.book-progress::-moz-range-thumb{ width: 4px; height: 1.2rem; background: var(--ink); border: none; border-radius: 0; }
+@media (max-width: 599px){
+  .book .controls .book-count{ order: -1; flex-basis: 100%; text-align: left; }
+  .book .controls .ctl-btn{ flex: 1 1 auto; }
 }
 
-/* ---- 3D model: drag to turn, click to open the spreads (Arsvita) ----
-   The stage is transparent, so the model sits straight on the page
-   background; its soft shadow is drawn in 3D. */
-.model3d{ margin-bottom: 1.5rem; }
-.model3d[hidden],
-.model3d-book[hidden]{ display: none; }
-.model3d:not([hidden]),
-.model3d-book:not([hidden]){
-  animation: model3d-in 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-}
-@keyframes model3d-in{
-  from{ opacity: 0; }
-  to{ opacity: 1; }
-}
+/* ---- 3D model (Arsvita): floats on the page, no floor, no shadow ---- */
 .model3d-stage{
   position: relative;
   width: 100%;
-  aspect-ratio: 1.412 / 1;
+  aspect-ratio: 16 / 10;
+  max-height: 82svh;
   overflow: hidden;
   background: transparent;
   cursor: grab;
   touch-action: pan-y;
-  -webkit-user-select: none;
-  user-select: none;
+  -webkit-user-select: none; user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
-@media (max-width: 640px){
-  .model3d-stage{ aspect-ratio: 1 / 1; }
-}
+@media (max-width: 699px){ .model3d-stage{ aspect-ratio: 1 / 1; } }
 .model3d-stage.is-dragging{ cursor: grabbing; }
-.model3d-stage.is-fallback{ cursor: pointer; }
-.model3d-stage:focus-visible{
-  outline: 3px solid var(--ink);
-  outline-offset: 2px;
-}
-.model3d-poster,
-.model3d-canvas{
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-}
+.model3d-poster, .model3d-canvas{ position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .model3d-poster{ object-fit: cover; z-index: 0; }
-.model3d-canvas{
-  z-index: 1;
-  opacity: 0;
-  transition: opacity 0.6s ease;
-}
+.model3d-canvas{ z-index: 1; opacity: 0; transition: opacity 0.9s var(--easy); }
 .model3d-stage.is-ready .model3d-canvas{ opacity: 1; }
-.model3d-stage.is-ready .model3d-poster{ visibility: hidden; transition: visibility 0s 0.6s; }
+.model3d-stage.is-ready .model3d-poster{ visibility: hidden; transition: visibility 0s 0.9s; }
 .model3d-stage.is-fallback .model3d-canvas{ display: none; }
-
-.model3d-loading{
-  position: absolute;
-  z-index: 2;
-  left: 0.75rem;
-  top: 0.75rem;
-  right: 0.75rem;
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  color: var(--grey);
-  pointer-events: none;
-}
-.model3d-stage.is-ready .model3d-loading,
-.model3d-stage.is-fallback .model3d-loading{ display: none; }
+.model3d-loading{ position: absolute; z-index: 2; left: 0.75rem; top: 0.75rem; right: 0.75rem; color: var(--grey); pointer-events: none; }
+.model3d-stage.is-ready .model3d-loading, .model3d-stage.is-fallback .model3d-loading{ display: none; }
 /* only shown if a file is in the wrong place, so it's easy to spot */
 .model3d-stage.is-missing .model3d-loading{
-  display: block;
-  right: auto;
-  max-width: calc(100% - 1.5rem);
-  color: var(--ink);
-  background: var(--paper);
-  border: 1px solid var(--ink);
-  padding: 0.4rem 0.6rem;
-}
-
-.model3d-open-label{
-  position: absolute;
-  left: 0.75rem;
-  bottom: 0.75rem;
-  z-index: 2;
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--paper);
-  background: var(--ink);
-  padding: 0.35rem 0.65rem;
-  pointer-events: none;
-}
-.model3d-stage:hover .model3d-open-label{
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
+  display: block; right: auto; max-width: calc(100% - 1.5rem);
+  color: var(--ink); background: var(--paper); border: 1px solid var(--ink); padding: 0.4rem 0.6rem;
 }
 .model3d-hint{
-  position: absolute;
-  right: 0.75rem;
-  bottom: 0.75rem;
-  z-index: 2;
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  color: var(--grey);
-  border: 1px solid var(--line);
-  padding: 0.3rem 0.6rem;
-  pointer-events: none;
-  transition: opacity 0.5s ease;
+  position: absolute; right: 0.75rem; bottom: 0.75rem; z-index: 2;
+  padding: 0.3rem 0.6rem; color: var(--grey); border: 1px solid var(--line);
+  pointer-events: none; transition: opacity 0.6s var(--easy);
 }
-.model3d-hint.is-hidden,
-.model3d-stage.is-fallback .model3d-hint{ opacity: 0; }
-
-.model3d-controls{
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.75rem;
-  margin-top: 0.6rem;
-}
-.model3d-stage.is-fallback ~ .model3d-controls{ display: none; }
-.model3d-toggle{
-  display: inline-flex;
-  border: 1px solid var(--ink);
-}
-.model3d-toggle button{
-  font-family: var(--mono);
-  font-size: 0.8rem;
-  color: var(--ink);
-  background: none;
-  border: none;
-  margin: 0;
-  padding: 0.45rem 0.85rem;
-  min-height: 2.75rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-.model3d-toggle button + button{ border-left: 1px solid var(--ink); }
-.model3d-toggle button[aria-pressed="true"]{
-  background: var(--ink);
-  color: var(--paper);
-}
-.model3d-toggle button:focus-visible{ outline-offset: -5px; outline-color: var(--paper); }
-.model3d-toggle button[aria-pressed="false"]:focus-visible{ outline-color: var(--ink); }
-
-/* ---- bird picker ---- */
-.bird-picker-prompt{
-  font-size: 0.95rem;
-  color: var(--grey);
-  margin-bottom: 1rem;
-}
-.bird-picker-grid{
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.6rem;
-  margin-bottom: 1.5rem;
-}
-.bird-picker-grid[hidden]{ display: none; }
-@media (min-width: 640px){
-  .bird-picker-grid{ grid-template-columns: repeat(4, 1fr); }
-}
-.bird-thumb{
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  text-align: left;
-  font-family: var(--sans);
-  color: var(--ink);
-}
-.bird-thumb-img{
-  display: block;
-  aspect-ratio: 1 / 1;
-  overflow: hidden;
-  background: var(--viewer-bg);
-}
-.bird-thumb-img img{
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.bird-thumb:hover .bird-thumb-img img{ transform: scale(1.05); }
-.bird-thumb-label{
-  font-size: 0.9rem;
-  font-weight: 700;
-}
-.bird-thumb.is-inprogress{ cursor: default; }
-.bird-thumb.is-inprogress .bird-thumb-img{ opacity: 0.4; }
-.bird-thumb.is-inprogress .bird-thumb-label{ color: var(--grey); }
-.bird-thumb-status{
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--grey);
-}
-
-.bird-viewer-back{
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35em;
-  background: none;
-  border: none;
-  padding: 0;
-  margin-bottom: 1.25rem;
-  font-family: var(--mono);
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--ink);
-  border-bottom: 1px solid var(--ink);
-  cursor: pointer;
-}
-.bird-viewer-back:hover{ color: var(--grey); border-bottom-color: var(--grey); }
-.bird-viewer-title{
-  font-size: 1.2rem;
-  font-weight: 800;
-  margin-bottom: 0.75rem;
-}
-.project-image img{
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-.project-image.placeholder{
-  background:
-    repeating-linear-gradient(135deg, var(--paper) 0 2px, var(--line) 2px 3px);
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
-}
-.project-image.placeholder .ph-label{
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  color: var(--grey);
-  background: var(--paper);
-  padding: 0.25rem 0.5rem;
-  margin: 0.6rem;
-  border: 1px solid var(--line);
-}
-
-.project-title{
-  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  margin-bottom: 0.6rem;
-  max-width: 26ch;
-}
-.project-credits{
-  max-width: var(--measure);
-  font-size: 0.95rem;
-  color: var(--grey);
-  padding-left: 1rem;
-  border-left: 2px solid var(--line);
-  margin-bottom: 1.75rem;
-}
-
-.project-block{
-  max-width: var(--measure);
-  margin-bottom: 1.5rem;
-}
-.project-block-label{
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--grey);
-  margin-bottom: 0.4rem;
-}
-.project-block-text{
-  font-size: 1.05rem;
-}
-
-.project-block-outcome{
-  padding-left: 1rem;
-  border-left: 3px solid var(--ink);
-}
-.project-block-outcome .project-block-label{
-  color: var(--ink);
-}
-
-.project-process{
-  margin-top: 2.5rem;
-  padding-top: 2rem;
-  border-top: 1px solid var(--line);
-}
-.project-process .project-block-label{
-  margin-bottom: 1rem;
-}
-
-.project-gallery{
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-auto-rows: 130px;
-  grid-auto-flow: dense;
-  gap: 0.5rem;
-  margin-top: 2rem;
-}
-.project-gallery-item{
-  overflow: hidden;
-  opacity: 0;
-  transform: scale(0.97);
-  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.project-gallery-item.is-revealed{
-  opacity: 1;
-  transform: scale(1);
-}
-.project-gallery-item img{
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-/* asymmetric sizing: first image is the big feature tile,
-   fourth/fifth/sixth run wide, second/third stay small */
-.project-gallery-item:nth-child(1){
-  grid-column: span 2;
-  grid-row: span 2;
-}
-.project-gallery-item:nth-child(4),
-.project-gallery-item:nth-child(5),
-.project-gallery-item:nth-child(6){
-  grid-column: span 2;
-}
-
-@media (min-width: 700px){
-  .project-gallery{ grid-auto-rows: 160px; }
-}
-
-/* ---- brand crossfade strip ---- */
-.brand-strip{
-  margin-top: auto;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--line);
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-.brand-strip-label{
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--grey);
-}
-.brand-strip-stage{
-  display: block;
-  height: 1.6rem;
-  overflow: hidden;
-  font-weight: 800;
-  font-size: 1.15rem;
-  letter-spacing: -0.01em;
-  filter: grayscale(1) contrast(1.1);
-}
-.brand-strip-name{
-  display: inline-block;
-  opacity: 0;
-  transform: translateY(6px);
-  transition: opacity 0.5s cubic-bezier(0.45, 0, 0.55, 1),
-              transform 0.5s cubic-bezier(0.45, 0, 0.55, 1);
-}
-.brand-strip-name.is-visible{
-  opacity: 1;
-  transform: translateY(0);
-}
+.model3d-hint.is-hidden, .model3d-stage.is-fallback .model3d-hint{ opacity: 0; }
+.model3d-foot{ display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 0.5rem; }
+.model3d-note{ color: var(--grey); }
+.model3d-stage.is-fallback ~ .model3d-foot .ctl-btn{ display: none; }
 
 /* ────────────────────────────────────────────────────────────
-   BACK TO TOP FOOTER
+   ABOUT + CONTACT
+   ──────────────────────────────────────────────────────────── */
+.section--text .section-main{ padding-top: 0; }
+@media (min-width: 900px){ .section--text .section-main{ padding-top: var(--gutter); } }
+.section-lede{ max-width: 30ch; font-size: clamp(1.35rem, 2.4vw, 2.1rem); line-height: 1.25; }
+.contact-email{
+  display: inline-block; align-self: flex-start; max-width: 100%;
+  font-family: var(--f-text); font-weight: 700;
+  font-size: clamp(1.1rem, 4.4vw, 3rem); letter-spacing: -0.015em;
+  text-decoration: none;
+  background: linear-gradient(currentColor, currentColor) left bottom / 100% 3px no-repeat;
+  padding-bottom: 0.1em;
+  white-space: nowrap;
+  transition: color 0.35s var(--easy);
+}
+.contact-email:hover{ color: var(--grey); }
+.contact-social{ list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; }
+.contact-social a{ display: inline-block; padding: 0.55rem 0; text-decoration: underline; text-underline-offset: 0.2em; }
+
+/* ────────────────────────────────────────────────────────────
+   BACK TO TOP: only appears once you've scrolled down
    ──────────────────────────────────────────────────────────── */
 .backtotop{
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 30;
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+  padding: 0.6rem var(--gutter);
+  padding-bottom: calc(0.6rem + env(safe-area-inset-bottom, 0px));
+  text-align: center;
   background: var(--paper);
   border-top: 1px solid var(--ink);
-  padding: 0.6rem var(--gutter);
-  text-align: center;
+  transform: translateY(100%);
+  visibility: hidden;
+  transition: transform 0.6s var(--easy), visibility 0s linear 0.6s;
 }
-.backtotop a{
-  display: inline-block;
-  font-family: var(--mono);
-  font-size: 0.8rem;
-  text-decoration: none;
-  border-bottom: 1px solid var(--ink);
-  padding-bottom: 0.1rem;
-}
-.backtotop a:hover{
-  color: var(--grey);
-  border-bottom-color: var(--grey);
-}
-
-@media (min-width: 900px){
-  .project{ grid-template-columns: 1fr 2fr; }
-  .project-rail{
-    border-bottom: none;
-    border-right: 1px solid var(--line);
-    position: sticky;
-    top: 2.75rem;
-    align-self: start;
-  }
-}
-
-/* empty scale state */
-.project-empty{
-  padding: var(--gutter);
-  border-bottom: 1px solid var(--line);
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 1.5rem;
-  align-items: center;
-}
-.project-empty .empty-mark{
-  font-weight: 900;
-  font-size: clamp(4rem, 12vw, 7rem);
-  line-height: 0.8;
-  color: var(--line);
-}
-.project-empty p{
-  font-family: var(--mono);
-  font-size: 0.85rem;
-  color: var(--grey);
-  max-width: 40ch;
-}
-
-/* ────────────────────────────────────────────────────────────
-   ABOUT — pull quote treatment via yellow block
-   ──────────────────────────────────────────────────────────── */
-.about{
-  display: grid;
-  grid-template-columns: 1fr;
-  border-bottom: 1px solid var(--line);
-}
-.about-number{
-  padding: var(--gutter);
-  font-family: var(--sans);
-  font-weight: 900;
-  font-size: clamp(4rem, 12vw, 7rem);
-  line-height: 0.8;
-  color: var(--ink);
-  border-bottom: 1px solid var(--line);
-}
-.about-grid{
-  padding: var(--gutter);
-  display: grid;
-  gap: 1.5rem;
-}
-.about-heading{
-  font-size: 1.1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  font-weight: 700;
-}
-.about-bio{
-  max-width: var(--measure);
-  font-size: 1.15rem;
-  padding-left: 1.25rem;
-  border-left: 3px solid var(--ink);
-}
-.about-contactline{
-  font-family: var(--mono);
-  font-size: 0.85rem;
-  color: var(--grey);
-}
-
-@media (min-width: 900px){
-  .about{ grid-template-columns: 1fr 3fr; }
-  .about-number{ border-bottom: none; border-right: 1px solid var(--line); }
-}
-
-/* ────────────────────────────────────────────────────────────
-   CONTACT
-   ──────────────────────────────────────────────────────────── */
-.contact{
-  display: grid;
-  grid-template-columns: 1fr;
-  border-bottom: 1px solid var(--line);
-}
-.contact-number{
-  padding: var(--gutter);
-  font-weight: 900;
-  font-size: clamp(4rem, 12vw, 7rem);
-  line-height: 0.8;
-  color: var(--ink);
-  border-bottom: 1px solid var(--line);
-}
-.contact-main{
-  padding: var(--gutter);
-}
-.contact-main h2{
-  font-size: 1.1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  font-weight: 700;
-  margin-bottom: 1rem;
-}
-.contact-status{
-  font-family: var(--mono);
-  font-size: 0.85rem;
-  color: var(--grey);
-  margin-bottom: 1rem;
-}
-.contact-email{
-  display: inline-block;
-  font-size: clamp(1.6rem, 5vw, 3rem);
-  font-weight: 800;
-  text-decoration: none;
-  border-bottom: 3px solid var(--ink);
-  margin-bottom: 1.5rem;
-}
-.contact-social{
-  list-style: none;
-  padding: 0;
-  display: flex;
-  gap: 1.5rem;
-  font-family: var(--mono);
-  font-size: 0.85rem;
-  flex-wrap: wrap;
-}
-.contact-social a{ text-decoration: underline; }
-
-@media (min-width: 900px){
-  .contact{ grid-template-columns: 1fr 3fr; }
-  .contact-number{ border-bottom: none; border-right: 1px solid var(--line); }
-}
+body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: transform 0.6s var(--easy), visibility 0s; }
+.backtotop a{ display: inline-block; text-decoration: none; padding: 0.35rem 0; border-bottom: 1px solid var(--ink); }
+.backtotop a:hover{ color: var(--grey); border-bottom-color: var(--grey); }
 
 ```
 
@@ -1240,706 +720,683 @@ h1,h2,h3,p,ol,ul{ margin: 0; }
 
 ```javascript
 (function(){
+  "use strict";
   const d = PORTFOLIO_DATA;
-  const SCALES = ["01", "02", "03"];
+  document.documentElement.classList.add("js");
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  const EASY = "cubic-bezier(0.33, 0, 0.67, 1)";     // After Effects' Easy Ease, used for every slide
 
-  function escapeAttr(str){
-    return String(str).replace(/"/g, "&quot;");
+  function esc(str){
+    return String(str == null ? "" : str)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+  const projectById = {};
+  d.projects.forEach(p => { projectById[p.id] = p; });
+
+  // waits for a transform transition to finish (with a safety timeout)
+  function afterSlide(el, ms, cb){
+    let done = false;
+    const finish = () => { if (done) return; done = true; el.removeEventListener("transitionend", onEnd); cb(); };
+    const onEnd = (e) => { if (e.target === el) finish(); };
+    el.addEventListener("transitionend", onEnd);
+    setTimeout(finish, ms + 80);
   }
 
-  // ---- hero ----
+  // ────────────────────────────────────────────────────────────
+  // HERO TEXT + PROJECT INDEX
+  // ────────────────────────────────────────────────────────────
+  const hero = document.getElementById("top");
   document.getElementById("hero-name").textContent = d.name;
   document.getElementById("hero-role").textContent = d.role;
-  document.getElementById("hero-tagline").textContent = d.tagline;
   document.getElementById("hero-location").textContent = d.location;
+  document.getElementById("hero-tagline").textContent = d.tagline;
   document.getElementById("runhead-name").textContent = d.name;
 
-  // ---- group projects by scale ----
-  const byScale = {};
-  SCALES.forEach(s => byScale[s] = []);
-  d.projects.forEach(p => { (byScale[p.scale] || (byScale[p.scale] = [])).push(p); });
-
-  // ---- floating cursor preview (desktop only, real pointer only) ----
-  const canHoverPreview = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-  let cursorPreviewEl = null;
-  if (canHoverPreview) {
-    cursorPreviewEl = document.createElement("div");
-    cursorPreviewEl.className = "cursor-preview";
-    const img = document.createElement("img");
-    img.alt = "";
-    cursorPreviewEl.appendChild(img);
-    document.body.appendChild(cursorPreviewEl);
-  }
-
-  function attachCursorPreview(rowEl, imageSrc){
-    if (!canHoverPreview || !imageSrc) return;
-    const img = cursorPreviewEl.querySelector("img");
-    rowEl.addEventListener("mouseenter", () => {
-      img.src = imageSrc;
-      cursorPreviewEl.classList.add("is-visible");
-    });
-    rowEl.addEventListener("mousemove", (e) => {
-      cursorPreviewEl.style.left = (e.clientX + 24) + "px";
-      cursorPreviewEl.style.top = (e.clientY - 90) + "px";
-    });
-    rowEl.addEventListener("mouseleave", () => {
-      cursorPreviewEl.classList.remove("is-visible");
-    });
-  }
-
-  // ---- contents list ----
-  const contentsList = document.getElementById("contents-list");
+  const heroIndex = document.getElementById("hero-index");
   d.projects.forEach(p => {
     const li = document.createElement("li");
-    const a = document.createElement("a");
-    a.href = "#project-" + p.id;
-    a.className = "contents-row";
-
-    const thumbSrc = p.contentsThumb ? p.contentsThumb.src : ((p.images && p.images.length) ? p.images[0] : null);
-    const thumbBg = p.contentsThumb ? ` style="background:${p.contentsThumb.background}"` : "";
-    const thumbClass = p.contentsThumb ? " is-logo" : "";
-    const thumbMarkup = thumbSrc
-      ? `<img src="${thumbSrc}" alt="" loading="lazy">`
-      : "";
-
-    a.innerHTML = `
-      <span class="toc-num">${p.scale}</span>
-      <span class="contents-thumb${thumbSrc ? "" : " is-empty"}${thumbClass}"${thumbBg}>${thumbMarkup}</span>
-      <span class="toc-title">${p.title}</span>
-      <span class="toc-leader" aria-hidden="true"></span>
-      <span class="toc-year">${p.year}</span>
-    `;
-    li.appendChild(a);
-    contentsList.appendChild(li);
-
-    attachCursorPreview(a, thumbSrc);
+    li.innerHTML = `
+      <a class="hero-index-row" href="#project-${esc(p.id)}" data-project="${esc(p.id)}">
+        <span class="hero-index-num">${esc(p.scale)}</span>
+        <span class="hero-index-title">${esc(p.title)}</span>
+        <span class="hero-index-year">${esc(p.year)}</span>
+      </a>`;
+    heroIndex.appendChild(li);
   });
+  function markIndex(id){
+    heroIndex.querySelectorAll(".hero-index-row").forEach(a => a.classList.toggle("is-current", a.dataset.project === id));
+  }
 
-  // ---- brand crossfade strip ----
-  function buildBrandStrip(brands){
-    const wrap = document.createElement("div");
-    wrap.className = "brand-strip";
-    wrap.setAttribute("aria-label", "As seen with: " + brands.join(", "));
+  // ────────────────────────────────────────────────────────────
+  // YOUR NAME TYPES ITSELF OUT, sized to fill the page width. An
+  // invisible full copy underneath holds the space, so nothing
+  // moves while it types. Then the rest of the hero slides in.
+  // ────────────────────────────────────────────────────────────
+  const nameEl = document.querySelector(".hero-name");
+  const ghost = document.getElementById("type-ghost");
+  const live = document.getElementById("type-live");
+  const words = d.name.trim().split(/\s+/);
+  const caret = '<span class="type-caret"></span>';
+  ghost.innerHTML = `<span class="type-inner">${words.map((w, i) =>
+    (i ? '<span class="type-space"> </span>' : "") + `<span class="type-line">${esc(w)}${i === words.length - 1 ? '<span class="type-caret" style="visibility:hidden"></span>' : ""}</span>`).join("")}</span>`;
 
-    const label = document.createElement("span");
-    label.className = "brand-strip-label";
-    label.textContent = "As seen with";
-    wrap.appendChild(label);
-
-    const stage = document.createElement("span");
-    stage.className = "brand-strip-stage";
-    wrap.appendChild(stage);
-
-    let i = 0;
-    let intervalId = null;
-    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    function showNext(){
-      stage.innerHTML = ""; // always start from a clean slate, never stack
-      const el = document.createElement("span");
-      el.className = "brand-strip-name";
-      el.textContent = brands[i % brands.length];
-      stage.appendChild(el);
-      requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add("is-visible")));
+  function renderTyped(n){
+    let left = n, html = "";
+    for (let i = 0; i < words.length; i++){
+      if (i > 0){ if (left <= 0) break; html += '<span class="type-space"> </span>'; }
+      const take = Math.min(words[i].length, left);
+      left -= take;
+      const caretHere = left <= 0;
+      html += `<span class="type-line">${esc(words[i].slice(0, take))}${caretHere ? caret : ""}</span>`;
+      if (caretHere) break;
     }
+    live.innerHTML = `<span class="type-inner">${html}</span>`;
+  }
+  // measured at a small size (text width scales evenly), so the test
+  // never makes the page wider than the screen on a phone
+  function fitName(){
+    nameEl.style.fontSize = "20px";
+    const inner = ghost.querySelector(".type-inner");
+    const w = inner.getBoundingClientRect().width, avail = nameEl.clientWidth;
+    if (w > 0 && avail > 0) nameEl.style.fontSize = Math.max(36, Math.min(420, Math.floor(200 * avail / w * 0.99) / 10)) + "px";
+  }
+  const viewW = () => document.documentElement.clientWidth;
+  const viewH = () => document.documentElement.clientHeight;
+  function typeName(done){
+    const total = words.join("").length;
+    if (reducedMotion) { renderTyped(total); done(); return; }
+    let n = 0;
+    renderTyped(0);
+    const tick = () => { n++; renderTyped(n); if (n < total) setTimeout(tick, 70); else setTimeout(done, 250); };
+    setTimeout(tick, 400);
+  }
 
-    function cycle(){
-      const current = stage.querySelector(".brand-strip-name");
-      if (!current) { showNext(); return; }
-      current.classList.remove("is-visible");
-      let done = false;
-      const finish = () => { if (done) return; done = true; showNext(); };
-      current.addEventListener("transitionend", finish, { once: true });
-      // fallback in case the transitionend event never fires (e.g. the tab
-      // was backgrounded mid-transition) so the strip can't get stuck
-      setTimeout(finish, 700);
-    }
+  // ────────────────────────────────────────────────────────────
+  // THE STRIP: every photo from every project, in order, each at its
+  // own shape and size (never cropped, never enlarged past its real
+  // size), sliding along to the next one with Easy Ease. Loops
+  // seamlessly. Drag or swipe to move it yourself; hover or Pause
+  // to stop it. Each image links to its project.
+  // ────────────────────────────────────────────────────────────
+  const strip = document.getElementById("strip");
+  const track = document.getElementById("strip-track");
+  const pauseBtn = document.getElementById("strip-pause");
+  const SIZES = [1, 0.8, 0.92, 0.74, 1, 0.86];          // gentle rhythm of image sizes
+  const LOAD_AHEAD = 14;                                // images loaded ahead of the one on screen
 
-    function start(){
-      if (intervalId || prefersReduced) return;
-      intervalId = setInterval(() => { i++; cycle(); }, 2200);
-    }
-    function stop(){
-      if (intervalId) { clearInterval(intervalId); intervalId = null; }
-    }
+  function autoReel(){
+    const out = [];
+    d.projects.forEach(p => {
+      const hasBook = p.spreads && p.spreads.length > 1;
+      (hasBook ? p.spreads : (p.images || [])).forEach(src => out.push({ src, project: p.id }));
+      (p.birds || []).filter(b => b.status !== "in-progress")
+        .forEach(b => b.spreads.forEach(src => out.push({ src, project: p.id })));
+    });
+    return out;
+  }
+  const reel = (Array.isArray(d.reel) && d.reel.length ? d.reel : autoReel()).filter(s => s && s.src && projectById[s.project]);
+  let stripH = 360;
+  const stripItems = reel.map((s, i) => {
+    const p = projectById[s.project];
+    const a = document.createElement("a");
+    a.className = "strip-item";
+    a.href = "#project-" + p.id;
+    a.dataset.project = p.id;
+    a.dataset.f = String(SIZES[i % SIZES.length]);
+    a.setAttribute("draggable", "false");
+    a.innerHTML = `<span class="strip-frame"><img alt="${esc(p.title)}" decoding="async" draggable="false"></span>
+      <span class="strip-cap"><b>${esc(p.scale)}</b>${esc(p.title)}</span>`;
+    const img = a.querySelector("img");
+    img.dataset.src = s.src;
+    img.addEventListener("load", () => { a.dataset.nw = img.naturalWidth; a.dataset.nh = img.naturalHeight; sizeItem(a); });
+    // an image that can't be found (e.g. a path in data.js that doesn't
+    // match the file) is simply left out instead of leaving a gap
+    img.addEventListener("error", () => { a.remove(); loadAhead(LOAD_AHEAD); });
+    track.appendChild(a);
+    return a;
+  });
+  function sizeItem(a){
+    const nh = +a.dataset.nh || 0, nw = +a.dataset.nw || 0;
+    let h = stripH * (+a.dataset.f || 1);
+    if (nh) h = Math.min(h, nh);                          // never enlarge past the real size
+    a.style.setProperty("--h", Math.round(h) + "px");
+    if (nw && nh) a.style.setProperty("--ar", (nw / nh).toFixed(4));
+  }
+  function loadAhead(count){
+    Array.from(track.children).slice(0, count).forEach(a => {
+      const img = a.querySelector("img");
+      if (!img.src && img.dataset.src) img.src = img.dataset.src;
+    });
+  }
+  function currentStripProject(){ const first = track.firstElementChild; if (first) markIndex(first.dataset.project); }
 
-    if (!prefersReduced) {
-      showNext();
-      start();
-      document.addEventListener("visibilitychange", () => {
-        if (document.hidden) {
-          stop();
-        } else {
-          // resync cleanly rather than resuming mid-transition
-          stage.innerHTML = "";
-          showNext();
-          start();
-        }
+  // strip height: whatever keeps the first project peeking at the bottom of the screen
+  function sizeStrip(){
+    if (!stripItems.length) return;
+    const peek = viewW() < 700 ? 90 : 110;
+    const capH = 30;
+    const stripTop = strip.getBoundingClientRect().top + window.scrollY;
+    const rest = hero.getBoundingClientRect().bottom - strip.getBoundingClientRect().bottom;
+    const lo = viewW() < 700 ? 200 : 260, hi = viewW() < 700 ? 420 : 640;
+    stripH = Math.round(Math.max(lo, Math.min(hi, viewH() - peek - rest - capH - stripTop)));
+    stripItems.forEach(sizeItem);
+  }
+
+  let stripPaused = reducedMotion, stripVisible = true, stripBusy = false, stripLastStep = performance.now();
+  // speed of the strip: how long each slide takes, and how long each
+  // image rests before the next slide (lower = faster)
+  const STRIP_SLIDE_MS = 700, STRIP_HOLD_MS = 800;
+  const gapPx = () => parseFloat(getComputedStyle(track).columnGap) || 0;
+  function slideStrip(dir, fromX){
+    if (stripBusy) return;
+    stripBusy = true;
+    const start = fromX || 0;
+    if (dir > 0){
+      const first = track.firstElementChild;
+      const w = Math.round(first.getBoundingClientRect().width + gapPx());
+      track.style.transition = "none";
+      track.style.transform = `translate3d(${start}px,0,0)`;
+      void track.offsetWidth;
+      track.style.transition = `transform ${STRIP_SLIDE_MS}ms ${EASY}`;
+      track.style.transform = `translate3d(${-w}px,0,0)`;
+      afterSlide(track, STRIP_SLIDE_MS, () => {
+        track.style.transition = "none";
+        track.appendChild(first);
+        track.style.transform = "translate3d(0,0,0)";
+        void track.offsetWidth;
+        stripBusy = false;
+        loadAhead(LOAD_AHEAD); currentStripProject();
       });
     } else {
-      stage.textContent = brands.join(" \u00b7 ");
+      const last = track.lastElementChild;
+      track.style.transition = "none";
+      track.insertBefore(last, track.firstElementChild);
+      const w = Math.round(last.getBoundingClientRect().width + gapPx());
+      track.style.transform = `translate3d(${start - w}px,0,0)`;
+      void track.offsetWidth;
+      track.style.transition = `transform ${STRIP_SLIDE_MS}ms ${EASY}`;
+      track.style.transform = "translate3d(0,0,0)";
+      afterSlide(track, STRIP_SLIDE_MS, () => { stripBusy = false; loadAhead(LOAD_AHEAD); currentStripProject(); });
     }
+  }
+  // A steady clock checks ten times a second whether it's time for the
+  // next slide. It keeps going through the whole set and round again,
+  // only holding while paused, while being dragged, while scrolled out
+  // of view, or while the tab is hidden.
+  function stripCanPlay(){
+    return !stripPaused && !sDrag && stripVisible && !document.hidden && hero.classList.contains("is-in");
+  }
+  function scheduleStrip(){ stripLastStep = performance.now(); }
+  setInterval(() => {
+    if (!stripCanPlay()) { stripLastStep = performance.now(); return; }
+    if (stripBusy) return;
+    if (performance.now() - stripLastStep >= STRIP_HOLD_MS + STRIP_SLIDE_MS) {
+      stripLastStep = performance.now();
+      slideStrip(1);
+    }
+  }, 100);
+  function setStripPaused(p){
+    stripPaused = p;
+    pauseBtn.setAttribute("aria-pressed", String(p));
+    pauseBtn.textContent = p ? "Play" : "Pause";
+    scheduleStrip();
+  }
+  pauseBtn.addEventListener("click", () => setStripPaused(!stripPaused));
+  // drag / swipe
+  let sDrag = null, sMoved = false;
+  strip.addEventListener("pointerdown", (e) => {
+    if (reducedMotion || stripBusy || (e.button !== undefined && e.button > 0)) return;
+    sDrag = { x: e.clientX, dx: 0, id: e.pointerId }; sMoved = false;
+  });
+  strip.addEventListener("pointermove", (e) => {
+    if (!sDrag) return;
+    sDrag.dx = e.clientX - sDrag.x;
+    if (!sMoved && Math.abs(sDrag.dx) > 6) { sMoved = true; strip.classList.add("is-dragging"); try { strip.setPointerCapture(sDrag.id); } catch (err) {} }
+    if (sMoved) { track.style.transition = "none"; track.style.transform = `translate3d(${sDrag.dx}px,0,0)`; }
+  });
+  function endStripDrag(){
+    if (!sDrag) return;
+    const dx = sDrag.dx; sDrag = null;
+    strip.classList.remove("is-dragging");
+    if (!sMoved) { scheduleStrip(); return; }
+    if (dx < -50) slideStrip(1, dx);
+    else if (dx > 50) slideStrip(-1, dx);
+    else { track.style.transition = `transform 500ms ${EASY}`; track.style.transform = "translate3d(0,0,0)"; }
+    scheduleStrip();
+  }
+  strip.addEventListener("pointerup", endStripDrag);
+  strip.addEventListener("pointercancel", endStripDrag);
+  strip.addEventListener("lostpointercapture", endStripDrag);
+  window.addEventListener("pointerup", endStripDrag);
+  window.addEventListener("blur", endStripDrag);
+  strip.addEventListener("click", (e) => { if (sMoved) { e.preventDefault(); e.stopPropagation(); sMoved = false; } }, true);
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(es => { stripVisible = es[0].isIntersecting; scheduleStrip(); }, { threshold: 0.15 }).observe(strip);
+  }
+  document.addEventListener("visibilitychange", scheduleStrip);
+  if (reducedMotion) { strip.classList.add("is-static"); loadAhead(stripItems.length); }
+  else loadAhead(LOAD_AHEAD);
+  currentStripProject();
 
-    return wrap;
+  // ────────────────────────────────────────────────────────────
+  // PROJECTS: one template for every project.
+  // Sidebar: number, name, small info, then the short text.
+  // Main column: the work.
+  // ────────────────────────────────────────────────────────────
+  function railMarkup(p){
+    const facts = [p.year, p.role, p.dimensions].filter(Boolean).map(f => `<li>${esc(f)}</li>`).join("");
+    const block = (label, text) => text
+      ? `<div class="rail-block"><h3 class="rail-label">${esc(label)}</h3><p>${esc(text)}</p></div>` : "";
+    let detail = "";
+    if (p.detail) {
+      const dt = p.detail;
+      let inner = "";
+      if (dt.items && dt.switch) {
+        inner = `<p class="switcher" aria-label="${esc(dt.items.join(", "))}">${dt.items.map((it, i) =>
+          `<span class="switcher-item${i === 0 ? " is-on" : ""}" aria-hidden="true">${esc(it)}</span>`).join("")}</p>`;
+      } else if (dt.items) {
+        inner = `<ul class="rail-detail-list">${dt.items.map(it => `<li>${esc(it)}</li>`).join("")}</ul>`;
+      } else {
+        inner = `${dt.image ? `<div class="rail-detail-image"><img src="${esc(dt.image)}" alt="${esc(p.title)} logo" loading="lazy"></div>` : ""}
+                 ${dt.text ? `<p>${esc(dt.text)}</p>` : ""}`;
+      }
+      detail = `<div class="rail-detail"><h3 class="rail-label">${esc(dt.label)}</h3>${inner}</div>`;
+    }
+    return `
+      <div class="rail-head">
+        <span class="rail-num">${esc(p.scale)}</span>
+        <h2 class="rail-name">${esc(p.title)}</h2>
+        <ul class="rail-facts">${facts}</ul>
+      </div>
+      <div class="rail-body">
+        ${p.summary ? `<p class="rail-summary">${esc(p.summary)}</p>` : ""}
+        ${block("Challenge", p.challenge)}
+        ${block("Approach", p.process)}
+        ${block(p.outcomeLabel || "Outcome", p.outcome)}
+        ${detail}
+      </div>`;
   }
 
-  // ---- work sections, one block per scale tier ----
-  const workRoot = document.getElementById("work-sections");
-  SCALES.forEach(scale => {
-    const projects = byScale[scale];
-    if (!projects || projects.length === 0) {
-      const empty = document.createElement("div");
-      empty.className = "project-empty";
-      empty.innerHTML = `
-        <span class="empty-mark">${scale}</span>
-        <p>No entry ${scale} published yet \u2014 check back, or ask to see work in progress.</p>
-      `;
-      workRoot.appendChild(empty);
-      return;
+  // spreads, one at a time; pages = [{src, alt, section, wip}]
+  function bookMarkup(p, pages, label){
+    const n = pages.length;
+    const how = finePointer
+      ? `Drag, click or use the arrows to go through all ${n} spreads.`
+      : `Swipe or use the arrows to go through all ${n} spreads.`;
+    return `
+      <figure class="book" data-book style="--aspect:${p.aspect || 1.412}">
+        <figcaption class="book-head">
+          <span class="book-label">${esc(label || "Inside the book")}</span>
+          <p class="book-how">${how}</p>
+        </figcaption>
+        <div class="slider" tabindex="0" role="region" aria-roledescription="carousel"
+             aria-label="${esc(p.title)}, ${n} spreads. Use the left and right arrow keys to move between them.">
+          <div class="slider-track">
+            ${pages.map((pg, i) => `
+              <div class="slide${pg.wip ? " is-wip" : ""}" role="group" aria-roledescription="slide"
+                   aria-label="${esc(pg.alt)}"${pg.section ? ` data-section="${esc(pg.section)}"` : ""}>
+                <img src="${esc(pg.src)}" alt="${esc(pg.alt)}" loading="${i < 2 ? "eager" : "lazy"}" decoding="async" draggable="false">
+                ${pg.wip ? `<span class="wip-badge">Work in progress</span>` : ""}
+              </div>`).join("")}
+          </div>
+          <span class="slider-hint" aria-hidden="true">${finePointer ? "Drag" : "Swipe"} \u2194</span>
+        </div>
+        <div class="controls">
+          <button type="button" class="ctl-btn book-prev">\u2190 Previous</button>
+          <span class="book-count" aria-live="polite"></span>
+          <button type="button" class="ctl-btn book-next">Next \u2192</button>
+          <button type="button" class="ctl-btn book-pause" aria-pressed="false">Pause</button>
+        </div>
+        <input type="range" class="book-progress" min="0" max="${n - 1}" value="0" step="1" aria-label="Jump to a spread">
+      </figure>`;
+  }
+
+  // returns {primary, secondary, stacked}: the main visual, and the rest
+  function mediaMarkup(p){
+    const parts = [];
+    if (p.model3d && p.model3d.src) {
+      const poster = p.model3d.poster ? `<img class="model3d-poster" src="${esc(p.model3d.poster)}" alt="" loading="lazy" decoding="async">` : "";
+      parts.push(`
+        <div class="model3d" data-model3d="${esc(p.id)}">
+          <div class="model3d-stage" tabindex="0" role="group" aria-roledescription="3D viewer"
+               aria-label="${esc(p.title)} in 3D. It turns on its own and its stand comes off and goes back on. Drag, or use the left and right arrow keys, to turn it yourself.">
+            ${poster}
+            <span class="model3d-loading" aria-hidden="true">Loading 3D model\u2026</span>
+            <span class="model3d-hint" aria-hidden="true">${finePointer ? "Drag" : "Swipe"} to turn \u2194</span>
+          </div>
+          <div class="model3d-foot">
+            <p class="model3d-note">The stand comes off and goes back on by itself.</p>
+            <button type="button" class="ctl-btn model3d-pause" aria-pressed="false">Pause</button>
+          </div>
+        </div>`);
     }
-    projects.forEach(p => {
-      const section = document.createElement("article");
-      section.className = "project project--" + p.id;
-      section.id = "project-" + p.id;
+    if (p.spreads && p.spreads.length > 1) {
+      parts.push(bookMarkup(p, p.spreads.map((src, i) => ({ src, alt: `${p.title}, spread ${i + 1} of ${p.spreads.length}` })), p.flipLabel));
+    }
+    if (p.birds && p.birds.length) {
+      const pages = [];
+      p.birds.forEach(b => b.spreads.forEach((src, i) => pages.push({
+        src, section: b.name, wip: b.status === "in-progress",
+        alt: `${p.title}, ${b.name}, spread ${i + 1} of ${b.spreads.length}${b.status === "in-progress" ? ", work in progress" : ""}`
+      })));
+      parts.push(bookMarkup(p, pages, p.flipLabel));
+    }
+    const hasBook = (p.spreads && p.spreads.length > 1) || (p.birds && p.birds.length);
+    const images = (!hasBook && p.images) ? p.images : [];
+    const img = (src, i) => `<img src="${esc(src)}" alt="${esc(p.title)}, image ${i + 1} of ${images.length}" loading="${i === 0 ? "eager" : "lazy"}" decoding="async">`;
+    let stacked = false;
+    if (images.length) {
+      stacked = true;
+      parts.push(`<div class="media-stack">${img(images[0], 0)}</div>`);
+      if (images.length > 1) parts.push(`<div class="media-stack">${images.slice(1).map((src, i) => img(src, i + 1)).join("")}</div>`);
+    }
+    if (!parts.length) parts.push(`<div class="media-placeholder">Images coming soon</div>`);
+    const proc = p.processImages || [];
+    if (proc.length) {
+      parts.push(`<div class="media-process"><h3 class="rail-label">Process</h3><div class="media-stack">${proc.map(src =>
+        `<img src="${esc(src)}" alt="${esc(p.title)}, process image" loading="lazy" decoding="async">`).join("")}</div></div>`);
+    }
+    return { primary: parts[0], secondary: parts.slice(1).join(""), stacked };
+  }
 
-      const hasImages = p.images && p.images.length > 0;
-      const hasSpreads = p.spreads && p.spreads.length > 1;
-      const hasBirdPicker = p.birdPicker && p.birdPicker.length > 0;
-      const hasModel3d = hasSpreads && p.model3d && p.model3d.src;
-
-      function buildFlipbookMarkup(spreads, title, aspectClass){
-        return `<div class="flipbook ${aspectClass}" role="img" aria-label="${escapeAttr(title)} \u2014 page-flip preview of ${spreads.length} spreads">
-             <div class="flipbook-stack">
-               ${spreads.map((src, i) => `
-                 <div class="flipbook-page" data-index="${i}" style="z-index:${spreads.length - i};">
-                   <img src="${src}" alt="${escapeAttr(title)} spread ${i + 1}" loading="${i < 2 ? 'eager' : 'lazy'}">
-                 </div>
-               `).join("")}
-             </div>
-             <span class="flipbook-hint">Drag to flip \u2194</span>
-           </div>
-           <input type="range" class="flipbook-slider" min="0" max="${spreads.length - 1}" value="0"
-                  step="1" aria-label="Spread position, ${spreads.length} total">`;
-      }
-
-      // 3D model shown first; clicking it swaps in the page-flip spreads
-      function buildModel3dMarkup(){
-        const clickWord = canHoverPreview ? "Click" : "Tap";
-        const poster = p.model3d.poster
-          ? `<img class="model3d-poster" src="${p.model3d.poster}" alt="" loading="lazy">`
-          : "";
-        return `<div class="model3d" data-model3d="${p.id}">
-             <div class="model3d-stage" tabindex="0" role="button"
-                  aria-label="${escapeAttr(p.title)} in 3D. Drag to turn it around. ${clickWord} or press Enter to open the book.">
-               ${poster}
-               <span class="model3d-loading" aria-hidden="true">Loading 3D model\u2026</span>
-               <span class="model3d-open-label" aria-hidden="true">${clickWord} to open the book</span>
-               <span class="model3d-hint" aria-hidden="true">Drag to turn \u2194</span>
-             </div>
-             <div class="model3d-controls">
-               <div class="model3d-toggle" role="group" aria-label="Acrylic stand">
-                 <button type="button" data-stand="on" aria-pressed="true">With stand</button>
-                 <button type="button" data-stand="off" aria-pressed="false">Without stand</button>
-               </div>
-             </div>
-           </div>
-           <div class="model3d-book" hidden>
-             <button type="button" class="bird-viewer-back model3d-back">\u2190 Back to 3D model</button>
-             ${buildFlipbookMarkup(p.spreads, p.title, 'flipbook--wide')}
-           </div>`;
-      }
-
-      const heroBlock = hasBirdPicker
-        ? `<div class="bird-picker">
-             <p class="bird-picker-prompt">Pick a bird below to see its full spread.</p>
-             <div class="bird-picker-grid">
-               ${p.birdPicker.map(bird => `
-                 <button type="button" class="bird-thumb${bird.status === 'in-progress' ? ' is-inprogress' : ''}"
-                         data-bird="${bird.id}" ${bird.status === 'in-progress' ? 'disabled' : ''}>
-                   <span class="bird-thumb-img"><img src="${bird.spreads[0]}" alt="${escapeAttr(bird.name)}" loading="lazy"></span>
-                   <span class="bird-thumb-label">${bird.name}</span>
-                   ${bird.status === 'in-progress' ? '<span class="bird-thumb-status">In progress</span>' : ''}
-                 </button>
-               `).join("")}
-             </div>
-             ${p.birdPicker.filter(b => b.status === 'complete').map(bird => `
-               <div class="bird-viewer" data-bird-viewer="${bird.id}" hidden>
-                 <button type="button" class="bird-viewer-back">\u2190 All birds</button>
-                 <h4 class="bird-viewer-title">${bird.name}</h4>
-                 ${buildFlipbookMarkup(bird.spreads, p.title + ' \u2014 ' + bird.name, 'flipbook--standard')}
-               </div>
-             `).join("")}
-           </div>`
-        : hasModel3d
-        ? buildModel3dMarkup()
-        : hasSpreads
-        ? buildFlipbookMarkup(p.spreads, p.title, 'flipbook--wide')
-        : hasImages
-        ? `<div class="project-image"><img src="${p.images[0]}" alt="${escapeAttr(p.title)} \u2014 featured photo" loading="lazy"></div>`
-        : `<div class="project-image placeholder"><span class="ph-label">image \u2014 ${p.dimensions}</span></div>`;
-
-      const galleryImages = hasImages ? p.images.slice(1) : [];
-      const galleryBlock = galleryImages.length
-        ? `<div class="project-gallery">${galleryImages.map(src =>
-            `<div class="project-gallery-item"><img src="${src}" alt="${escapeAttr(p.title)} \u2014 supporting photo" loading="lazy"></div>`
-          ).join("")}</div>`
-        : "";
-
-      const outcomeBlock = p.outcome
-        ? `<div class="project-block project-block-outcome">
-             <h4 class="project-block-label">Outcome</h4>
-             <p class="project-block-text">${p.outcome}</p>
-           </div>`
-        : "";
-
-      const processImages = p.processImages || [];
-      const processBlock = processImages.length
-        ? `<div class="project-process">
-             <h4 class="project-block-label">Process</h4>
-             <div class="project-gallery">${processImages.map(src =>
-                `<div class="project-gallery-item"><img src="${src}" alt="${escapeAttr(p.title)} \u2014 process image" loading="lazy"></div>`
-              ).join("")}</div>
-           </div>`
-        : "";
-
-      const specBlock = p.chapters && p.chapters.length
-        ? `<div class="project-chapters">
-             <h4 class="project-block-label">Contents</h4>
-             <ol class="project-chapters-list">
-               ${p.chapters.map(c => `
-                 <li><span class="ch-num">${c.n}</span><span class="ch-title">${c.title}</span></li>
-               `).join("")}
-             </ol>
-             <p class="project-chapters-meta">${p.id} \u2014 ${p.year} \u00b7 ${p.dimensions}</p>
-           </div>`
-        : p.statGrid && p.statGrid.length
-        ? `<div class="project-statgrid">
-             ${p.statGrid.map(s => `
-               <div class="stat">
-                 <span class="stat-label">${s.label}</span>
-                 <span class="stat-value">${s.value}</span>
-               </div>
-             `).join("")}
-           </div>`
-        : `<div class="project-spec">
-             <span>${p.id} \u2014 ${p.year}</span>
-             <span>${p.client}</span>
-             <span>${p.role}</span>
-             <span>${p.dimensions}</span>
-           </div>`;
-
-      const logoBlock = p.logoBreakdown
-        ? `<div class="project-logobreak">
-             <h4 class="project-block-label">Logo Breakdown</h4>
-             <div class="logobreak-full">
-               <img src="${p.logoBreakdown.full}" alt="${escapeAttr(p.title)} logo mark" loading="lazy">
-             </div>
-             <p class="project-block-text">${p.logoBreakdown.description}</p>
-           </div>`
-        : "";
-
-      section.innerHTML = `
-        <div class="project-rail">
-          <span class="project-scale-mark">${p.scale}</span>
-          ${specBlock}
-          ${logoBlock}
-        </div>
-        <div class="project-main">
-          ${heroBlock}
-          <h3 class="project-title">${p.title}</h3>
-          <p class="project-credits">${p.credits}</p>
-
-          <div class="project-block">
-            <h4 class="project-block-label">The Challenge</h4>
-            <p class="project-block-text">${p.challenge}</p>
-          </div>
-
-          <div class="project-block">
-            <h4 class="project-block-label">Design &amp; Art Direction</h4>
-            <p class="project-block-text">${p.process}</p>
-          </div>
-
-          ${outcomeBlock}
-          ${galleryBlock}
-          ${processBlock}
-        </div>
-      `;
-      workRoot.appendChild(section);
-
-      if (p.brands && p.brands.length) {
-        const rail = section.querySelector(".project-rail");
-        rail.appendChild(buildBrandStrip(p.brands));
-      }
-    });
+  const workRoot = document.getElementById("work-sections");
+  d.projects.forEach(p => {
+    const section = document.createElement("article");
+    section.className = "section project";
+    section.id = "project-" + p.id;
+    section.setAttribute("aria-labelledby", "project-title-" + p.id);
+    const media = mediaMarkup(p);
+    section.innerHTML = `
+      <div class="rail">${railMarkup(p)}</div>
+      <div class="section-main${media.stacked ? " is-stacked" : ""}">
+        <div class="media-primary">${media.primary}</div>
+        ${media.secondary ? `<div class="media-secondary">${media.secondary}</div>` : ""}
+      </div>`;
+    section.querySelector(".rail-name").id = "project-title-" + p.id;
+    workRoot.appendChild(section);
   });
 
-  // ---- about ----
+  // ---- about + contact ----
   document.getElementById("about-bio").textContent = d.bio;
-  document.getElementById("about-location").textContent = d.location;
-
-  // ---- contact ----
-  if (d.status) {
-    const statusEl = document.getElementById("contact-status");
-    if (statusEl) statusEl.textContent = d.status;
-  }
-
+  document.getElementById("about-location").textContent = "Based in " + d.location;
+  document.getElementById("contact-status").textContent = d.status || "";
   const emailEl = document.getElementById("contact-email");
   emailEl.textContent = d.email;
   emailEl.href = "mailto:" + d.email;
-
   const socialList = document.getElementById("contact-social");
   d.social.forEach(s => {
     const li = document.createElement("li");
-    li.innerHTML = `<a href="${s.url}" target="_blank" rel="noopener">${s.label}</a>`;
+    li.innerHTML = `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.label)}</a>`;
     socialList.appendChild(li);
   });
 
   // ────────────────────────────────────────────────────────────
-  // FLIPBOOK — drag left/right to turn pages like a real book.
-  // Rotation tracks the pointer directly while dragging; releasing
-  // past ~1/3 of the drag range commits the turn, releasing short
-  // of that snaps back. Idles into a slow auto-play loop when left
-  // alone, so it's never just a static image if nobody touches it,
-  // but any pointer interaction takes over immediately.
+  // NAMES THAT SWITCH BY THEMSELVES (Dozer's "As seen with"):
+  // each name slides up and out as the next slides in.
   // ────────────────────────────────────────────────────────────
-  function initFlipbooks(){
-    const DRAG_RANGE = 220;   // px of drag for a full page turn
-    const COMMIT_AT = 0.32;   // fraction of DRAG_RANGE to commit vs. snap back
-    const SETTLE_MS = 260;    // commit/snap-back animation
-    const AUTO_HOLD_MS = 2100;
-    const AUTO_FLIP_MS = 850;
-    const AUTO_RESUME_MS = 3500; // idle time before auto-play resumes after interaction
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    document.querySelectorAll(".flipbook").forEach(book => {
-      const pages = Array.from(book.querySelectorAll(".flipbook-page"));
-      const N = pages.length;
-      if (N < 2) return;
-
-      if (reduced) {
-        pages.forEach((p, i) => { if (i > 0) p.style.display = "none"; });
-        return;
-      }
-
-      let currentIndex = 0;
-      const slider = book.nextElementSibling && book.nextElementSibling.classList.contains("flipbook-slider")
-        ? book.nextElementSibling : null;
-      const hint = book.querySelector(".flipbook-hint");
-      let hintDismissed = false;
-
-      function dismissHint(){
-        if (hintDismissed || !hint) return;
-        hintDismissed = true;
-        hint.classList.add("is-hidden");
-      }
-
-      function syncSlider(){
-        if (slider) slider.value = String(currentIndex);
-      }
-
-      function setTransform(page, deg, animate, duration){
-        if (animate) {
-          page.style.transitionDuration = duration + "ms";
-          page.classList.add("is-animating");
-        } else {
-          page.classList.remove("is-animating");
-        }
-        page.style.transform = "rotateY(" + deg + "deg)";
-      }
-
-      // pure function of currentIndex \u2014 safe to call any time the
-      // book is at rest, including after wrapping back to page 0
-      function layout(){
-        pages.forEach((page, i) => {
-          if (i === currentIndex) {
-            page.style.zIndex = String(N + 10);
-            setTransform(page, 0, false);
-          } else if (i < currentIndex) {
-            page.style.zIndex = String(N + 20 + i);   // most recently turned sits on top of the turned pile
-            setTransform(page, -176, false);
-          } else {
-            page.style.zIndex = String(N - i);         // upcoming pages stacked in order beneath current
-            setTransform(page, 0, false);
-          }
-        });
-        syncSlider();
-      }
-      layout();
-
-      // ---- idle auto-play ----
-      let autoTimer = null, resumeTimer = null, autoRunning = false, visible = false;
-
-      function autoFlipOnce(){
-        const page = pages[currentIndex];
-        setTransform(page, -176, true, AUTO_FLIP_MS);
-        setTimeout(() => {
-          currentIndex = (currentIndex + 1) % N;
-          layout();
-        }, AUTO_FLIP_MS);
-      }
-      function autoLoop(){
-        if (!autoRunning) return;
-        autoTimer = setTimeout(() => { autoFlipOnce(); autoLoop(); }, AUTO_HOLD_MS + AUTO_FLIP_MS);
-      }
-      function startAuto(){
-        if (autoRunning || !visible) return;
-        autoRunning = true;
-        autoLoop();
-      }
-      function stopAuto(){
-        autoRunning = false;
-        if (autoTimer) clearTimeout(autoTimer);
-      }
-      function pauseForInteraction(){
-        dismissHint();
-        stopAuto();
-        if (resumeTimer) clearTimeout(resumeTimer);
-        resumeTimer = setTimeout(startAuto, AUTO_RESUME_MS);
-      }
-
-      if ("IntersectionObserver" in window) {
-        new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
-            visible = entry.isIntersecting;
-            if (visible) startAuto(); else stopAuto();
-          });
-        }, { threshold: 0.4 }).observe(book);
-      } else {
-        visible = true;
-        startAuto();
-      }
-
-      // ---- slider: jumps straight to a spread, like scrubbing video ----
-      if (slider) {
-        slider.addEventListener("input", () => {
-          pauseForInteraction();
-          currentIndex = parseInt(slider.value, 10);
-          layout();
-        });
-      }
-
-      // ---- drag to turn ----
-      let dragging = false, dragStartX = 0, dragDir = 0;
-
-      book.addEventListener("pointerdown", (e) => {
-        pauseForInteraction();
-        dragging = true;
-        dragDir = 0;
-        dragStartX = e.clientX;
-        book.classList.add("is-dragging");
-        book.setPointerCapture(e.pointerId);
-      });
-
-      book.addEventListener("pointermove", (e) => {
-        if (!dragging) return;
-        const dx = e.clientX - dragStartX;
-        if (dx < 0 && currentIndex < N - 1) {
-          dragDir = -1;
-          const progress = Math.min(-dx / DRAG_RANGE, 1);
-          setTransform(pages[currentIndex], -176 * progress, false);
-        } else if (dx > 0 && currentIndex > 0) {
-          dragDir = 1;
-          const progress = Math.min(dx / DRAG_RANGE, 1);
-          setTransform(pages[currentIndex - 1], -176 + 176 * progress, false);
-        }
-      });
-
-      function endDrag(e){
-        if (!dragging) return;
-        dragging = false;
-        book.classList.remove("is-dragging");
-        const dx = e.clientX - dragStartX;
-
-        if (dragDir === -1) {
-          const progress = Math.min(-dx / DRAG_RANGE, 1);
-          if (progress >= COMMIT_AT) {
-            setTransform(pages[currentIndex], -176, true, SETTLE_MS);
-            currentIndex++;
-          } else {
-            setTransform(pages[currentIndex], 0, true, SETTLE_MS);
-          }
-        } else if (dragDir === 1) {
-          const progress = Math.min(dx / DRAG_RANGE, 1);
-          if (progress >= COMMIT_AT) {
-            setTransform(pages[currentIndex - 1], 0, true, SETTLE_MS);
-            currentIndex--;
-          } else {
-            setTransform(pages[currentIndex - 1], -176, true, SETTLE_MS);
-          }
-        }
-        setTimeout(layout, SETTLE_MS);
-      }
-
-      book.addEventListener("pointerup", endDrag);
-      book.addEventListener("pointercancel", () => {
-        dragging = false;
-        book.classList.remove("is-dragging");
-        layout();
-      });
-    });
-  }
-  initFlipbooks();
-
-  // ---- bird picker: click a thumbnail to reveal that bird's flipbook ----
-  document.querySelectorAll(".bird-picker").forEach(picker => {
-    const grid = picker.querySelector(".bird-picker-grid");
-
-    picker.querySelectorAll(".bird-thumb:not(.is-inprogress)").forEach(thumb => {
-      thumb.addEventListener("click", () => {
-        const id = thumb.dataset.bird;
-        const viewer = picker.querySelector(`.bird-viewer[data-bird-viewer="${id}"]`);
-        if (!viewer) return;
-        grid.hidden = true;
-        picker.querySelectorAll(".bird-viewer").forEach(v => { v.hidden = (v !== viewer); });
-        viewer.hidden = false;
-      });
-    });
-
-    picker.querySelectorAll(".bird-viewer-back").forEach(backBtn => {
-      backBtn.addEventListener("click", () => {
-        picker.querySelectorAll(".bird-viewer").forEach(v => { v.hidden = true; });
-        grid.hidden = false;
-      });
-    });
+  document.querySelectorAll(".switcher").forEach(sw => {
+    const items = Array.from(sw.querySelectorAll(".switcher-item"));
+    if (reducedMotion || items.length < 2) {
+      sw.classList.add("is-static");
+      sw.textContent = items.map(it => it.textContent).join(", ");
+      return;
+    }
+    let i = 0, timer = null, visible = false;
+    function next(){
+      const out = items[i];
+      i = (i + 1) % items.length;
+      const inn = items[i];
+      inn.style.transition = "none"; inn.classList.remove("is-off", "is-on"); void inn.offsetWidth; inn.style.transition = "";
+      out.classList.remove("is-on"); out.classList.add("is-off");
+      inn.classList.add("is-on");
+    }
+    function schedule(){
+      clearTimeout(timer);
+      if (!visible || document.hidden) return;
+      timer = setTimeout(() => { next(); schedule(); }, 2600);
+    }
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(es => { visible = es[0].isIntersecting; schedule(); }).observe(sw);
+    } else { visible = true; schedule(); }
+    document.addEventListener("visibilitychange", schedule);
   });
 
   // ────────────────────────────────────────────────────────────
-  // 3D MODEL — drag to turn it and see every side, switch the stand
-  // on or off, click (or tap) to open the page-flip spreads, and
-  // "Back to 3D model" to return. The model file is a few MB, so it
-  // only starts loading when the project is about to scroll into view.
-  // If a browser can't show 3D, the poster image stands in and a
-  // click still opens the book.
+  // SPREADS: one at a time, sliding to the next with Easy Ease.
+  // Drag or swipe it, click its left or right half, use Previous /
+  // Next or the arrow keys, or drag the bar underneath. Left alone
+  // it slides on by itself (hover or Pause to stop it), and it loops
+  // back to the first spread without jumping.
+  // ────────────────────────────────────────────────────────────
+  function initBook(fig){
+    const slider = fig.querySelector(".slider");
+    const strack = slider.querySelector(".slider-track");
+    const real = Array.from(strack.children);
+    const N = real.length;
+    const firstClone = real[0].cloneNode(true), lastClone = real[N - 1].cloneNode(true);
+    [firstClone, lastClone].forEach(c => { c.setAttribute("aria-hidden", "true"); c.removeAttribute("role"); });
+    strack.insertBefore(lastClone, real[0]);
+    strack.appendChild(firstClone);
+    const prevBtn = fig.querySelector(".book-prev"), nextBtn = fig.querySelector(".book-next");
+    const pauseB = fig.querySelector(".book-pause"), countEl = fig.querySelector(".book-count");
+    const progress = fig.querySelector(".book-progress"), hint = slider.querySelector(".slider-hint");
+    const SLIDE_MS = 850, AUTO_MS = 1300, HOLD_MS = 2800;
+    let cur = 0, busy = false, paused = reducedMotion, visible = false, hover = false, lastTouch = -Infinity, timer = null;
+
+    const W = () => slider.clientWidth;
+    function place(pos, ms){
+      strack.style.transition = ms ? `transform ${ms}ms ${EASY}` : "none";
+      strack.style.transform = `translate3d(${-Math.round(pos * W())}px,0,0)`;
+    }
+    function label(i){
+      const name = real[i].dataset.section;
+      if (!name) return `Spread ${i + 1} of ${N}`;
+      const same = real.filter(s => s.dataset.section === name);
+      if (real[i].classList.contains("is-wip")) return `${name}, work in progress`;
+      return `${name}, spread ${same.indexOf(real[i]) + 1} of ${same.length}`;
+    }
+    function update(){
+      countEl.textContent = label(cur);
+      progress.value = String(cur);
+      real.forEach((s, k) => s.setAttribute("aria-hidden", k === cur ? "false" : "true"));
+      for (let k = -1; k <= 2; k++) {
+        const im = real[(cur + k + N) % N].querySelector("img");
+        if (im.loading === "lazy") im.loading = "eager";
+      }
+    }
+    function go(target, ms){
+      if (busy) return;
+      busy = true;
+      const wrap = target >= N || target < 0;
+      place(target + 1, ms || SLIDE_MS);                  // clones sit at 0 and N + 1
+      cur = (target + N) % N;
+      update();
+      afterSlide(strack, ms || SLIDE_MS, () => { if (wrap) place(cur + 1, 0); busy = false; });
+    }
+    function schedule(){
+      clearTimeout(timer);
+      if (paused || hover || !visible || document.hidden) return;
+      const wait = Math.max(HOLD_MS, 4500 - (performance.now() - lastTouch));
+      timer = setTimeout(() => { go(cur + 1, AUTO_MS); schedule(); }, wait);
+    }
+    function touched(){
+      lastTouch = performance.now();
+      if (hint) hint.classList.add("is-hidden");
+      schedule();
+    }
+    function setPaused(p){
+      paused = p;
+      pauseB.setAttribute("aria-pressed", String(p));
+      pauseB.textContent = p ? "Play" : "Pause";
+      schedule();
+    }
+    prevBtn.addEventListener("click", () => { touched(); go(cur - 1); });
+    nextBtn.addEventListener("click", () => { touched(); go(cur + 1); });
+    pauseB.addEventListener("click", () => setPaused(!paused));
+    progress.addEventListener("input", () => {
+      touched();
+      const t = parseInt(progress.value, 10);
+      busy = false; cur = t; place(cur + 1, 450); update();
+    });
+    slider.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") { e.preventDefault(); touched(); go(cur + 1); }
+      else if (e.key === "ArrowLeft") { e.preventDefault(); touched(); go(cur - 1); }
+    });
+    if (finePointer) {
+      slider.addEventListener("pointerenter", () => { hover = true; schedule(); });
+      slider.addEventListener("pointerleave", () => { hover = false; schedule(); });
+    }
+    let drag = null;
+    slider.addEventListener("pointerdown", (e) => {
+      if (busy || (e.button !== undefined && e.button > 0)) return;
+      drag = { x: e.clientX, dx: 0, moved: false, id: e.pointerId };
+    });
+    slider.addEventListener("pointermove", (e) => {
+      if (!drag) return;
+      drag.dx = e.clientX - drag.x;
+      if (!drag.moved && Math.abs(drag.dx) > 6) {
+        drag.moved = true; slider.classList.add("is-dragging");
+        try { slider.setPointerCapture(drag.id); } catch (err) {}
+      }
+      if (drag.moved) {
+        strack.style.transition = "none";
+        strack.style.transform = `translate3d(${-Math.round((cur + 1) * W()) + drag.dx}px,0,0)`;
+      }
+    });
+    function endDrag(e, cancelled){
+      if (!drag) return;
+      const { dx, moved } = drag; drag = null;
+      slider.classList.remove("is-dragging");
+      touched();
+      if (cancelled) { place(cur + 1, 300); return; }
+      if (!moved) {
+        const r = slider.getBoundingClientRect();
+        go(e.clientX > r.left + r.width / 2 ? cur + 1 : cur - 1);
+        return;
+      }
+      const threshold = W() * 0.15;
+      if (dx < -threshold) go(cur + 1, 650);
+      else if (dx > threshold) go(cur - 1, 650);
+      else { busy = true; place(cur + 1, 450); afterSlide(strack, 450, () => { busy = false; }); }
+    }
+    slider.addEventListener("pointerup", (e) => endDrag(e, false));
+    slider.addEventListener("pointercancel", (e) => endDrag(e, true));
+    window.addEventListener("resize", () => place(cur + 1, 0));
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(es => { visible = es[0].isIntersecting; schedule(); }, { threshold: 0.35 }).observe(slider);
+    } else { visible = true; }
+    document.addEventListener("visibilitychange", schedule);
+    place(1, 0);
+    update();
+    setPaused(paused);
+  }
+  document.querySelectorAll("[data-book]").forEach(initBook);
+
+  // focus rings show for keyboard users only, never after a click or tap
+  document.querySelectorAll(".slider, .model3d-stage, .strip").forEach(el => {
+    el.addEventListener("pointerdown", () => el.setAttribute("data-pointer", ""));
+    el.addEventListener("keydown", () => el.removeAttribute("data-pointer"));
+  });
+
+  // ────────────────────────────────────────────────────────────
+  // 3D MODEL: turns on its own, and its stand fades away and comes
+  // back by itself. Drag to turn it; Pause stops all its movement.
+  // The model file is a few MB, so it only loads when the project
+  // is about to scroll into view.
   // ────────────────────────────────────────────────────────────
   document.querySelectorAll("[data-model3d]").forEach(wrap => {
-    const project = d.projects.find(p => p.id === wrap.dataset.model3d);
+    const project = projectById[wrap.dataset.model3d];
     const stage = wrap.querySelector(".model3d-stage");
-    const bookView = wrap.nextElementSibling;
-    const backBtn = bookView.querySelector(".model3d-back");
-    const toggles = wrap.querySelectorAll("[data-stand]");
-    let viewer = null;
-
-    function openBook(){
-      wrap.hidden = true;
-      bookView.hidden = false;
-      backBtn.focus({ preventScroll: true });
+    const pause = wrap.querySelector(".model3d-pause");
+    let viewer = null, paused = reducedMotion;
+    function setPaused(p){
+      paused = p;
+      pause.setAttribute("aria-pressed", String(p));
+      pause.textContent = p ? "Play" : "Pause";
+      if (viewer && viewer.setPaused) viewer.setPaused(p);
     }
-    function closeBook(){
-      bookView.hidden = true;
-      wrap.hidden = false;
-      stage.focus({ preventScroll: true });
-    }
-    backBtn.addEventListener("click", closeBook);
-
-    function useFallback(){
-      stage.classList.add("is-fallback");
-      stage.addEventListener("click", openBook);
-      stage.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openBook(); }
-      });
-    }
-
     function start(){
       if (!window.Arsvita3D) {
-        // arsvita-3d.js didn't load: show the poster and say what's missing
-        useFallback();
-        stage.classList.add("is-missing");
+        stage.classList.add("is-fallback", "is-missing");
         const msg = stage.querySelector(".model3d-loading");
         if (msg) msg.textContent = "3D viewer file not found. Put arsvita-3d.js next to index.html.";
         return;
       }
-      viewer = window.Arsvita3D.mount(stage, { src: project.model3d.src, onOpen: openBook });
-      if (!viewer.ok) useFallback();
+      viewer = window.Arsvita3D.mount(stage, { src: project.model3d.src, autoStand: true, paused });
+      if (!viewer.ok) stage.classList.add("is-fallback");
     }
-
+    pause.addEventListener("click", () => setPaused(!paused));
+    setPaused(paused);
     if ("IntersectionObserver" in window) {
-      const io = new IntersectionObserver((entries) => {
-        if (entries.some(en => en.isIntersecting)) { io.disconnect(); start(); }
-      }, { rootMargin: "600px 0px" });
+      const io = new IntersectionObserver(es => { if (es.some(en => en.isIntersecting)) { io.disconnect(); start(); } }, { rootMargin: "700px 0px" });
       io.observe(stage);
-    } else {
-      start();
-    }
-
-    toggles.forEach(btn => {
-      btn.addEventListener("click", () => {
-        toggles.forEach(b => b.setAttribute("aria-pressed", String(b === btn)));
-        if (viewer) viewer.setStand(btn.dataset.stand === "on");
-      });
-    });
+    } else start();
   });
 
   // ────────────────────────────────────────────────────────────
-  // SCROLL EFFECTS
-  // Two restrained, purposeful effects: images resolve into focus
-  // the first time they enter view, and the running head names
-  // whichever project is currently in view \u2014 the same job a
-  // running head does in a real book. The project rail itself
-  // (in style.css) stays pinned while you scroll through a
-  // project's images and text, a standard pattern in case-study
-  // sites so the project's context never scrolls out of view.
+  // SIDEBAR stays beside the work on wide screens. One that fits the
+  // window pins to the top; a taller one scrolls until its last line
+  // is showing and stays there, so the column never goes empty.
   // ────────────────────────────────────────────────────────────
-  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  if (!prefersReducedMotion) {
-    // images resolve into focus the first time they enter view
-    const revealTargets = document.querySelectorAll(
-      ".project-image, .project-gallery-item, .logobreak-full"
-    );
-    if (revealTargets.length && "IntersectionObserver" in window) {
-      const io = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-revealed");
-            io.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.15 });
-      revealTargets.forEach(el => io.observe(el));
-    }
-
-    // running head names the project currently in view
-    const runheadSection = document.getElementById("runhead-section");
-    if (runheadSection && "IntersectionObserver" in window) {
-      const sectionIo = new IntersectionObserver((entries) => {
-        const visible = entries.filter(e => e.isIntersecting);
-        if (visible.length) {
-          const topMost = visible.reduce((a, b) =>
-            a.boundingClientRect.top < b.boundingClientRect.top ? a : b
-          );
-          runheadSection.textContent = topMost.target.dataset.runheadLabel;
-        } else {
-          runheadSection.textContent = "portfolio";
-        }
-      }, { rootMargin: "-45% 0px -45% 0px", threshold: 0 });
-
-      document.querySelectorAll(".project").forEach(section => {
-        const titleEl = section.querySelector(".project-title");
-        section.dataset.runheadLabel = titleEl ? titleEl.textContent : "portfolio";
-        sectionIo.observe(section);
-      });
-    }
+  const rails = Array.from(document.querySelectorAll(".section .rail"));
+  function fitRails(){
+    const headH = document.querySelector(".runhead").offsetHeight;
+    rails.forEach(r => {
+      const room = window.innerHeight - headH;
+      r.style.top = (r.offsetHeight <= room ? headH : Math.round(window.innerHeight - r.offsetHeight - 16)) + "px";
+    });
   }
 
-  // thin reading-progress line under the running head \u2014 always on,
-  // even for reduced-motion users, since it's a direct 1:1 reflection
-  // of scroll position rather than an independent animation
+  // ────────────────────────────────────────────────────────────
+  // RUNNING HEAD, PROGRESS LINE, BACK TO TOP
+  // ────────────────────────────────────────────────────────────
+  const runheadSection = document.getElementById("runhead-section");
+  const labelled = Array.from(document.querySelectorAll(".section")).map(s => {
+    const name = s.querySelector(".rail-name");
+    return { el: s, label: name ? name.textContent : "Portfolio" };
+  });
   const progressBar = document.getElementById("scroll-progress");
-  if (progressBar) {
-    const updateProgress = () => {
-      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
-      const pct = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0;
-      progressBar.style.width = pct + "%";
-    };
-    let ticking = false;
-    window.addEventListener("scroll", () => {
-      if (!ticking) {
-        requestAnimationFrame(() => { updateProgress(); ticking = false; });
-        ticking = true;
-      }
-    }, { passive: true });
-    updateProgress();
+  let ticking = false;
+  function onScroll(){
+    const line = window.innerHeight * 0.4;
+    const hit = labelled.find(({ el }) => { const r = el.getBoundingClientRect(); return r.top <= line && r.bottom > line; });
+    const text = hit ? hit.label : "Portfolio";
+    if (runheadSection.textContent !== text) runheadSection.textContent = text;
+    const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+    if (progressBar) progressBar.style.width = (scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0) + "%";
+    document.body.classList.toggle("is-scrolled", window.scrollY > window.innerHeight * 0.8);
+    ticking = false;
   }
+  window.addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
+
+  // ────────────────────────────────────────────────────────────
+  // START: size everything, type the name, then bring in the work
+  // ────────────────────────────────────────────────────────────
+  function layoutAll(){ fitName(); sizeStrip(); fitRails(); }
+  // Phones change their reported height as the browser bar hides while
+  // scrolling; only a real width change (e.g. rotating) re-sizes the
+  // strip there, so the page never jumps under your thumb.
+  let lastW = viewW();
+  window.addEventListener("resize", () => {
+    const widthChanged = viewW() !== lastW;
+    lastW = viewW();
+    fitName();
+    if (widthChanged || finePointer) sizeStrip();
+    fitRails();
+  });
+  layoutAll();
+  window.addEventListener("load", layoutAll);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(layoutAll);
+  setTimeout(layoutAll, 300);
+  onScroll();
+  typeName(() => {
+    layoutAll();                                          // final sizes, just before the work slides in
+    lastW = viewW();
+    hero.classList.add("is-in");
+    setTimeout(() => hero.classList.add("is-done"), 400);
+    setStripPaused(stripPaused);
+  });
 })();
 
 ```
@@ -1953,68 +1410,64 @@ h1,h2,h3,p,ol,ul{ margin: 0; }
   You never need to touch index.html, style.css, or script.js
   for content changes.
 
-  - Each project has FOUR possible writeup fields: "credits" (the
-    opening context line — press, sponsors, launch details),
-    "challenge", "process" (Design & Art Direction), and the
-    optional "outcome" (what actually happened — results, press,
-    what it led to). Hiring managers consistently say this is the
-    part most portfolios skip. Add it whenever you have a real
-    result to point to; omit the field entirely to hide the block.
-  - "images" is an array of paths. The first image is the hero
-    image for the project; any additional images render in a
-    gallery grid below the writeup. Leave the array empty ([])
-    to show a placeholder tile instead.
-  - "processImages" (optional) is a second, separate gallery for
-    sketches, InDesign screenshots, early drafts, laser-cutter
-    files, contact sheets — anything that shows your thinking
-    before the final piece. This is the single most-requested
-    addition in design-hiring research: reviewers want evidence
-    of process, not just polished output. Leave empty until you
-    have material to add.
-  - "brands" (optional) is a list of names that render as a
-    crossfading black-and-white credit strip — used for Dozer's
-    sponsors/press mentions. Omit or leave empty for projects
-    that don't need it.
-  - "scale" is the chapter number shown in the contents index and next
-    to each project (e.g. "01", "02", "03"). Add projects in the order
-    you want them numbered.
-  - "chapters" (optional) is an ordered list of {n, title} used only by
-    the contents-style rail format — pass this when a project has a
-    real chapter/section structure worth showing (used by Arsvita).
-  - "statGrid" (optional) is a list of {label, value} pairs rendered as
-    a bordered fact-box grid in the rail instead of the plain spec list
-    — use this for projects with field-guide/spec-sheet style data
-    (used by The Pecking Order).
-  - "logoBreakdown" (optional) shows a project's logo in the rail,
-    with a written breakdown of how the mark is constructed below
-    it — {full: "path/to/logo.png", description: "..."}. Use this
-    for a branding project where the mark itself is worth explaining
-    (used by The Pecking Order).
-  - "spreads" (optional) is an ordered list of page/spread images
-    that render as an auto-playing page-flip viewer instead of the
-    normal hero image \u2014 use this for a project that's literally a
-    printed book (used by Arsvita). Set "images" to just the cover
-    for the contents-index thumbnail; "spreads" carries the full set.
-  - "model3d" (optional) puts a 3D model of the finished object in
-    front of the "spreads" viewer. Visitors drag it around to see every
-    side, switch the stand on or off, and click it to open the
-    page-flip spreads underneath. It needs arsvita-3d.js next to
-    script.js, plus {src: the model file, poster: a still image shown
-    while the model loads}. Used by Arsvita.
-  - "birdPicker" (optional) shows a grid of clickable thumbnails
-    instead of a single hero image \u2014 clicking one reveals that
-    entry's own drag-to-flip spreads. Each entry is {id, name,
-    status: "complete" | "in-progress", spreads: [...]}. An
-    "in-progress" entry shows its thumbnail (greyed, not clickable)
-    so people know it's coming without being able to open an
-    unfinished flipbook. Used by The Pecking Order.
-  - "contentsThumb" (optional) overrides the contents-index thumbnail
-    for a project \u2014 {src, background}. Use this when the real cover
-    image doesn't work as a small square crop (e.g. a logo needs to
-    sit on its own brand color and show in full, not get cropped).
-    Without it, the thumbnail defaults to a cover-cropped first image.
-  - Top-level "status" is a one-line availability note shown near
-    your contact info — edit this any time your availability changes.
+  EVERY PROJECT USES THE SAME LAYOUT
+  The sidebar holds all of a project's text, always in this order:
+    - "scale"       the big number (01, 02, 03)
+    - "title"       the project name
+    - "year", "role", "dimensions"   the small info lines
+    - "summary"     one or two sentences: what it is
+    - "challenge", "process", "outcome"   three short blocks,
+                    shown as Challenge / Approach / Outcome.
+                    "outcomeLabel" renames the last one (e.g.
+                    "Status" for work that's still in progress).
+    - "detail"      (optional) one small extra block at the bottom,
+                    styled the same wherever it's used. Either a list
+                    {label, items: [...]}, a list that switches from
+                    name to name by itself {label, switch: true,
+                    items: [...]}, or an image with a note
+                    {label, image, text}. Leave it out
+                    when there's nothing worth adding.
+  Keep each block to a sentence or two. Reviewers skim.
+
+  The main column holds the imagery, using whichever of these the
+  project has:
+    - "model3d"   a 3D model that turns on its own, with its stand
+                  fading away and coming back on a timer. Visitors can
+                  drag it around to see every side.
+                  Needs arsvita-3d.js next to script.js, plus
+                  {src: the model file, poster: a still shown while
+                  it loads}. Used by Arsvita.
+    - "spreads"   the book's spreads, one at a time, sliding from one
+                  to the next, with Previous / Next buttons. If the
+                  project also has a 3D model, the spreads sit
+                  directly under it. Used by Arsvita.
+    - "birds"     one run of spreads through several sections in a
+                  row: {name, status, spreads}. A
+                  section with status "in-progress" is greyed out
+                  and labelled "Work in progress". Used by The
+                  Pecking Order.
+    - "images"    the first image is shown large, the rest in rows
+                  below it. Rows fill the full width and every image
+                  keeps its own shape, so nothing is ever cropped.
+                  Export images at least 2400px wide so they stay
+                  sharp at these sizes on high-resolution screens.
+    - "processImages" (optional) sketches, drafts, files, shown
+                  under the main imagery.
+  "flipLabel" (optional) is the heading above the spreads, e.g.
+  "Inside the book". "aspect" (optional) is the width ÷ height of
+  one spread, so the frame matches your pages exactly.
+
+  THE OPENING STRIP
+  Right after your name types itself out, every photo from every
+  project slides past in order: all of 01's, then 02's, then 03's
+  (work in progress is left out). Each image keeps its own shape,
+  captioned with its project and linked to it. Nothing to edit here:
+  it updates itself when you add or remove images above. To show a
+  hand-picked set instead, add a "reel" list of {src, project}
+  (project = that project's "id") next to "projects".
+
+  Top-level "status" is a one-line availability note shown with
+  your contact info. Edit it any time.
   ────────────────────────────────────────────────────────────
 */
 
@@ -2031,7 +1484,7 @@ const PORTFOLIO_DATA = {
     { label: "LinkedIn", url: "https://www.linkedin.com/in/morganchochinov/" }
   ],
 
-  bio: "I'm an extremely passionate designer who wants to change the way the world sees design! I get my inspiration by looking at other art forms such as music, film, fashion, architecture, etc. I find this is the best way to maximize my creativity, and it always leads to the best, most original ideas.",
+  bio: "I'm a designer who wants to change the way the world sees design. I find inspiration in other art forms, like music, film, fashion and architecture. That's where my most original ideas come from.",
 
   projects: [
     {
@@ -2039,23 +1492,19 @@ const PORTFOLIO_DATA = {
       scale: "01",
       title: "Dozer Magazine",
       year: "2025\u20132026",
-      client: "Dozer Magazine",
       role: "Editorial design, art direction",
-
-      credits: "New York City launch party hosted by Paul Stuart. Sponsored by Mount Gay Rum & Dirty Water Seltzers. Product placement by L.L. Bean, G.H. Bass, and Sperry. Posted in The New York Times & WSJ.",
-
-      challenge: "Throughout its history, \u2018prep fashion\u2019 has always had a predominantly caucasian community base which dominated the culture. This traditionally exclusive demographic was challenged through modern art direction and diverse casting practices, in an attempt to make the prep style more accessible and inclusive to everyone and not just one defined group. Although achieved, this proved to be quite difficult, as breaking and expanding barriers while simultaneously respecting and honouring style traditions can become a difficult needle to thread. All the while having to meet strict commercial print standards for an 1,000+ copy run, you can say we had our work cut out for us.",
-
-      process: "We chose to feature models of different ethnicities, cultures and backgrounds while simultaneously placing focus on the new face of prep, \u201cPreppy Pete\u201d. Our friend Pete became known as the new face of prep below the magazine. The effort to diversify our cast of models ultimately resulted in success, as we opened the door to prep fashion to everyone and anyone who identified with the style.",
-
-      outcome: "Issue 01 sold over a resounding 1,000 copies on debut release, and earned its placement at multiple store locations, such as Casa Magazines and Rare Magazines. A limited J.Crew collaboration run also took place, successfully selling out stock in under 10 minutes! Sales aside, the positive reception carried straight into the second issue, encouraging us to double the length (84\u2013164 pages), and continue to amass sponsor support and national press coverage in The Wall Street Journal and The New York Times.",
-
       dimensions: "Issue 01: 84 pages (2025) \u00b7 Issue 02: 164 pages (2026)",
 
-      brands: [
-        "The New York Times", "Wall Street Journal", "Paul Stuart",
-        "L.L. Bean", "G.H. Bass", "Sperry"
-      ],
+      summary: "A prep-fashion magazine that opened a traditionally exclusive style up to everyone. Launched in New York with a party hosted by Paul Stuart.",
+      challenge: "Prep culture has long been predominantly white and exclusive. We wanted to widen it without disrespecting its traditions, while meeting commercial print standards for a 1,000+ copy run.",
+      process: "We cast models from many ethnicities, cultures and backgrounds, and made our friend Pete, \u201cPreppy Pete,\u201d the new face of prep.",
+      outcome: "Issue 01 sold over 1,000 copies on release and was stocked at Casa Magazines and Rare Magazines. A limited J.Crew run sold out in under 10 minutes. Issue 02 nearly doubled in length, with press in The New York Times and The Wall Street Journal.",
+
+      detail: {
+        label: "As seen with",
+        switch: true,
+        items: ["The New York Times", "The Wall Street Journal", "Paul Stuart", "J.Crew", "L.L. Bean", "G.H. Bass", "Sperry", "Mount Gay Rum", "Dirty Water Seltzers"]
+      },
 
       images: [
         "images/dozer-01-main.jpg",
@@ -2066,7 +1515,6 @@ const PORTFOLIO_DATA = {
         "images/dozer-06.jpg",
         "images/dozer-07.jpg"
       ],
-
       processImages: []
     },
     {
@@ -2074,33 +1522,20 @@ const PORTFOLIO_DATA = {
       scale: "02",
       title: "Arsvita Magazine",
       year: "2026",
-      client: "Arsvita Magazine",
       role: "Editorial design, self-published",
-
-      credits: "Volume 01: Maya Civilization. A one-of-one hand-bound edition, self-published as a personal experiment in production: laser-cut acrylic casing, custom InDesign layouts, and a hand-glued binding process built entirely in-house.",
-
-      challenge: "Translating information dense academic material on Maya art and archaeology into an engaging and exciting reading and visual experience can be quite the daunting task. On top of that, how can one condense all of the curated scholarly material into easily readable paragraphs without mashing them into a listicle format? These challenges had to be tackled with precision, alongside having to solve production problems with no pre-existing templates. The deliberate effort to laser cut acrylic to the right tolerance, bond it into a durable case with appropriate acrylic solvent, and hard binding paper pages into unconventional material not normally meant to be bound can prove difficult, but once efficiently executed and tackled, made the sweat and elbow grease well worth it.",
-
-      process: "We\u2019ve all read your average magazine. We know the story, we understand the formula. It\u2019s predictable, for the most part. So in the spirit of ancient civilizations and the once lost artifacts and ancient archaeological history that accompanies them, why not turn that typical reading experience into that of a page-bound museum tour?! Prologue, Foundation, Stone, Ceramics, Figure, Glyphs, Epilogue. All chapters built around one class of object. \u201cArs Longa, Vita Brevis\u201d (translated: Art Is Long, Life Is Short), is the title of the manifesto which opens the issue. The premise of objects and works of art long outlasting their original creators runs course through the metaphorical veins of each page. Scholarly essays are ran in disciplined serif columns, broken up by oversized type treatments used as effective punctuation rather than average decoration. A spec-sheet catalogue treats each artifact with the exact clinical precision as your typical auction listing. The acrylic housing extends the idea into the object itself: a vitrine you hold in your hands. The reading experience is designed to pull you into the history itself, instead of just feeling like you\u2019re reading an essay for your high school history class.",
-
       dimensions: "46 pages \u00b7 hand-bound, laser-cut acrylic case \u00b7 one-of-one edition",
 
-      chapters: [
-        { n: "00", title: "Prologue" },
-        { n: "01", title: "Foundation" },
-        { n: "02", title: "Stone" },
-        { n: "03", title: "Ceramics" },
-        { n: "04", title: "Figure" },
-        { n: "05", title: "Glyphs" },
-        { n: "06", title: "Epilogue" }
-      ],
+      summary: "Volume 01: Maya Civilization. A one-of-one magazine, hand-bound and housed in a laser-cut acrylic case, designed and built entirely in-house.",
+      challenge: "Make dense academic writing on Maya art and archaeology exciting to read without turning it into a listicle, and build the object with no templates to follow.",
+      process: "The issue reads like a museum tour, opening with the manifesto \u201cArs Longa, Vita Brevis\u201d (art is long, life is short). Each chapter centres on one class of object. Serif essay columns are broken up by oversized type, and a spec-sheet catalogue lists every artifact like an auction lot. The acrylic case is a vitrine you hold in your hands.",
+      outcome: "A finished one-of-one edition and a production process built from scratch: acrylic cut to tolerance and solvent-bonded into a case, custom InDesign layouts, and pages hand-glued into a binding never meant for paper.",
 
-      images: ["images/arsvita/spread-01.jpg"],
-      processImages: [],
       model3d: {
         src: "models/arsvita-3d-model.js",
-        poster: "images/arsvita/3d-poster.png"
+        poster: "images/arsvita/3d-poster.webp"
       },
+      flipLabel: "Inside the book",
+      aspect: 1.412,
       spreads: [
         "images/arsvita/spread-01.jpg","images/arsvita/spread-02.jpg","images/arsvita/spread-03.jpg",
         "images/arsvita/spread-04.jpg","images/arsvita/spread-05.jpg","images/arsvita/spread-06.jpg",
@@ -2110,43 +1545,34 @@ const PORTFOLIO_DATA = {
         "images/arsvita/spread-16.jpg","images/arsvita/spread-17.jpg","images/arsvita/spread-18.jpg",
         "images/arsvita/spread-19.jpg","images/arsvita/spread-20.jpg","images/arsvita/spread-21.jpg",
         "images/arsvita/spread-22.jpg","images/arsvita/spread-23.jpg"
-      ]
+      ],
+      images: ["images/arsvita/spread-01.jpg"],
+      processImages: []
     },
     {
       id: "03",
       scale: "03",
       title: "The Pecking Order Magazine",
       year: "2026\u2013present",
-      client: "The Pecking Order Magazine",
       role: "Branding, editorial design",
+      dimensions: "Issue One: The Unrefined \u00b7 5 bird profiles \u00b7 in progress",
 
-      credits: "Issue One: The Unrefined. A branding and editorial project \u2014 identity, layout system, and five bird profiles \u2014 built to spread awareness of overlooked species and the environmental pressures they're up against.",
+      summary: "Issue One: The Unrefined. An identity and editorial system for a magazine that spreads awareness of overlooked birds and the environmental pressures they face.",
+      challenge: "Combine field-guide data (height, wingspan, range, IUCN status) with long-form essays on ecology and extinction, without it feeling like two publications stapled together.",
+      process: "Each bird gets a spec sheet set against a single saturated yellow, and photos from many sources are unified by a high-contrast black-and-white duotone. Essays break the field-guide rhythm with oversized italic pull-quotes, arguing what the data can\u2019t: \u201cleast concern\u201d isn\u2019t the same as \u201cbeautiful.\u201d",
+      outcomeLabel: "Status",
+      outcome: "In progress. Three of the five bird profiles are finished, and the Hoatzin is underway.",
 
-      challenge: "Combining field-guide styled information (such as height, wingspans, range, IUCN status) and articles on ecology, extinction and sustainability can sometimes prove difficult. Having information that usually is reserved for separate pages suddenly mashed together requires deliberate design choices and aesthetic workarounds to make sure the two registers complement instead of clash. The end goal was to ultimately include these vastly different information pieces and combine them effectively without making it feel like two entirely separate publications were stapled together.",
-
-      process: "Each bird is meant to be displayed with a spec sheet, showing data displayed against a single saturated yellow, unifying photography pulled from a vast array of sources, all compiled into one visually cohesive system. A high contrast black and white duotone treatment is used to preserve the academic, documentary style of the imagery as a means of properly representing and reflecting the spirit of the birds that most people are convinced to find ugly. Various long form essays interrupt the organized field guide rhythm with oversized italic pull-quotes, effectively giving the writing room to argue for what some of the data can\u2019t; that species of \u201cleast concern\u201d is not the same as \u201cbeautiful\u201d.",
-
-      dimensions: "Branding + editorial system \u00b7 in progress, started 2026",
-
-      statGrid: [
-        { label: "Format", value: "Branding + editorial" },
-        { label: "Issue", value: "One: The Unrefined" },
-        { label: "Profiles", value: "5 birds" },
-        { label: "Status", value: "In progress" },
-        { label: "Started", value: "2026" },
-        { label: "Focus", value: "Ecology + awareness" }
-      ],
-
-      contentsThumb: { src: "images/logo-full.png", background: "#F8D507" },
-
-      logoBreakdown: {
-        full: "images/logo-full.png",
-        description: "Designed to be instantly recognizable \u2014 a mark people connect with, not just look at. The rough, hand-cut edges are deliberate: they soften the entry point into subject matter that can otherwise feel dense or daunting, from scientific detail to tougher reads on extinction and habitat loss, so the magazine feels like something to pick up rather than brace for."
+      detail: {
+        label: "Logo",
+        image: "images/logo-full.png",
+        text: "The rough, hand-cut edges soften the way into a dense subject, so the magazine feels like something to pick up rather than brace for."
       },
 
-      birdPicker: [
+      flipLabel: "Inside the magazine",
+      aspect: 1.333,
+      birds: [
         {
-          id: "marabou",
           name: "Marabou Stork",
           status: "complete",
           spreads: [
@@ -2156,7 +1582,6 @@ const PORTFOLIO_DATA = {
           ]
         },
         {
-          id: "shoebill",
           name: "Shoebill",
           status: "complete",
           spreads: [
@@ -2166,7 +1591,6 @@ const PORTFOLIO_DATA = {
           ]
         },
         {
-          id: "kingvulture",
           name: "King Vulture",
           status: "complete",
           spreads: [
@@ -2176,7 +1600,6 @@ const PORTFOLIO_DATA = {
           ]
         },
         {
-          id: "hoatzin",
           name: "Hoatzin",
           status: "in-progress",
           spreads: [
@@ -2184,7 +1607,6 @@ const PORTFOLIO_DATA = {
           ]
         }
       ],
-
       images: [],
       processImages: []
     }
@@ -2211,7 +1633,11 @@ const PORTFOLIO_DATA = {
   giving up, and then says on the stage which file is missing.
 
   Used by script.js:
-    Arsvita3D.mount(stageEl, { src, onOpen })  ->  { setStand(bool) }
+    Arsvita3D.mount(stageEl, { src, autoStand, paused })  ->  { setPaused(bool) }
+  The model turns slowly on its own and, with autoStand on, its stand
+  fades away and comes back every few seconds. Dragging turns it by
+  hand and holds both movements until it's left alone for a moment.
+  There's no floor or shadow: the book floats on the page itself.
   ────────────────────────────────────────────────────────────
 */
 (function(){
@@ -2302,7 +1728,7 @@ vec3 toSRGB(vec3 c){return mix(c*12.92,1.055*pow(c,vec3(1./2.4))-.055,step(vec3(
   const FS = `#version 300 es
 precision highp float;
 in vec3 vPos;in vec3 vNrm;in vec2 vUV;in vec4 vTan;
-uniform vec3 uCam,uKeyDir,uKeyCol;uniform vec4 uBase;uniform float uRough,uMetal,uOcc,uNScale,uTransl,uClipY;
+uniform vec3 uCam,uKeyDir,uKeyCol;uniform vec4 uBase;uniform float uRough,uMetal,uOcc,uNScale,uTransl,uClipY,uFade;
 uniform sampler2D tBase,tMR,tOccT,tNormal;uniform int uHasBase,uHasMR,uHasOcc,uHasNormal,uBlend;
 out vec4 frag;${COMMON}
 void main(){
@@ -2336,30 +1762,17 @@ void main(){
    float a=clamp(base.a*.5+fr*.5,0.,.8);
    float back=gl_FrontFacing?1.:.45;
    vec3 c=toSRGB(aces((spec*(.8+fr*1.6)*back+diff*base.a*.5)*uExposure))*back;
-   frag=vec4(c,max(a*back,max(c.r,max(c.g,c.b)))); return;}
- frag=vec4(toSRGB(aces(col*uExposure)),1.);
+   frag=vec4(c,max(a*back,max(c.r,max(c.g,c.b))))*uFade; return;}
+ frag=vec4(toSRGB(aces(col*uExposure))*uFade,uFade);
 }`;
-  const G_VS = `#version 300 es
-layout(location=0) in vec3 aPos;uniform mat4 uVP;out vec3 vPos;
-void main(){vPos=aPos;gl_Position=uVP*vec4(aPos,1.);}`;
-  const G_FS = `#version 300 es
-precision highp float;in vec3 vPos;uniform sampler2D tG0,tG1;uniform float uMix,uStr;uniform vec2 uRes;out vec4 frag;
-void main(){vec2 uv=vPos.xz/.6+.5;float v=mix(texture(tG0,uv).r,texture(tG1,uv).r,uMix);
- float e=smoothstep(.5,.4,max(abs(uv.x-.5),abs(uv.y-.5)));v=mix(1.,v,e);
- float near=1.-smoothstep(.09,.22,length(vPos.xz*vec2(1.,1.6)));          // keep it a compact pool under the book
- vec2 q=gl_FragCoord.xy/uRes;
- float edge=smoothstep(0.,.12,min(q.x,1.-q.x))*smoothstep(0.,.14,min(q.y,1.-q.y));   // never reach the box edges
- frag=vec4(0.,0.,0.,(1.-v)*uStr*near*edge);}`;   // premultiplied black: darkens whatever page colour is behind
-
-  // stage look: no background of its own. The book floats a little above
-  // an invisible floor, and only its soft shadow is drawn, as a
-  // see-through darkening of whatever the page colour is behind it.
-  const FLOAT = 0.028;          // metres the book hovers above its shadow
-  const SHADOW = 0.5;           // shadow strength, 0 = none, 1 = full
+  // stage look: no background, no floor, no shadow. The book floats on
+  // whatever the page colour is behind it.
   const EXPOSURE = 1.06;
   const KEY_DIR = (() => { const a = -28 * Math.PI / 180, e = 42 * Math.PI / 180; return [Math.sin(a) * Math.cos(e), Math.sin(e), Math.cos(a) * Math.cos(e)]; })();
   const KEY_COL = [2.3, 2.3, 2.3];   // neutral white, so the cover blue reads true
-  const STAND_MS = 950;
+  const STAND_MS = 1300;         // stand fade in / out
+  const STAND_EVERY_MS = 5000;   // time between automatic stand changes
+  const IDLE_MS = 4500;          // after a drag, wait this long before moving on its own again
   const HOME = { yaw: -0.52, pitch: 0.2 };
 
   function mount(stage, opts){
@@ -2375,11 +1788,11 @@ void main(){vec2 uv=vPos.xz/.6+.5;float v=mix(texture(tG0,uv).r,texture(tG1,uv).
     const api = { ok: !!gl, setStand(){}, render(){}, setView(){}, ready: Promise.resolve() };
     if (!gl){ stage.classList.add("is-fallback"); return api; }
 
-    let pbr, gP, envTex, groundVAO, scene = null, dirty = true, visible = false, raf = 0;
-    const gTex = [];
-    const view = { yaw: HOME.yaw, pitch: HOME.pitch, fov: 26 * Math.PI / 180, target: [0, 0.106 + FLOAT * 0.55, 0] };
+    let pbr, envTex, scene = null, dirty = true, visible = false, raf = 0;
+    const view = { yaw: HOME.yaw, pitch: HOME.pitch, fov: 26 * Math.PI / 180, target: [0, 0.108, 0] };
     let standK = 1, standTarget = 1, standFrom = 1, standT0 = 0;
     let vel = 0, lastInteract = performance.now(), drag = null;
+    let paused = !!opts.paused, lastStandSwitch = performance.now(), standHoldUntil = 0;
     let W = 1, H = 1;
 
     function prog(vs, fs){
@@ -2411,7 +1824,7 @@ void main(){vec2 uv=vPos.xz/.6+.5;float v=mix(texture(tG0,uv).r,texture(tG1,uv).
     const loadImg = url => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error("texture")); i.src = url; });
 
     async function build(DATA){
-      pbr = prog(VS, FS); gP = prog(G_VS, G_FS);
+      pbr = prog(VS, FS);
       // image-based lighting: prefiltered studio environment (half floats)
       envTex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, envTex); gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
       const eb = b64(DATA.env.env), half = new Uint16Array(eb.buffer, eb.byteOffset, eb.byteLength / 2); let off = 0;
@@ -2420,13 +1833,6 @@ void main(){vec2 uv=vPos.xz/.6+.5;float v=mix(texture(tG0,uv).r,texture(tG1,uv).
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
       gl.pixelStorei(gl.UNPACK_ALIGNMENT, 4);
       DATA.shFlat = DATA.shFlat || new Float32Array(DATA.env.sh.flat());
-      // baked floor shadows: [book on its own, book in its stand]
-      for (const g of DATA.shadows) gTex.push(tex2D(await loadImg("data:image/png;base64," + g), false, false));
-      groundVAO = gl.createVertexArray(); gl.bindVertexArray(groundVAO);
-      gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-      const S = 6, Y = -0.0004;
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-S,Y,-S, S,Y,-S, S,Y,S, -S,Y,-S, S,Y,S, -S,Y,S]), gl.STATIC_DRAW);
-      gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0); gl.bindVertexArray(null);
       scene = await loadGLB(b64(DATA.glb).buffer);
     }
 
@@ -2478,7 +1884,7 @@ void main(){vec2 uv=vPos.xz/.6+.5;float v=mix(texture(tG0,uv).r,texture(tG1,uv).
     }
     function camera(){
       const asp = W / H, tv = Math.tan(view.fov / 2), th = tv * asp;
-      const d = Math.max(0.168 / tv, 0.114 / th), cp = Math.cos(view.pitch);
+      const d = Math.max(0.148 / tv, 0.108 / th), cp = Math.cos(view.pitch);
       const eye = [view.target[0] + d * Math.sin(view.yaw) * cp, view.target[1] + d * Math.sin(view.pitch), view.target[2] + d * Math.cos(view.yaw) * cp];
       return { eye, vp: M4.mul(M4.persp(view.fov, asp, 0.02, 30), M4.look(eye, view.target, [0, 1, 0])) };
     }
@@ -2499,30 +1905,33 @@ void main(){vec2 uv=vPos.xz/.6+.5;float v=mix(texture(tG0,uv).r,texture(tG1,uv).
       gl.clearColor(0, 0, 0, 0); gl.depthMask(true);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
       gl.enable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE);
-      gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);   // floor shadow only
-      gl.useProgram(gP.p); gl.uniformMatrix4fv(gP.u.uVP, false, cam.vp);
-      gl.uniform1f(gP.u.uStr, SHADOW); gl.uniform1f(gP.u.uMix, k); gl.uniform2f(gP.u.uRes, W, H);
-      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, gTex[0]); gl.uniform1i(gP.u.tG0, 0);
-      gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, gTex[1]); gl.uniform1i(gP.u.tG1, 1);
-      gl.bindVertexArray(groundVAO); gl.drawArrays(gl.TRIANGLES, 0, 6);
       gl.useProgram(pbr.p); const u = pbr.u;
       gl.uniformMatrix4fv(u.uVP, false, cam.vp); gl.uniform3fv(u.uCam, cam.eye);
       gl.uniform3fv(u.uSH, window.ARSVITA_3D_DATA.shFlat); gl.uniform1f(u.uExposure, EXPOSURE);
       gl.uniform3fv(u.uKeyDir, KEY_DIR); gl.uniform3fv(u.uKeyCol, KEY_COL);
+      gl.uniform1f(u.uClipY, -10);
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, envTex); gl.uniform1i(u.tEnv, 0);
       const book = scene.byName.Book, st = scene.byName.Case;
-      if (book) book.t = [0, FLOAT + 0.004 * k, 0];               // book rests on the stand's base plate
-      if (st) st.t = [0, FLOAT - (0.19 + FLOAT) * (1 - k), 0];   // stand sinks away through the floor when hidden
-      const opaque = [], trans = [];
+      if (book) book.t = [0, 0.004 * k, 0];            // book rests on the stand's base plate
+      if (st) st.t = [0, -0.012 * (1 - k), 0];          // stand drops a little as it fades away
+      const bookPrims = [], standOpaque = [], standClear = [];
       const walk = (i, parent, inStand) => { const n = scene.nodes[i]; const m = M4.mul(parent, M4.trs(n.t, n.r, n.s)); const c = inStand || n === st;
-        if (c && k <= 0.001) return;
-        if (n.mesh !== undefined) scene.meshes[n.mesh].forEach(pr => (pr.mat.blend ? trans : opaque).push([pr, m, c]));
+        if (n.mesh !== undefined) scene.meshes[n.mesh].forEach(pr => (c ? (pr.mat.blend ? standClear : standOpaque) : bookPrims).push([pr, m]));
         n.children.forEach(ch => walk(ch, m, c)); };
       scene.roots.forEach(r => walk(r, M4.ident(), false));
-      gl.disable(gl.BLEND); gl.depthMask(true);
-      for (const [pr, m, c] of opaque){ gl.uniform1f(u.uClipY, c && k < 0.999 ? 0 : -10); drawPrim(pr, m); }
-      gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false);
-      for (const pass of [gl.FRONT, gl.BACK]) for (const [pr, m, c] of trans){ gl.uniform1f(u.uClipY, c && k < 0.999 ? 0 : -10); drawPrim(pr, m, pass); }
+      // the book
+      gl.disable(gl.BLEND); gl.depthMask(true); gl.uniform1f(u.uFade, 1);
+      for (const [pr, m] of bookPrims) drawPrim(pr, m);
+      if (k > 0.002){
+        // the stand: solid when fully there, see-through while it fades
+        const fading = k < 0.998;
+        gl.uniform1f(u.uFade, k);
+        if (fading){ gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); } else gl.disable(gl.BLEND);
+        gl.depthMask(true);
+        for (const [pr, m] of standOpaque) drawPrim(pr, m);
+        gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false);
+        for (const pass of [gl.FRONT, gl.BACK]) for (const [pr, m] of standClear) drawPrim(pr, m, pass);
+      }
       gl.depthMask(true); gl.disable(gl.BLEND); gl.frontFace(gl.CCW); gl.bindVertexArray(null);
     }
 
@@ -2535,7 +1944,15 @@ void main(){vec2 uv=vPos.xz/.6+.5;float v=mix(texture(tG0,uv).r,texture(tG1,uv).
       if (!scene) return;
       if (standK !== standTarget){ const t = Math.min(1, (now - standT0) / STAND_MS); standK = standFrom + (standTarget - standFrom) * t; if (t >= 1) standK = standTarget; dirty = true; }
       if (!drag && Math.abs(vel) > 1e-4){ view.yaw += vel; vel *= 0.87; dirty = true; }
-      if (!reduced && !drag && !opts.still && now - lastInteract > 4500){ const ramp = Math.min(1, (now - lastInteract - 4500) / 2500); view.yaw += dt * 0.18 * ramp; dirty = true; }
+      const idle = !drag && now - lastInteract > IDLE_MS;
+      if (!reduced && !paused && idle && !opts.still){ const ramp = Math.min(1, (now - lastInteract - IDLE_MS) / 2500); view.yaw += dt * 0.18 * ramp; dirty = true; }
+      // automatic stand on / off
+      if (opts.autoStand && !reduced && !paused && idle && !opts.still && standK === standTarget &&
+          now > standHoldUntil && now - lastStandSwitch > STAND_EVERY_MS){
+        lastStandSwitch = now;
+        startStand(standTarget === 0);
+        if (opts.onStandChange) opts.onStandChange(standTarget === 1);
+      }
       resize(); if (dirty){ render(); dirty = false; }
     }
     function wake(){ if (visible && !raf){ lastT = performance.now(); raf = requestAnimationFrame(frame); } }
@@ -2583,11 +2000,13 @@ void main(){vec2 uv=vPos.xz/.6+.5;float v=mix(texture(tG0,uv).r,texture(tG1,uv).
       if (used){ e.preventDefault(); touched(); dirty = true; wake(); }
     });
 
-    api.setStand = on => {
+    function startStand(on){
       standTarget = on ? 1 : 0;
       if (reduced || opts.still){ standK = standTarget; standFrom = standTarget; } else { standFrom = standK; standT0 = performance.now(); }
       dirty = true; wake();
-    };
+    }
+    api.setStand = on => startStand(on);
+    api.setPaused = p => { paused = !!p; lastInteract = performance.now() - (p ? 0 : IDLE_MS); dirty = true; wake(); };
     api.render = () => { render(); };
     api.setView = (yaw, pitch) => { view.yaw = yaw; view.pitch = pitch; dirty = true; wake(); };
     api.ready = loadData(opts.src).then(build).then(() => {
@@ -2630,7 +2049,7 @@ All images referenced below live in the `images/` folder alongside this README, 
 
 ### Arsvita Magazine — 3D model poster
 
-![3d-poster.png](images/arsvita/3d-poster.png)
+![3d-poster.webp](images/arsvita/3d-poster.webp)
 
 ### Arsvita Magazine — all 23 spreads
 

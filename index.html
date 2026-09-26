@@ -20,73 +20,89 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- running index strip, mimics a book's running head -->
+<a class="skip-link" href="#work">Skip to the work</a>
+
+<!-- running head, like a book's: names the section you're in -->
 <div class="runhead" aria-hidden="true">
   <span id="runhead-name"></span>
-  <span class="runhead-mid">·</span>
-  <span id="runhead-section">portfolio</span>
+  <span class="runhead-mid">/</span>
+  <span id="runhead-section">Portfolio</span>
   <span class="runhead-progress-track"><span id="scroll-progress" class="runhead-progress-fill"></span></span>
 </div>
 
+<!-- HERO: your name types itself out across the page, then the work
+     slides in underneath it: every image from every project, in order,
+     each at its own shape and size, sliding along to the next one.
+     Kept shorter than the screen so the first project shows below. -->
 <header class="hero" id="top">
-  <nav class="hero-nav">
-    <a href="#work">work</a>
-    <a href="#about">about</a>
-    <a href="#contact">contact</a>
-  </nav>
-
-  <div class="hero-main">
-    <h1 id="hero-name" class="hero-name"></h1>
-    <div class="hero-side">
-      <p id="hero-role" class="hero-role"></p>
-      <p id="hero-tagline" class="hero-tagline"></p>
-    </div>
+  <div class="hero-top">
+    <nav class="hero-nav" aria-label="Sections">
+      <a href="#work">Work</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <p class="hero-role"><span id="hero-role"></span>, <span id="hero-location"></span></p>
   </div>
 
-  <div class="hero-foot">
-    <span id="hero-location"></span>
-    <span class="hero-scroll">scroll — 01 / 02 / 03</span>
+  <h1 class="hero-name">
+    <span class="sr-only" id="hero-name"></span>
+    <span class="type" aria-hidden="true">
+      <span class="type-ghost" id="type-ghost"></span>
+      <span class="type-live" id="type-live"></span>
+    </span>
+  </h1>
+
+  <div class="strip" id="strip" role="region" aria-roledescription="carousel" aria-label="Work from every project, in order">
+    <div class="strip-track" id="strip-track"></div>
+  </div>
+
+  <div class="hero-sub">
+    <p id="hero-tagline" class="hero-tagline"></p>
+    <div class="hero-index-wrap">
+      <ol id="hero-index" class="hero-index" aria-label="Projects"></ol>
+      <button type="button" class="ctl-btn" id="strip-pause" aria-pressed="false">Pause</button>
+    </div>
   </div>
 </header>
 
 <main>
 
-  <!-- CONTENTS: literalizes the book's S/M/L/XL organizing device as a real index -->
-  <section class="contents" aria-label="Contents">
-    <div class="contents-label">
-      <span class="contents-number">00</span>
-      <h2>Contents</h2>
-    </div>
-    <ol id="contents-list" class="contents-list"></ol>
-  </section>
-
-  <section id="work" class="work">
+  <section id="work" class="work" aria-label="Work">
     <div id="work-sections"></div>
   </section>
 
-  <section id="about" class="about">
-    <div class="about-number">
-      <span>04</span>
-    </div>
-    <div class="about-grid">
-      <h2 class="about-heading">About</h2>
-      <p id="about-bio" class="about-bio"></p>
-      <div class="about-contactline">
-        <p>Based in <span id="about-location"></span>. Available for identity, print, and systems work.</p>
+  <section id="about" class="section section--text" aria-labelledby="about-title">
+    <div class="rail">
+      <div class="rail-head">
+        <span class="rail-num">04</span>
+        <h2 class="rail-name" id="about-title">About</h2>
+        <ul class="rail-facts">
+          <li id="about-location"></li>
+          <li>Identity, print and systems work</li>
+        </ul>
       </div>
+    </div>
+    <div class="section-main">
+      <p id="about-bio" class="section-lede"></p>
     </div>
   </section>
 
-  <section id="contact" class="contact">
-    <div class="contact-number"><span>05</span></div>
-    <div class="contact-main">
-      <h2>Get in touch</h2>
-      <p id="contact-status" class="contact-status"></p>
+  <section id="contact" class="section section--text" aria-labelledby="contact-title">
+    <div class="rail">
+      <div class="rail-head">
+        <span class="rail-num">05</span>
+        <h2 class="rail-name" id="contact-title">Contact</h2>
+        <ul class="rail-facts">
+          <li id="contact-status"></li>
+        </ul>
+      </div>
+    </div>
+    <div class="section-main">
       <a id="contact-email" class="contact-email" href="#"></a>
       <ul id="contact-social" class="contact-social"></ul>
     </div>
