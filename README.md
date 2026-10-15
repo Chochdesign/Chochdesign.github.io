@@ -1,12 +1,12 @@
 # Morgan Chochinov — Portfolio Site
 
-A static portfolio website built around a single design concept: the book *S, M, L, XL* by Rem Koolhaas and Bruce Mau. The site treats itself like a printed book: a running head, numbered chapters, and one consistent sidebar alongside each project's work. It opens with the name typing itself out, then every photo from every project sliding past underneath, sized so the first project already shows on the first screen.
+A static portfolio website built around a single design concept: the book *S, M, L, XL* by Rem Koolhaas and Bruce Mau. The site treats itself like a printed book: a running head, numbered chapters, and one consistent sidebar alongside each project's work. It opens with your CHOCH logo animation on neon orange; when the pieces snap together the orange turns into the page colour and fades into the site. Then the name types itself out and every photo from every project slides past underneath, sized so the first project already shows on the first screen.
 
-No build step, no framework, no dependencies beyond two Google Fonts. Everything renders from a single data file.
+No build step, no framework, no dependencies beyond three Google Fonts. Everything renders from a single data file.
 
 ## How to use this
 
-Open `index.html` in a browser — that's it, it runs locally with no server needed. To host it, upload the five `.js`/`.html`/`.css` files plus the `images/` and `models/` folders to any static host (Netlify, GitHub Pages, Vercel, etc.) keeping the folder structure intact.
+Open `index.html` in a browser — that's it, it runs locally with no server needed. To host it, upload the six `.js`/`.html`/`.css` files (plus `CNAME` for GitHub Pages) and the `images/` and `models/` folders to any static host (Netlify, GitHub Pages, Vercel, etc.) keeping the folder structure intact.
 
 **To update content, only edit `data.js`.** It's fully commented — name, bio, contact info, and every project's copy, images, and layout options live there. You should never need to touch `index.html`, `style.css`, or `script.js` for a content change.
 
@@ -18,11 +18,15 @@ Open `index.html` in a browser — that's it, it runs locally with no server nee
 ├── style.css            All visual styling, design tokens at the top
 ├── script.js             Renders everything from data.js into the page
 ├── data.js               ALL editable content — start here
+├── intro.js              The opening logo animation (neon orange, then into the site)
 ├── arsvita-3d.js         Draggable 3D model viewer (Arsvita)
 ├── README.md            This file
 ├── models/
 │   └── arsvita-3d-model.js      Arsvita book + acrylic stand 3D model (loaded on demand)
 └── images/
+    ├── intro/
+    │   ├── choch-logo-animated-loop.mp4, .webm   Your logo animation (fly in, snap, hold), black on white
+    │   └── choch-logo-animated-loop-still.png    The finished logo, for reduced motion / no video
     ├── dozer-*.jpg              7 photos — Dozer Magazine
     ├── logo-full.png            The Pecking Order logo mark
     ├── arsvita/
@@ -35,18 +39,27 @@ Open `index.html` in a browser — that's it, it runs locally with no server nee
 
 ## Design system quick reference
 
-- **Palette:** paper `#F0EFE9`, ink `#121212`, grey `#6E6D67`, line `#C7C5BB` — all defined as CSS custom properties at the top of `style.css`.
-- **Type:** Bricolage Grotesque for everything you read, from the heavy condensed capitals of the name, numbers and project names down to body text. Geist Mono for small labels, info lines and buttons. Every piece of text uses one of six roles, defined once at the top of `style.css`: display, lede, body, label, meta, button.
+- **Palette:** paper `#F0EFE9`, ink `#121212`, grey `#6E6D67`, line `#C7C5BB`, plus the intro's neon orange `#FF5F1F` — all defined as CSS custom properties at the top of `style.css`.
+- **Type:** Geist Black (900), a plain sans serif at its heaviest weight, for your name, the section numbers, the project names and the numbers in the opening index. Bricolage Grotesque for everything you read, from the summaries down to body text (plus the condensed capitals of Dozer's "As seen with" names). Geist Mono for small labels, info lines, buttons and the intro's welcome line. Every piece of text uses one of six roles, defined once at the top of `style.css`: display, lede, body, label, meta, button.
 - **Chapter numbering:** projects are numbered 01/02/03 in the order they appear in the `projects` array in `data.js`.
 - **One grid everywhere:** every project, About and Contact use the same two columns: a sidebar (a quarter of the width) for the text and the work (three quarters) as big as it can be. The opening screen's tagline and index line up with the same columns. On phones everything stacks and the imagery runs edge to edge, and each project runs number and name, then its main visual, then its text, then the rest of the work.
 - **One sidebar format:** number, name, small info (year, role, specs), a one- or two-sentence summary, then Challenge / Approach / Outcome, then an optional detail block. On wide screens the sidebar stays beside the work while you scroll; if it's taller than the window, it scrolls until its last line is showing and stays there.
 - **Imagery is never cropped, boxed or stretched.** Dozer's images stack one under another at the full width of the work column. The spreads show whole. The opening strip shows every image at its own shape.
-- **Motion:** every slide on the site uses the same curve as After Effects' Easy Ease. Nothing fades in. The strip, the 3D model and both sets of spreads move on their own, and each has a Pause button (an accessibility requirement for anything that moves for more than 5 seconds). With "reduce motion" turned on in the device's settings, none of them move by themselves.
+- **Motion:** every slide on the site uses the same curve as After Effects' Easy Ease. Nothing fades in; the only fade is the intro handing over to the site. The strip, the 3D model and both sets of spreads move on their own, and each has a Pause button (an accessibility requirement for anything that moves for more than 5 seconds). With "reduce motion" turned on in the device's settings, none of them move by themselves.
 - All of the content options are documented in the comment block at the top of `data.js`.
+
+## The intro
+
+Before anything else, your CHOCH logo animation plays full screen on neon orange, with "Welcome to my site" wiping in underneath once the pieces have flown into place. The moment they snap together, the orange turns into the page colour; a beat later the logo fades away and the site does its own intro (your name typing itself out). It takes about three seconds, and clicking, tapping, scrolling or pressing a key skips it.
+
+- **The logo is the site's exact black.** The animation is drawn onto a canvas that blends it with the page colour, so the logo is exactly `#121212` (the `--ink` colour) on the orange and on the page colour, with clean edges and motion blur. It works the same hosted or opened straight from disk.
+- **Files** (in `images/intro/`): made from your `choch-logo-animated-loop.mp4`. `choch-logo-animated-loop.mp4` and `.webm` are the part of it the intro uses (fly in, snap, hold; the loop's reverse is left off) as a pure black logo on pure white (the canvas turns the black into the ink colour), framed so the finished logo sits dead centre. `choch-logo-animated-loop-still.png` is the finished logo, shown instead of the animation when a device asks for reduced motion or a video can't play (some phones in Low Power Mode). To swap in a new animation, export it as a black logo on a white background and send it over, or replace these files keeping the names (then add `?v=2` after the names in `index.html` so browsers fetch the new ones).
+- **Change things:** the orange is `--intro` at the top of `style.css` (any #hex colour). The welcome line is `welcome` in `data.js`. Timings (when the colour changes, when it fades) are at the top of `intro.js`.
+- Without JavaScript there's no intro and the site shows as normal. If `intro.js` is missing, the site starts straight away.
 
 ## The opening screen
 
-Your name types itself out across the full width of the page (it's sized to fit exactly, on any screen). Then the work slides in from the right: every photo from every project, in order (all of Dozer, then Arsvita's spreads, then The Pecking Order's finished birds), each at its own shape, in a gentle rhythm of sizes. It slides along to the next image every 1.5 seconds (change `STRIP_SLIDE_MS` and `STRIP_HOLD_MS` near the top of the strip code in `script.js` to adjust), loops back to the start seamlessly, and can be dragged or swiped. It keeps going round on its own; Pause stops it. Any image that can't be found is simply left out. Each image is captioned with its project and links to it, and the matching project lights up in the index underneath. The whole opening screen is kept shorter than the window so the start of project 01 is always visible below it.
+After the intro, your name types itself out across the full width of the page in Geist Black (it's sized to fit exactly, on any screen). Then the work slides in from the right: every photo from every project, in order (all of Dozer, then Arsvita's spreads, then The Pecking Order's finished birds), each at its own shape, in a gentle rhythm of sizes. It slides along to the next image every 1.5 seconds (change `STRIP_SLIDE_MS` and `STRIP_HOLD_MS` near the top of the strip code in `script.js` to adjust), loops back to the start seamlessly, and can be dragged or swiped. It keeps going round on its own; Pause stops it. Any image that can't be found is simply left out. Each image is captioned with its project and links to it, and the matching project lights up in the index underneath. The whole opening screen is kept shorter than the window so the start of project 01 is always visible below it.
 
 It builds itself from the images in `data.js`, so it stays up to date as you add or remove work. To show a hand-picked set instead, add a `reel` list (see the notes at the top of `data.js`).
 
@@ -80,7 +93,9 @@ The Pecking Order runs through every bird in a row (the `birds` list in `data.js
 
 ## Images
 
-Export images at least 2400px wide (spreads included). Everything is shown much larger now, and on high-resolution screens anything smaller will look soft. Nothing on the site is cropped, so you can export at each image's natural shape.
+Export images at least 3000px wide (spreads included). A high-resolution (Retina) screen needs twice as many pixels as the size an image is shown at, and the spreads fill the whole work column, so anything smaller looks soft. Nothing on the site is cropped, so you can export at each image's natural shape.
+
+The opening strip keeps every image sharp on its own: an image is never shown bigger than its file has pixels for on the screen it's on, so a small file shows a little smaller instead of blurry, and grows back by itself once a bigger file replaces it. Right now the Arsvita spreads (1600px wide) and The Pecking Order spreads (1200px wide) are the ones held back; the spreads inside each project still show at full size, so those files are the next thing to re-export.
 
 ## The code
 
@@ -109,10 +124,30 @@ Export images at least 2400px wide (spreads included). Everything is shown much 
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Geist:wght@900&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<!-- the intro covers the page from the very first frame (intro.js takes it
+     from there). Without JavaScript there's no intro and the site shows as normal. -->
+<script>document.documentElement.classList.add("js", "intro-on");</script>
 </head>
 <body>
+
+<!-- INTRO: your logo animation on neon orange with a welcome line. When the
+     pieces snap together the orange turns into the page colour, then it fades
+     into the site and your name types itself out. See intro.js. -->
+<div class="intro" id="intro" aria-hidden="true">
+  <div class="intro-stage">
+    <div class="intro-logo">
+      <video class="intro-video" muted playsinline preload="auto" disablepictureinpicture disableremoteplayback tabindex="-1">
+        <source src="images/intro/choch-logo-animated-loop.mp4" type="video/mp4">
+        <source src="images/intro/choch-logo-animated-loop.webm" type="video/webm">
+      </video>
+      <canvas class="intro-canvas"></canvas>
+      <img class="intro-still" src="images/intro/choch-logo-animated-loop-still.png" alt="" decoding="async">
+    </div>
+    <p class="intro-welcome">Welcome to my site</p>
+  </div>
+</div>
 
 <a class="skip-link" href="#work">Skip to the work</a>
 
@@ -204,6 +239,7 @@ Export images at least 2400px wide (spreads included). Everything is shown much 
 </footer>
 
 <script src="data.js"></script>
+<script src="intro.js"></script>
 <script src="arsvita-3d.js"></script>
 <script src="script.js"></script>
 </body>
@@ -223,9 +259,11 @@ Export images at least 2400px wide (spreads included). Everything is shown much 
   --grey: #6E6D67;
   --line: #C7C5BB;
   --viewer-bg: #121212;
+  --intro: #FF5F1F;              /* the neon orange behind your logo at the start (any #hex colour) */
 
-  /* one family for everything you read, one mono for small info */
-  --f-display: "Bricolage Grotesque", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  /* a plain, heavy sans serif for your name, numbers and project names,
+     one family for everything you read, one mono for small info */
+  --f-display: "Geist", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --f-text: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
   --f-mono: "Geist Mono", "IBM Plex Mono", ui-monospace, Menlo, monospace;
 
@@ -282,14 +320,15 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
 /* ────────────────────────────────────────────────────────────
    TYPE ROLES: every piece of text on the site is one of these
    ──────────────────────────────────────────────────────────── */
-/* 1. display: your name, section numbers, project names */
-.hero-name, .rail-num, .rail-name, .hero-index-num, .switcher{
+/* 1. display: your name, section numbers, project names.
+      A plain sans serif (Geist) at its heaviest weight. */
+.hero-name, .rail-num, .rail-name, .hero-index-num{
   font-family: var(--f-display);
-  font-weight: 800;
-  font-stretch: 75%;
+  font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.03em;
 }
+.hero-name{ letter-spacing: -0.04em; }
 /* 2. lede: tagline, summaries, about */
 .hero-tagline, .rail-summary, .section-lede, .book-how{
   font-family: var(--f-text);
@@ -303,8 +342,8 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
   font-size: 1rem;
   line-height: 1.55;
 }
-/* 4. label: small headings, nav, buttons */
-.rail-label, .book-label, .hero-nav a, .ctl-btn, .wip-badge, .backtotop a, .skip-link{
+/* 4. label: small headings, nav, buttons, the intro's welcome line */
+.rail-label, .book-label, .hero-nav a, .ctl-btn, .wip-badge, .backtotop a, .skip-link, .intro-welcome{
   font-family: var(--f-mono);
   font-weight: 500;
   font-size: 0.72rem;
@@ -320,6 +359,44 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
   font-size: 0.78rem;
   line-height: 1.45;
   letter-spacing: 0;
+}
+
+/* ────────────────────────────────────────────────────────────
+   INTRO: your logo animation on neon orange. When the pieces snap
+   together the orange turns into the page colour, then the whole
+   screen fades into the site. Only shown when JavaScript runs.
+   ──────────────────────────────────────────────────────────── */
+.intro{ display: none; }
+.intro-on .intro{
+  position: fixed; inset: 0; z-index: 1000;
+  display: grid; place-items: center;
+  padding: var(--gutter);
+  background: var(--intro);
+  color: var(--ink);
+  /* failsafe: if intro.js never runs, step out of the way */
+  animation: intro-failsafe 0.01s linear 9s forwards;
+}
+@keyframes intro-failsafe{ to{ visibility: hidden; } }
+.intro.is-leaving{ opacity: 0; pointer-events: none; transition: opacity var(--intro-fade, 0.7s) var(--easy); }
+.intro-stage{ position: relative; width: min(100%, 32.875rem); }
+.intro-logo{ position: relative; aspect-ratio: 1052 / 838; }   /* the animation's frame size */
+.intro-video, .intro-canvas, .intro-still{ position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+/* the video plays underneath; the canvas on top shows it in your exact black */
+.intro-video, .intro-canvas, .intro-still{ visibility: hidden; }
+.intro.is-ready .intro-video, .intro.is-ready .intro-canvas{ visibility: visible; }
+.intro.is-still .intro-still{ visibility: visible; }
+.intro.is-still .intro-video, .intro.is-still .intro-canvas{ visibility: hidden; }
+.intro-welcome{
+  position: absolute; left: 0; right: 0; top: 71%;
+  font-size: clamp(0.82rem, 1.35vw, 1.02rem);
+  font-weight: 700;
+  text-align: center;
+  clip-path: inset(0 0 100% 0);
+  transform: translateY(0.6rem);
+}
+.intro.is-welcome .intro-welcome{
+  clip-path: inset(0 0 0 0); transform: none;
+  transition: clip-path 0.45s var(--easy), transform 0.45s var(--easy);
 }
 
 /* ────────────────────────────────────────────────────────────
@@ -539,20 +616,23 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
 }
 
 /* ---- sidebar: identical for every section ---- */
-.rail-num{ display: block; font-size: clamp(3.75rem, 7vw, 7rem); line-height: 0.78; letter-spacing: -0.02em; }
-.rail-name{ margin-top: 0.8rem; font-size: clamp(1.9rem, 2.7vw, 2.8rem); line-height: 0.92; font-stretch: 78%; }
+.rail-num{ display: block; font-size: clamp(3.75rem, 7vw, 7rem); line-height: 0.78; letter-spacing: -0.045em; }
+.rail-name{ margin-top: 0.8rem; font-size: clamp(1.9rem, 2.7vw, 2.8rem); line-height: 0.92; }
 .rail-facts{ list-style: none; padding: 0; margin-top: 1rem; display: grid; gap: 0.2rem; color: var(--grey); }
 .rail-body{ max-width: 60ch; }
 .rail-summary{ font-size: clamp(1.1rem, 1.35vw, 1.25rem); line-height: 1.32; }
 .rail-block{ margin-top: 1.4rem; }
 .rail-label{ color: var(--grey); margin-bottom: 0.4rem; }
 .rail-detail{ margin-top: 1.75rem; padding-top: 1rem; border-top: 1px solid var(--line); }
-/* names that switch by themselves (Dozer's "As seen with") */
+/* names that switch by themselves (Dozer's "As seen with"):
+   condensed capitals in the body font */
 .switcher{
   position: relative;
   height: 2.05em;
   font-size: clamp(1.6rem, 2vw, 2rem);
   line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
   font-stretch: 78%;
   overflow: hidden;
 }
@@ -814,10 +894,13 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
 
   // ────────────────────────────────────────────────────────────
   // THE STRIP: every photo from every project, in order, each at its
-  // own shape and size (never cropped, never enlarged past its real
-  // size), sliding along to the next one with Easy Ease. Loops
-  // seamlessly. Drag or swipe to move it yourself; hover or Pause
-  // to stop it. Each image links to its project.
+  // own shape and size (never cropped), sliding along to the next one
+  // with Easy Ease. Loops seamlessly. Drag or swipe to move it
+  // yourself; hover or Pause to stop it. Each image links to its project.
+  // Every image is kept sharp: it's never shown bigger than its file
+  // has pixels for on the screen it's on (a high-resolution screen
+  // needs twice the pixels), so a small file shows a little smaller
+  // instead of blurry. Export bigger files and they grow back by themselves.
   // ────────────────────────────────────────────────────────────
   const strip = document.getElementById("strip");
   const track = document.getElementById("strip-track");
@@ -856,10 +939,13 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
     track.appendChild(a);
     return a;
   });
+  // pixels the screen packs into one CSS pixel (2 on a Retina screen);
+  // past 2 the eye can't tell the difference, so it stops counting there
+  const sharpScale = () => Math.min(Math.max(window.devicePixelRatio || 1, 1), 2);
   function sizeItem(a){
     const nh = +a.dataset.nh || 0, nw = +a.dataset.nw || 0;
     let h = stripH * (+a.dataset.f || 1);
-    if (nh) h = Math.min(h, nh);                          // never enlarge past the real size
+    if (nh) h = Math.min(h, nh / sharpScale());           // never bigger than the file can show sharply
     a.style.setProperty("--h", Math.round(h) + "px");
     if (nw && nh) a.style.setProperty("--ar", (nw / nh).toFixed(4));
   }
@@ -1371,7 +1457,8 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
   window.addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
 
   // ────────────────────────────────────────────────────────────
-  // START: size everything, type the name, then bring in the work
+  // START: size everything, wait for the intro (intro.js) to hand
+  // over, then type the name and bring in the work
   // ────────────────────────────────────────────────────────────
   function layoutAll(){ fitName(); sizeStrip(); fitRails(); }
   // Phones change their reported height as the browser bar hides while
@@ -1390,13 +1477,294 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(layoutAll);
   setTimeout(layoutAll, 300);
   onScroll();
-  typeName(() => {
-    layoutAll();                                          // final sizes, just before the work slides in
-    lastW = viewW();
-    hero.classList.add("is-in");
-    setTimeout(() => hero.classList.add("is-done"), 400);
-    setStripPaused(stripPaused);
-  });
+  // the screen can change between monitors while the page is open
+  if (window.matchMedia) {
+    let dprQuery = null;
+    const watchDpr = () => {
+      if (dprQuery) dprQuery.removeEventListener("change", onDpr);
+      dprQuery = window.matchMedia(`(resolution: ${window.devicePixelRatio || 1}dppx)`);
+      if (dprQuery.addEventListener) dprQuery.addEventListener("change", onDpr);
+    };
+    const onDpr = () => { stripItems.forEach(sizeItem); watchDpr(); };
+    watchDpr();
+  }
+  function startHero(){
+    typeName(() => {
+      layoutAll();                                        // final sizes, just before the work slides in
+      lastW = viewW();
+      hero.classList.add("is-in");
+      setTimeout(() => hero.classList.add("is-done"), 400);
+      setStripPaused(stripPaused);
+    });
+  }
+  if (window.Intro && window.Intro.done) window.Intro.done.then(startHero);
+  else {
+    // no intro.js: take the intro screen away and start straight away
+    const introEl = document.getElementById("intro");
+    if (introEl) introEl.remove();
+    document.documentElement.classList.remove("intro-on");
+    startHero();
+  }
+})();
+
+```
+
+### `intro.js`
+
+```javascript
+/*
+  ────────────────────────────────────────────────────────────
+  INTRO: the opening screen.
+  Your CHOCH logo animation plays on neon orange with "Welcome to my
+  site" under it. The moment the pieces snap together, the orange turns
+  into the page colour, then the screen fades away and the site does its
+  own intro (your name typing itself out).
+
+  The logo is drawn onto a canvas in the site's exact black (--ink),
+  so it matches every other black on the page. It works the same hosted
+  or opened straight from disk.
+
+  Files (all in images/intro/), made from your choch-logo-animated-loop.mp4:
+    choch-logo-animated-loop.mp4 / .webm
+                          the animation up to the hold (fly in, snap,
+                          hold), black logo on white
+    choch-logo-animated-loop-still.png
+                          the finished logo, shown instead of the
+                          animation when the device asks for reduced
+                          motion or a video can't play
+  The orange is --intro in style.css. The welcome line is "welcome" in
+  data.js. Clicking, scrolling or pressing a key skips the intro.
+  If you swap in a new version under the same file name, add "?v=2"
+  after its name in index.html so browsers fetch the new one.
+
+  Used by script.js:  Intro.done.then(() => ...)  runs once the intro
+  has handed over to the site (straight away if there's no intro).
+  ────────────────────────────────────────────────────────────
+*/
+(function(){
+  "use strict";
+
+  let finish;
+  const done = new Promise(r => { finish = r; });
+  window.Intro = { done };
+
+  const root = document.documentElement;
+  const el = document.getElementById("intro");
+  if (!el || !root.classList.contains("intro-on")) { if (el) el.remove(); root.classList.remove("intro-on"); finish(); return; }
+  el.style.animation = "none";                     // intro.js is running: switch off the CSS failsafe
+
+  // ── timing, in seconds of the logo animation ──
+  const WELCOME_AT = 0.7;        // "Welcome to my site" wipes in once the pieces have flown past it
+  const SNAP_AT = 28.5 / 30;     // frame 29, where the pieces lock together: orange turns to page colour
+  const LEAVE_AT = 2.0;          // a beat after the letters fill in: fade into the site
+  // ── in milliseconds ──
+  const COLOUR_MS = 240;         // orange to page colour
+  const FADE_MS = 700;           // the intro fading away
+  const SKIP_FADE_MS = 350;      // fading away after a click, scroll or key
+  const HAND_OVER = 0.45;        // how far into the fade the site starts its own intro
+  const KICK_MS = 400;           // start playing by now even if the video is still downloading
+  const MAX_WAIT_MS = 2500;      // if the video hasn't started by then, show the still logo instead
+  const STILL_HOLD_MS = 1100;    // how long the still logo shows before the colour changes
+  const GIVE_UP_MS = 9000;       // whatever happens, the site is never kept waiting longer than this
+
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const data = window.PORTFOLIO_DATA || {};
+  const welcome = el.querySelector(".intro-welcome");
+  if (welcome && data.welcome) welcome.textContent = data.welcome;
+
+  const video = el.querySelector(".intro-video");
+  const canvas = el.querySelector(".intro-canvas");
+  const box = el.querySelector(".intro-logo");
+  const ctx = canvas && canvas.getContext ? canvas.getContext("2d", { alpha: false }) : null;
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+
+  // colours come from style.css so they always match the page
+  const css = getComputedStyle(root);
+  function hex(v, fallback){
+    let s = (v || "").trim().replace("#", "");
+    if (s.length === 3) s = s.split("").map(c => c + c).join("");
+    if (!/^[0-9a-f]{6}$/i.test(s)) return fallback;
+    return [0, 2, 4].map(i => parseInt(s.slice(i, i + 2), 16));
+  }
+  const INK = hex(css.getPropertyValue("--ink"), [18, 18, 18]);
+  const FROM = hex(css.getPropertyValue("--intro"), [255, 95, 31]);
+  const TO = hex(css.getPropertyValue("--paper"), [240, 239, 233]);
+  const toHex = c => "#" + c.map(n => Math.round(n).toString(16).padStart(2, "0")).join("");
+
+  let bg = FROM.slice(), colourFrom = FROM, colourT0 = 0, colourMs = 0, colouring = false;
+  let phase = "wait", raf = 0, leaving = false, handedOver = false, waitTimer = 0, playing = false;
+
+  // ── the canvas: page colour, with the logo in the exact ink colour ──
+  // colour x video  +  ink x (1 - video)   =   the colour where the video
+  // is white, ink where it's black, and a clean blend along every edge.
+  // Plain canvas blending, so it also works when the site is opened from disk.
+  const rgb = c => `rgb(${c[0]},${c[1]},${c[2]})`;
+  const frame = document.createElement("canvas"), off = document.createElement("canvas");
+  const fctx = frame.getContext ? frame.getContext("2d", { alpha: false }) : null;
+  const octx = off.getContext ? off.getContext("2d", { alpha: false }) : null;
+  let W = 0, H = 0;
+  function sizeCanvas(){
+    if (!ctx || !box) return;
+    const r = box.getBoundingClientRect();
+    const src = (video && video.videoWidth) || 1052;
+    const scale = Math.min(window.devicePixelRatio || 1, src / Math.max(1, r.width));
+    const w = Math.max(1, Math.round(r.width * scale)), h = Math.max(1, Math.round(r.height * scale));
+    if (w !== W || h !== H){ canvas.width = frame.width = off.width = W = w; canvas.height = frame.height = off.height = H = h; }
+  }
+  function draw(){
+    if (!ctx || !W) return;
+    ctx.globalCompositeOperation = "source-over";
+    ctx.fillStyle = rgb(bg);
+    ctx.fillRect(0, 0, W, H);
+    if (!playing || video.readyState < 2 || !octx || !fctx) return;
+    // one copy of the video's current frame, so every step below uses the same frame
+    fctx.imageSmoothingQuality = "high";
+    fctx.drawImage(video, 0, 0, W, H);
+    // the page colour, kept where the video is white
+    ctx.globalCompositeOperation = "multiply";
+    ctx.drawImage(frame, 0, 0);
+    // the ink, kept where the video is black
+    octx.globalCompositeOperation = "source-over";
+    octx.drawImage(frame, 0, 0);
+    octx.globalCompositeOperation = "difference";
+    octx.fillStyle = "#fff";
+    octx.fillRect(0, 0, W, H);
+    octx.globalCompositeOperation = "multiply";
+    octx.fillStyle = rgb(INK);
+    octx.fillRect(0, 0, W, H);
+    // the two added together
+    ctx.globalCompositeOperation = "lighter";
+    ctx.drawImage(off, 0, 0);
+    ctx.globalCompositeOperation = "source-over";
+  }
+  function setBg(c){
+    bg = c.map(Math.round);
+    el.style.backgroundColor = rgb(bg);
+  }
+
+  // orange -> page colour, eased out, in step with the canvas
+  function startColour(){
+    if (colouring || bg.join() === TO.join()) return;
+    colouring = true; colourFrom = bg.slice(); colourT0 = performance.now(); colourMs = reduced ? 0 : COLOUR_MS;
+    if (themeMeta) themeMeta.setAttribute("content", toHex(TO));
+    el.classList.add("is-snapped");
+  }
+  function stepColour(now){
+    if (!colouring) return;
+    const t = colourMs ? Math.min(1, (now - colourT0) / colourMs) : 1;
+    const e = 1 - Math.pow(1 - t, 3);
+    setBg(colourFrom.map((v, i) => v + (TO[i] - v) * e));
+    if (t >= 1) colouring = false;
+  }
+
+  // ── fade into the site ──
+  function leave(fast){
+    if (leaving) return;
+    leaving = true;
+    stopListening();
+    clearTimeout(waitTimer);
+    const ms = reduced ? 0 : (fast ? SKIP_FADE_MS : FADE_MS);
+    if (themeMeta) themeMeta.setAttribute("content", toHex(TO));
+    el.style.setProperty("--intro-fade", ms + "ms");
+    el.classList.add("is-leaving");
+    setTimeout(handOver, ms * HAND_OVER);
+    setTimeout(cleanUp, ms + 60);
+  }
+  function handOver(){ if (handedOver) return; handedOver = true; finish(); }
+  function cleanUp(){
+    cancelAnimationFrame(raf);
+    handOver();
+    if (video){ try { video.pause(); video.removeAttribute("src"); Array.from(video.querySelectorAll("source")).forEach(s => s.remove()); video.load(); } catch (e) {} }
+    el.remove();
+    root.classList.remove("intro-on");
+    window.removeEventListener("resize", sizeCanvas);
+  }
+
+  // ── the still logo: reduced motion, autoplay blocked, or a missing video ──
+  function showStill(){
+    if (leaving || phase === "still") return;
+    phase = "still";
+    playing = false;
+    clearTimeout(waitTimer);
+    if (video){ try { video.pause(); } catch (e) {} }
+    el.classList.add("is-still", "is-welcome");
+    draw();
+    if (reduced){ setTimeout(() => { startColour(); stepColour(performance.now()); leave(false); }, STILL_HOLD_MS); return; }
+    setTimeout(startColour, STILL_HOLD_MS);
+    setTimeout(() => leave(false), STILL_HOLD_MS + COLOUR_MS + 450);
+  }
+
+  // ── the animation ──
+  // time of the frame actually on screen where the browser can say
+  // (so the colour change lands exactly on the snap), else the clock
+  const frameCallbacks = !!(video && video.requestVideoFrameCallback);
+  let shownTime = -1;
+  function onVideoFrame(now, meta){
+    shownTime = meta && typeof meta.mediaTime === "number" ? meta.mediaTime : video.currentTime;
+    if (!leaving) video.requestVideoFrameCallback(onVideoFrame);
+  }
+  function loop(now){
+    raf = requestAnimationFrame(loop);
+    if (phase === "play"){
+      const t = frameCallbacks && shownTime >= 0 ? shownTime : video.currentTime;
+      if (t >= WELCOME_AT) el.classList.add("is-welcome");
+      if (t >= SNAP_AT) startColour();
+      if (t >= LEAVE_AT || video.ended) leave(false);
+    }
+    stepColour(now);
+    draw();
+  }
+  // plays as soon as the whole (small) video is in, or after KICK_MS anyway:
+  // some phones don't download a video at all until it's asked to play
+  function play(){
+    if (phase !== "wait" || leaving) return;
+    phase = "starting";
+    try { if (video.currentTime > 0) video.currentTime = 0; } catch (e) {}
+    let p;
+    video.muted = true;
+    try { p = video.play(); } catch (e) { showStill(); return; }
+    const ok = () => {
+      if (phase !== "starting") return;
+      phase = "play"; playing = true; clearTimeout(waitTimer);
+      if (frameCallbacks) video.requestVideoFrameCallback(onVideoFrame);
+    };
+    if (p && p.then) p.then(ok, showStill); else ok();
+  }
+  function begin(){
+    sizeCanvas();
+    setBg(FROM);
+    draw();
+    el.classList.add("is-ready");                  // canvas on, covering the video underneath it
+    if (themeMeta) themeMeta.setAttribute("content", toHex(FROM));
+    raf = requestAnimationFrame(loop);
+    setTimeout(() => leave(false), GIVE_UP_MS);
+    if (reduced || !ctx || !video || !video.canPlayType){ showStill(); return; }
+    waitTimer = setTimeout(showStill, MAX_WAIT_MS);
+    video.addEventListener("error", showStill);
+    const sources = video.querySelectorAll("source");
+    if (sources.length) sources[sources.length - 1].addEventListener("error", showStill);
+    video.addEventListener("loadedmetadata", sizeCanvas);
+    if (video.readyState >= 4) play();
+    else {
+      video.addEventListener("canplaythrough", play, { once: true });
+      setTimeout(play, KICK_MS);
+      if (video.networkState === 0) video.load();
+    }
+  }
+
+  // ── skipping: click, tap, scroll or any key ──
+  const SKIP_EVENTS = ["pointerdown", "keydown", "wheel", "touchmove"];
+  const MODIFIERS = ["Meta", "Control", "Alt", "Shift", "CapsLock", "Fn", "OS"];
+  function skip(e){ if (e.type === "keydown" && MODIFIERS.indexOf(e.key) > -1) return; leave(true); }
+  function stopListening(){ SKIP_EVENTS.forEach(t => window.removeEventListener(t, skip, true)); }
+  SKIP_EVENTS.forEach(t => window.addEventListener(t, skip, { capture: true, passive: true }));
+  window.addEventListener("resize", sizeCanvas);
+
+  // if the page opened in a background tab, wait until it's looked at
+  if (document.visibilityState === "hidden"){
+    const onVis = () => { if (document.visibilityState !== "hidden"){ document.removeEventListener("visibilitychange", onVis); begin(); } };
+    document.addEventListener("visibilitychange", onVis);
+  } else begin();
 })();
 
 ```
@@ -1449,13 +1817,20 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
     - "images"    the first image is shown large, the rest in rows
                   below it. Rows fill the full width and every image
                   keeps its own shape, so nothing is ever cropped.
-                  Export images at least 2400px wide so they stay
-                  sharp at these sizes on high-resolution screens.
+                  Export images (and spreads) at least 3000px wide
+                  so they stay sharp on high-resolution screens.
     - "processImages" (optional) sketches, drafts, files, shown
                   under the main imagery.
   "flipLabel" (optional) is the heading above the spreads, e.g.
   "Inside the book". "aspect" (optional) is the width ÷ height of
   one spread, so the frame matches your pages exactly.
+
+  THE INTRO
+  Before anything else, your logo animation plays on neon orange with
+  the line in "welcome" under it. When the pieces snap together the
+  orange turns into the page colour, then it fades into the site and
+  your name types itself out. The animation files live in images/intro/
+  (more in intro.js). Change the orange with --intro in style.css.
 
   THE OPENING STRIP
   Right after your name types itself out, every photo from every
@@ -1465,6 +1840,9 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
   it updates itself when you add or remove images above. To show a
   hand-picked set instead, add a "reel" list of {src, project}
   (project = that project's "id") next to "projects".
+  To stay sharp, an image is never shown bigger than its file allows
+  on the screen it's on, so small files show a little smaller. Spreads
+  exported 3000px wide or more always show at full size.
 
   Top-level "status" is a one-line availability note shown with
   your contact info. Edit it any time.
@@ -1475,6 +1853,7 @@ const PORTFOLIO_DATA = {
   name: "Morgan Chochinov",
   role: "Graphic & Editorial Designer",
   tagline: "Bringing experimental design into a world of corporate minimalism.",
+  welcome: "Welcome to my site",          // the line under your logo in the intro
   location: "Toronto, Canada",
   email: "morgan.chochinov@gmail.com",
   status: "Currently open to full-time and freelance editorial & graphic design roles.",
@@ -2031,6 +2410,10 @@ void main(){
 ## Images
 
 All images referenced below live in the `images/` folder alongside this README, so they'll render inline if you're viewing this on GitHub or any Markdown viewer that resolves relative paths.
+
+### Intro — finished logo
+
+![choch-logo-animated-loop-still.png](images/intro/choch-logo-animated-loop-still.png)
 
 ### Dozer Magazine
 

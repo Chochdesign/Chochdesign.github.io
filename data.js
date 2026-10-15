@@ -43,13 +43,20 @@
     - "images"    the first image is shown large, the rest in rows
                   below it. Rows fill the full width and every image
                   keeps its own shape, so nothing is ever cropped.
-                  Export images at least 2400px wide so they stay
-                  sharp at these sizes on high-resolution screens.
+                  Export images (and spreads) at least 3000px wide
+                  so they stay sharp on high-resolution screens.
     - "processImages" (optional) sketches, drafts, files, shown
                   under the main imagery.
   "flipLabel" (optional) is the heading above the spreads, e.g.
   "Inside the book". "aspect" (optional) is the width ÷ height of
   one spread, so the frame matches your pages exactly.
+
+  THE INTRO
+  Before anything else, your logo animation plays on neon orange with
+  the line in "welcome" under it. When the pieces snap together the
+  orange turns into the page colour, then it fades into the site and
+  your name types itself out. The animation files live in images/intro/
+  (more in intro.js). Change the orange with --intro in style.css.
 
   THE OPENING STRIP
   Right after your name types itself out, every photo from every
@@ -59,6 +66,9 @@
   it updates itself when you add or remove images above. To show a
   hand-picked set instead, add a "reel" list of {src, project}
   (project = that project's "id") next to "projects".
+  To stay sharp, an image is never shown bigger than its file allows
+  on the screen it's on, so small files show a little smaller. Spreads
+  exported 3000px wide or more always show at full size.
 
   Top-level "status" is a one-line availability note shown with
   your contact info. Edit it any time.
@@ -69,6 +79,7 @@ const PORTFOLIO_DATA = {
   name: "Morgan Chochinov",
   role: "Graphic & Editorial Designer",
   tagline: "Bringing experimental design into a world of corporate minimalism.",
+  welcome: "Welcome to my site",          // the line under your logo in the intro
   location: "Toronto, Canada",
   email: "morgan.chochinov@gmail.com",
   status: "Currently open to full-time and freelance editorial & graphic design roles.",

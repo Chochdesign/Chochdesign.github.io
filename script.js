@@ -93,10 +93,13 @@
 
   // ────────────────────────────────────────────────────────────
   // THE STRIP: every photo from every project, in order, each at its
-  // own shape and size (never cropped, never enlarged past its real
-  // size), sliding along to the next one with Easy Ease. Loops
-  // seamlessly. Drag or swipe to move it yourself; hover or Pause
-  // to stop it. Each image links to its project.
+  // own shape and size (never cropped), sliding along to the next one
+  // with Easy Ease. Loops seamlessly. Drag or swipe to move it
+  // yourself; hover or Pause to stop it. Each image links to its project.
+  // Every image is kept sharp: it's never shown bigger than its file
+  // has pixels for on the screen it's on (a high-resolution screen
+  // needs twice the pixels), so a small file shows a little smaller
+  // instead of blurry. Export bigger files and they grow back by themselves.
   // ────────────────────────────────────────────────────────────
   const strip = document.getElementById("strip");
   const track = document.getElementById("strip-track");
@@ -135,10 +138,13 @@
     track.appendChild(a);
     return a;
   });
+  // pixels the screen packs into one CSS pixel (2 on a Retina screen);
+  // past 2 the eye can't tell the difference, so it stops counting there
+  const sharpScale = () => Math.min(Math.max(window.devicePixelRatio || 1, 1), 2);
   function sizeItem(a){
     const nh = +a.dataset.nh || 0, nw = +a.dataset.nw || 0;
     let h = stripH * (+a.dataset.f || 1);
-    if (nh) h = Math.min(h, nh);                          // never enlarge past the real size
+    if (nh) h = Math.min(h, nh / sharpScale());           // never bigger than the file can show sharply
     a.style.setProperty("--h", Math.round(h) + "px");
     if (nw && nh) a.style.setProperty("--ar", (nw / nh).toFixed(4));
   }
@@ -650,7 +656,8 @@
   window.addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
 
   // ────────────────────────────────────────────────────────────
-  // START: size everything, type the name, then bring in the work
+  // START: size everything, wait for the intro (intro.js) to hand
+  // over, then type the name and bring in the work
   // ────────────────────────────────────────────────────────────
   function layoutAll(){ fitName(); sizeStrip(); fitRails(); }
   // Phones change their reported height as the browser bar hides while
@@ -669,11 +676,32 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(layoutAll);
   setTimeout(layoutAll, 300);
   onScroll();
-  typeName(() => {
-    layoutAll();                                          // final sizes, just before the work slides in
-    lastW = viewW();
-    hero.classList.add("is-in");
-    setTimeout(() => hero.classList.add("is-done"), 400);
-    setStripPaused(stripPaused);
-  });
+  // the screen can change between monitors while the page is open
+  if (window.matchMedia) {
+    let dprQuery = null;
+    const watchDpr = () => {
+      if (dprQuery) dprQuery.removeEventListener("change", onDpr);
+      dprQuery = window.matchMedia(`(resolution: ${window.devicePixelRatio || 1}dppx)`);
+      if (dprQuery.addEventListener) dprQuery.addEventListener("change", onDpr);
+    };
+    const onDpr = () => { stripItems.forEach(sizeItem); watchDpr(); };
+    watchDpr();
+  }
+  function startHero(){
+    typeName(() => {
+      layoutAll();                                        // final sizes, just before the work slides in
+      lastW = viewW();
+      hero.classList.add("is-in");
+      setTimeout(() => hero.classList.add("is-done"), 400);
+      setStripPaused(stripPaused);
+    });
+  }
+  if (window.Intro && window.Intro.done) window.Intro.done.then(startHero);
+  else {
+    // no intro.js: take the intro screen away and start straight away
+    const introEl = document.getElementById("intro");
+    if (introEl) introEl.remove();
+    document.documentElement.classList.remove("intro-on");
+    startHero();
+  }
 })();

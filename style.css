@@ -7,9 +7,11 @@
   --grey: #6E6D67;
   --line: #C7C5BB;
   --viewer-bg: #121212;
+  --intro: #FF5F1F;              /* the neon orange behind your logo at the start (any #hex colour) */
 
-  /* one family for everything you read, one mono for small info */
-  --f-display: "Bricolage Grotesque", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  /* a plain, heavy sans serif for your name, numbers and project names,
+     one family for everything you read, one mono for small info */
+  --f-display: "Geist", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --f-text: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
   --f-mono: "Geist Mono", "IBM Plex Mono", ui-monospace, Menlo, monospace;
 
@@ -66,14 +68,15 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
 /* ────────────────────────────────────────────────────────────
    TYPE ROLES: every piece of text on the site is one of these
    ──────────────────────────────────────────────────────────── */
-/* 1. display: your name, section numbers, project names */
-.hero-name, .rail-num, .rail-name, .hero-index-num, .switcher{
+/* 1. display: your name, section numbers, project names.
+      A plain sans serif (Geist) at its heaviest weight. */
+.hero-name, .rail-num, .rail-name, .hero-index-num{
   font-family: var(--f-display);
-  font-weight: 800;
-  font-stretch: 75%;
+  font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.03em;
 }
+.hero-name{ letter-spacing: -0.04em; }
 /* 2. lede: tagline, summaries, about */
 .hero-tagline, .rail-summary, .section-lede, .book-how{
   font-family: var(--f-text);
@@ -87,8 +90,8 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
   font-size: 1rem;
   line-height: 1.55;
 }
-/* 4. label: small headings, nav, buttons */
-.rail-label, .book-label, .hero-nav a, .ctl-btn, .wip-badge, .backtotop a, .skip-link{
+/* 4. label: small headings, nav, buttons, the intro's welcome line */
+.rail-label, .book-label, .hero-nav a, .ctl-btn, .wip-badge, .backtotop a, .skip-link, .intro-welcome{
   font-family: var(--f-mono);
   font-weight: 500;
   font-size: 0.72rem;
@@ -104,6 +107,44 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
   font-size: 0.78rem;
   line-height: 1.45;
   letter-spacing: 0;
+}
+
+/* ────────────────────────────────────────────────────────────
+   INTRO: your logo animation on neon orange. When the pieces snap
+   together the orange turns into the page colour, then the whole
+   screen fades into the site. Only shown when JavaScript runs.
+   ──────────────────────────────────────────────────────────── */
+.intro{ display: none; }
+.intro-on .intro{
+  position: fixed; inset: 0; z-index: 1000;
+  display: grid; place-items: center;
+  padding: var(--gutter);
+  background: var(--intro);
+  color: var(--ink);
+  /* failsafe: if intro.js never runs, step out of the way */
+  animation: intro-failsafe 0.01s linear 9s forwards;
+}
+@keyframes intro-failsafe{ to{ visibility: hidden; } }
+.intro.is-leaving{ opacity: 0; pointer-events: none; transition: opacity var(--intro-fade, 0.7s) var(--easy); }
+.intro-stage{ position: relative; width: min(100%, 32.875rem); }
+.intro-logo{ position: relative; aspect-ratio: 1052 / 838; }   /* the animation's frame size */
+.intro-video, .intro-canvas, .intro-still{ position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+/* the video plays underneath; the canvas on top shows it in your exact black */
+.intro-video, .intro-canvas, .intro-still{ visibility: hidden; }
+.intro.is-ready .intro-video, .intro.is-ready .intro-canvas{ visibility: visible; }
+.intro.is-still .intro-still{ visibility: visible; }
+.intro.is-still .intro-video, .intro.is-still .intro-canvas{ visibility: hidden; }
+.intro-welcome{
+  position: absolute; left: 0; right: 0; top: 71%;
+  font-size: clamp(0.82rem, 1.35vw, 1.02rem);
+  font-weight: 700;
+  text-align: center;
+  clip-path: inset(0 0 100% 0);
+  transform: translateY(0.6rem);
+}
+.intro.is-welcome .intro-welcome{
+  clip-path: inset(0 0 0 0); transform: none;
+  transition: clip-path 0.45s var(--easy), transform 0.45s var(--easy);
 }
 
 /* ────────────────────────────────────────────────────────────
@@ -323,20 +364,23 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
 }
 
 /* ---- sidebar: identical for every section ---- */
-.rail-num{ display: block; font-size: clamp(3.75rem, 7vw, 7rem); line-height: 0.78; letter-spacing: -0.02em; }
-.rail-name{ margin-top: 0.8rem; font-size: clamp(1.9rem, 2.7vw, 2.8rem); line-height: 0.92; font-stretch: 78%; }
+.rail-num{ display: block; font-size: clamp(3.75rem, 7vw, 7rem); line-height: 0.78; letter-spacing: -0.045em; }
+.rail-name{ margin-top: 0.8rem; font-size: clamp(1.9rem, 2.7vw, 2.8rem); line-height: 0.92; }
 .rail-facts{ list-style: none; padding: 0; margin-top: 1rem; display: grid; gap: 0.2rem; color: var(--grey); }
 .rail-body{ max-width: 60ch; }
 .rail-summary{ font-size: clamp(1.1rem, 1.35vw, 1.25rem); line-height: 1.32; }
 .rail-block{ margin-top: 1.4rem; }
 .rail-label{ color: var(--grey); margin-bottom: 0.4rem; }
 .rail-detail{ margin-top: 1.75rem; padding-top: 1rem; border-top: 1px solid var(--line); }
-/* names that switch by themselves (Dozer's "As seen with") */
+/* names that switch by themselves (Dozer's "As seen with"):
+   condensed capitals in the body font */
 .switcher{
   position: relative;
   height: 2.05em;
   font-size: clamp(1.6rem, 2vw, 2rem);
   line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
   font-stretch: 78%;
   overflow: hidden;
 }
@@ -465,11 +509,15 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
    ──────────────────────────────────────────────────────────── */
 .section--text .section-main{ padding-top: 0; }
 @media (min-width: 900px){ .section--text .section-main{ padding-top: var(--gutter); } }
-.section-lede{ max-width: 30ch; font-size: clamp(1.35rem, 2.4vw, 2.1rem); line-height: 1.25; }
+/* the About text and your email: the same heavy sans serif as your name */
+.section-lede{
+  max-width: 30ch; font-size: clamp(1.35rem, 2.4vw, 2.1rem); line-height: 1.25;
+  font-family: var(--f-display); font-weight: 900; letter-spacing: -0.02em;
+}
 .contact-email{
   display: inline-block; align-self: flex-start; max-width: 100%;
-  font-family: var(--f-text); font-weight: 700;
-  font-size: clamp(1.1rem, 4.4vw, 3rem); letter-spacing: -0.015em;
+  font-family: var(--f-display); font-weight: 900;
+  font-size: clamp(1.1rem, 4.2vw, 3rem); letter-spacing: -0.03em;
   text-decoration: none;
   background: linear-gradient(currentColor, currentColor) left bottom / 100% 3px no-repeat;
   padding-bottom: 0.1em;

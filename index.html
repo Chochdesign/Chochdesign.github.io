@@ -20,10 +20,30 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Geist:wght@900&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<!-- the intro covers the page from the very first frame (intro.js takes it
+     from there). Without JavaScript there's no intro and the site shows as normal. -->
+<script>document.documentElement.classList.add("js", "intro-on");</script>
 </head>
 <body>
+
+<!-- INTRO: your logo animation on neon orange with a welcome line. When the
+     pieces snap together the orange turns into the page colour, then it fades
+     into the site and your name types itself out. See intro.js. -->
+<div class="intro" id="intro" aria-hidden="true">
+  <div class="intro-stage">
+    <div class="intro-logo">
+      <video class="intro-video" muted playsinline preload="auto" disablepictureinpicture disableremoteplayback tabindex="-1">
+        <source src="images/intro/choch-logo-animated-loop.mp4" type="video/mp4">
+        <source src="images/intro/choch-logo-animated-loop.webm" type="video/webm">
+      </video>
+      <canvas class="intro-canvas"></canvas>
+      <img class="intro-still" src="images/intro/choch-logo-animated-loop-still.png" alt="" decoding="async">
+    </div>
+    <p class="intro-welcome">Welcome to my site</p>
+  </div>
+</div>
 
 <a class="skip-link" href="#work">Skip to the work</a>
 
@@ -115,6 +135,7 @@
 </footer>
 
 <script src="data.js"></script>
+<script src="intro.js"></script>
 <script src="arsvita-3d.js"></script>
 <script src="script.js"></script>
 </body>
