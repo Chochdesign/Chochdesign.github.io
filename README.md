@@ -40,7 +40,7 @@ Open `index.html` in a browser — that's it, it runs locally with no server nee
 ## Design system quick reference
 
 - **Palette:** paper `#F0EFE9`, ink `#121212`, grey `#6E6D67`, line `#C7C5BB`, plus the intro's neon orange `#FF5F1F` — all defined as CSS custom properties at the top of `style.css`.
-- **Type:** Geist Black (900), a plain sans serif at its heaviest weight, for your name, the section numbers, the project names and the numbers in the opening index. Bricolage Grotesque for everything you read, from the summaries down to body text (plus the condensed capitals of Dozer's "As seen with" names). Geist Mono for small labels, info lines, buttons and the intro's welcome line. Every piece of text uses one of six roles, defined once at the top of `style.css`: display, lede, body, label, meta, button.
+- **Type:** Geist Black (900), a plain sans serif at its heaviest weight, for your name, the section numbers, the project names, the numbers in the opening index, the About text and your email. Bricolage Grotesque for everything else you read, from the summaries down to body text (plus the condensed capitals of Dozer's "As seen with" names). Geist Mono for small labels, info lines, buttons and the intro's welcome line. Every piece of text uses one of six roles, defined once at the top of `style.css`: display, lede, body, label, meta, button.
 - **Chapter numbering:** projects are numbered 01/02/03 in the order they appear in the `projects` array in `data.js`.
 - **One grid everywhere:** every project, About and Contact use the same two columns: a sidebar (a quarter of the width) for the text and the work (three quarters) as big as it can be. The opening screen's tagline and index line up with the same columns. On phones everything stacks and the imagery runs edge to edge, and each project runs number and name, then its main visual, then its text, then the rest of the work.
 - **One sidebar format:** number, name, small info (year, role, specs), a one- or two-sentence summary, then Challenge / Approach / Outcome, then an optional detail block. On wide screens the sidebar stays beside the work while you scroll; if it's taller than the window, it scrolls until its last line is showing and stays there.
@@ -55,6 +55,7 @@ Before anything else, your CHOCH logo animation plays full screen on neon orange
 - **The logo is the site's exact black.** The animation is drawn onto a canvas that blends it with the page colour, so the logo is exactly `#121212` (the `--ink` colour) on the orange and on the page colour, with clean edges and motion blur. It works the same hosted or opened straight from disk.
 - **Files** (in `images/intro/`): made from your `choch-logo-animated-loop.mp4`. `choch-logo-animated-loop.mp4` and `.webm` are the part of it the intro uses (fly in, snap, hold; the loop's reverse is left off) as a pure black logo on pure white (the canvas turns the black into the ink colour), framed so the finished logo sits dead centre. `choch-logo-animated-loop-still.png` is the finished logo, shown instead of the animation when a device asks for reduced motion or a video can't play (some phones in Low Power Mode). To swap in a new animation, export it as a black logo on a white background and send it over, or replace these files keeping the names (then add `?v=2` after the names in `index.html` so browsers fetch the new ones).
 - **Change things:** the orange is `--intro` at the top of `style.css` (any #hex colour). The welcome line is `welcome` in `data.js`. Timings (when the colour changes, when it fades) are at the top of `intro.js`.
+- **Safari's bars on iPhone:** Safari (iOS 26) colours its top and bottom bars from a fixed element at the screen's edge, or else from the page background, and only keeps the page background up to date. So while the intro is up its colour sits on the page background too, and the bars go from orange to the page colour along with it.
 - Without JavaScript there's no intro and the site shows as normal. If `intro.js` is missing, the site starts straight away.
 
 ## The opening screen
@@ -128,7 +129,7 @@ The opening strip keeps every image sharp on its own: an image is never shown bi
 <link rel="stylesheet" href="style.css">
 <!-- the intro covers the page from the very first frame (intro.js takes it
      from there). Without JavaScript there's no intro and the site shows as normal. -->
-<script>document.documentElement.classList.add("js", "intro-on");</script>
+<script>document.documentElement.classList.add("js", "intro-on", "intro-tint");</script>
 </head>
 <body>
 
@@ -136,6 +137,7 @@ The opening strip keeps every image sharp on its own: an image is never shown bi
      pieces snap together the orange turns into the page colour, then it fades
      into the site and your name types itself out. See intro.js. -->
 <div class="intro" id="intro" aria-hidden="true">
+  <div class="intro-bg"></div>
   <div class="intro-stage">
     <div class="intro-logo">
       <video class="intro-video" muted playsinline preload="auto" disablepictureinpicture disableremoteplayback tabindex="-1">
@@ -371,12 +373,23 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
   position: fixed; inset: 0; z-index: 1000;
   display: grid; place-items: center;
   padding: var(--gutter);
-  background: var(--intro);
+  background: transparent;         /* the colour is on .intro-bg, see below */
   color: var(--ink);
   /* failsafe: if intro.js never runs, step out of the way */
   animation: intro-failsafe 0.01s linear 9s forwards;
 }
 @keyframes intro-failsafe{ to{ visibility: hidden; } }
+.intro-bg{ position: absolute; inset: 0; background: var(--intro); }
+.intro-stage{ z-index: 1; }
+/* Safari on iPhone (iOS 26) colours its top and bottom bars from a fixed
+   element at the screen's edge, or else from the page background, and
+   only keeps the page background up to date. So while the intro is up,
+   its colour lives on the page background (intro.js keeps the two in
+   step), nothing fixed at the edges has a colour of its own, and the
+   bars follow the orange into the page colour. */
+.intro-on.intro-tint body{ background-color: var(--intro); }
+.intro-on.intro-tint .runhead{ background-color: transparent; }
+.intro-on.intro-tint .backtotop{ display: none; }
 .intro.is-leaving{ opacity: 0; pointer-events: none; transition: opacity var(--intro-fade, 0.7s) var(--easy); }
 .intro-stage{ position: relative; width: min(100%, 32.875rem); }
 .intro-logo{ position: relative; aspect-ratio: 1052 / 838; }   /* the animation's frame size */
@@ -761,11 +774,15 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
    ──────────────────────────────────────────────────────────── */
 .section--text .section-main{ padding-top: 0; }
 @media (min-width: 900px){ .section--text .section-main{ padding-top: var(--gutter); } }
-.section-lede{ max-width: 30ch; font-size: clamp(1.35rem, 2.4vw, 2.1rem); line-height: 1.25; }
+/* the About text and your email: the same heavy sans serif as your name */
+.section-lede{
+  max-width: 30ch; font-size: clamp(1.35rem, 2.4vw, 2.1rem); line-height: 1.25;
+  font-family: var(--f-display); font-weight: 900; letter-spacing: -0.02em;
+}
 .contact-email{
   display: inline-block; align-self: flex-start; max-width: 100%;
-  font-family: var(--f-text); font-weight: 700;
-  font-size: clamp(1.1rem, 4.4vw, 3rem); letter-spacing: -0.015em;
+  font-family: var(--f-display); font-weight: 900;
+  font-size: clamp(1.1rem, 4.2vw, 3rem); letter-spacing: -0.03em;
   text-decoration: none;
   background: linear-gradient(currentColor, currentColor) left bottom / 100% 3px no-repeat;
   padding-bottom: 0.1em;
@@ -1497,12 +1514,14 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
       setStripPaused(stripPaused);
     });
   }
+  // whatever happens, the page colour (and Safari's bars) are back to normal after 10 seconds
+  setTimeout(() => { document.documentElement.classList.remove("intro-tint"); document.body.style.backgroundColor = ""; }, 10000);
   if (window.Intro && window.Intro.done) window.Intro.done.then(startHero);
   else {
     // no intro.js: take the intro screen away and start straight away
     const introEl = document.getElementById("intro");
     if (introEl) introEl.remove();
-    document.documentElement.classList.remove("intro-on");
+    document.documentElement.classList.remove("intro-on", "intro-tint");
     startHero();
   }
 })();
@@ -1550,7 +1569,7 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
 
   const root = document.documentElement;
   const el = document.getElementById("intro");
-  if (!el || !root.classList.contains("intro-on")) { if (el) el.remove(); root.classList.remove("intro-on"); finish(); return; }
+  if (!el || !root.classList.contains("intro-on")) { if (el) el.remove(); root.classList.remove("intro-on", "intro-tint"); finish(); return; }
   el.style.animation = "none";                     // intro.js is running: switch off the CSS failsafe
 
   // ── timing, in seconds of the logo animation ──
@@ -1572,6 +1591,7 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
   const welcome = el.querySelector(".intro-welcome");
   if (welcome && data.welcome) welcome.textContent = data.welcome;
 
+  const bgLayer = el.querySelector(".intro-bg") || el;
   const video = el.querySelector(".intro-video");
   const canvas = el.querySelector(".intro-canvas");
   const box = el.querySelector(".intro-logo");
@@ -1637,9 +1657,17 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
     ctx.drawImage(off, 0, 0);
     ctx.globalCompositeOperation = "source-over";
   }
+  // the intro's colour, and the page background behind it: Safari on
+  // iPhone colours its top and bottom bars from the page background
   function setBg(c){
     bg = c.map(Math.round);
-    el.style.backgroundColor = rgb(bg);
+    bgLayer.style.backgroundColor = rgb(bg);
+    if (root.classList.contains("intro-tint")) document.body.style.backgroundColor = rgb(bg);
+  }
+  // the bars and the page go back to the page colour
+  function untint(){
+    root.classList.remove("intro-tint");
+    document.body.style.backgroundColor = "";
   }
 
   // orange -> page colour, eased out, in step with the canvas
@@ -1665,6 +1693,7 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
     clearTimeout(waitTimer);
     const ms = reduced ? 0 : (fast ? SKIP_FADE_MS : FADE_MS);
     if (themeMeta) themeMeta.setAttribute("content", toHex(TO));
+    untint();
     el.style.setProperty("--intro-fade", ms + "ms");
     el.classList.add("is-leaving");
     setTimeout(handOver, ms * HAND_OVER);
@@ -1676,6 +1705,7 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
     handOver();
     if (video){ try { video.pause(); video.removeAttribute("src"); Array.from(video.querySelectorAll("source")).forEach(s => s.remove()); video.load(); } catch (e) {} }
     el.remove();
+    untint();
     root.classList.remove("intro-on");
     window.removeEventListener("resize", sizeCanvas);
   }

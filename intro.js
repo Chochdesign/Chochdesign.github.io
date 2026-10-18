@@ -36,7 +36,7 @@
 
   const root = document.documentElement;
   const el = document.getElementById("intro");
-  if (!el || !root.classList.contains("intro-on")) { if (el) el.remove(); root.classList.remove("intro-on"); finish(); return; }
+  if (!el || !root.classList.contains("intro-on")) { if (el) el.remove(); root.classList.remove("intro-on", "intro-tint"); finish(); return; }
   el.style.animation = "none";                     // intro.js is running: switch off the CSS failsafe
 
   // ── timing, in seconds of the logo animation ──
@@ -58,6 +58,7 @@
   const welcome = el.querySelector(".intro-welcome");
   if (welcome && data.welcome) welcome.textContent = data.welcome;
 
+  const bgLayer = el.querySelector(".intro-bg") || el;
   const video = el.querySelector(".intro-video");
   const canvas = el.querySelector(".intro-canvas");
   const box = el.querySelector(".intro-logo");
@@ -123,9 +124,17 @@
     ctx.drawImage(off, 0, 0);
     ctx.globalCompositeOperation = "source-over";
   }
+  // the intro's colour, and the page background behind it: Safari on
+  // iPhone colours its top and bottom bars from the page background
   function setBg(c){
     bg = c.map(Math.round);
-    el.style.backgroundColor = rgb(bg);
+    bgLayer.style.backgroundColor = rgb(bg);
+    if (root.classList.contains("intro-tint")) document.body.style.backgroundColor = rgb(bg);
+  }
+  // the bars and the page go back to the page colour
+  function untint(){
+    root.classList.remove("intro-tint");
+    document.body.style.backgroundColor = "";
   }
 
   // orange -> page colour, eased out, in step with the canvas
@@ -151,6 +160,7 @@
     clearTimeout(waitTimer);
     const ms = reduced ? 0 : (fast ? SKIP_FADE_MS : FADE_MS);
     if (themeMeta) themeMeta.setAttribute("content", toHex(TO));
+    untint();
     el.style.setProperty("--intro-fade", ms + "ms");
     el.classList.add("is-leaving");
     setTimeout(handOver, ms * HAND_OVER);
@@ -162,6 +172,7 @@
     handOver();
     if (video){ try { video.pause(); video.removeAttribute("src"); Array.from(video.querySelectorAll("source")).forEach(s => s.remove()); video.load(); } catch (e) {} }
     el.remove();
+    untint();
     root.classList.remove("intro-on");
     window.removeEventListener("resize", sizeCanvas);
   }

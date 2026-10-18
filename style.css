@@ -119,12 +119,23 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
   position: fixed; inset: 0; z-index: 1000;
   display: grid; place-items: center;
   padding: var(--gutter);
-  background: var(--intro);
+  background: transparent;         /* the colour is on .intro-bg, see below */
   color: var(--ink);
   /* failsafe: if intro.js never runs, step out of the way */
   animation: intro-failsafe 0.01s linear 9s forwards;
 }
 @keyframes intro-failsafe{ to{ visibility: hidden; } }
+.intro-bg{ position: absolute; inset: 0; background: var(--intro); }
+.intro-stage{ z-index: 1; }
+/* Safari on iPhone (iOS 26) colours its top and bottom bars from a fixed
+   element at the screen's edge, or else from the page background, and
+   only keeps the page background up to date. So while the intro is up,
+   its colour lives on the page background (intro.js keeps the two in
+   step), nothing fixed at the edges has a colour of its own, and the
+   bars follow the orange into the page colour. */
+.intro-on.intro-tint body{ background-color: var(--intro); }
+.intro-on.intro-tint .runhead{ background-color: transparent; }
+.intro-on.intro-tint .backtotop{ display: none; }
 .intro.is-leaving{ opacity: 0; pointer-events: none; transition: opacity var(--intro-fade, 0.7s) var(--easy); }
 .intro-stage{ position: relative; width: min(100%, 32.875rem); }
 .intro-logo{ position: relative; aspect-ratio: 1052 / 838; }   /* the animation's frame size */

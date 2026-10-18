@@ -24,7 +24,7 @@
 <link rel="stylesheet" href="style.css">
 <!-- the intro covers the page from the very first frame (intro.js takes it
      from there). Without JavaScript there's no intro and the site shows as normal. -->
-<script>document.documentElement.classList.add("js", "intro-on");</script>
+<script>document.documentElement.classList.add("js", "intro-on", "intro-tint");</script>
 </head>
 <body>
 
@@ -32,6 +32,7 @@
      pieces snap together the orange turns into the page colour, then it fades
      into the site and your name types itself out. See intro.js. -->
 <div class="intro" id="intro" aria-hidden="true">
+  <div class="intro-bg"></div>
   <div class="intro-stage">
     <div class="intro-logo">
       <video class="intro-video" muted playsinline preload="auto" disablepictureinpicture disableremoteplayback tabindex="-1">

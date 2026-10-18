@@ -696,12 +696,14 @@
       setStripPaused(stripPaused);
     });
   }
+  // whatever happens, the page colour (and Safari's bars) are back to normal after 10 seconds
+  setTimeout(() => { document.documentElement.classList.remove("intro-tint"); document.body.style.backgroundColor = ""; }, 10000);
   if (window.Intro && window.Intro.done) window.Intro.done.then(startHero);
   else {
     // no intro.js: take the intro screen away and start straight away
     const introEl = document.getElementById("intro");
     if (introEl) introEl.remove();
-    document.documentElement.classList.remove("intro-on");
+    document.documentElement.classList.remove("intro-on", "intro-tint");
     startHero();
   }
 })();
