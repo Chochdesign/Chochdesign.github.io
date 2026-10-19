@@ -122,7 +122,7 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
   background: transparent;         /* the colour is on .intro-bg, see below */
   color: var(--ink);
   /* failsafe: if intro.js never runs, step out of the way */
-  animation: intro-failsafe 0.01s linear 9s forwards;
+  animation: intro-failsafe 0.01s step-start 9s forwards;
 }
 @keyframes intro-failsafe{ to{ visibility: hidden; } }
 .intro-bg{ position: absolute; inset: 0; background: var(--intro); }
@@ -133,7 +133,12 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
    its colour lives on the page background (intro.js keeps the two in
    step), nothing fixed at the edges has a colour of its own, and the
    bars follow the orange into the page colour. */
-.intro-on.intro-tint body{ background-color: var(--intro); }
+.intro-on.intro-tint body{
+  background-color: var(--intro);
+  /* failsafe: if intro.js never runs, the page goes back to its own colour */
+  animation: intro-untint 0.01s step-start 9s forwards;
+}
+@keyframes intro-untint{ to{ background-color: var(--paper); } }
 .intro-on.intro-tint .runhead{ background-color: transparent; }
 .intro-on.intro-tint .backtotop{ display: none; }
 .intro.is-leaving{ opacity: 0; pointer-events: none; transition: opacity var(--intro-fade, 0.7s) var(--easy); }

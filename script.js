@@ -696,14 +696,26 @@
       setStripPaused(stripPaused);
     });
   }
-  // whatever happens, the page colour (and Safari's bars) are back to normal after 10 seconds
-  setTimeout(() => { document.documentElement.classList.remove("intro-tint"); document.body.style.backgroundColor = ""; }, 10000);
-  if (window.Intro && window.Intro.done) window.Intro.done.then(startHero);
-  else {
-    // no intro.js: take the intro screen away and start straight away
+  // the site starts once the intro hands over. If there's no intro.js, or it
+  // ever goes wrong, the intro screen is taken away and the site starts anyway,
+  // at most 10 seconds after the page is first looked at
+  let heroStarted = false;
+  const go = () => { if (heroStarted) return; heroStarted = true; startHero(); };
+  const rescue = () => {
     const introEl = document.getElementById("intro");
     if (introEl) introEl.remove();
     document.documentElement.classList.remove("intro-on", "intro-tint");
-    startHero();
-  }
+    document.body.style.backgroundColor = "";
+    document.body.style.animation = "";
+    go();
+  };
+  if (window.Intro && window.Intro.done){
+    window.Intro.done.then(go);
+    const arm = () => setTimeout(rescue, 10000);
+    if (document.visibilityState !== "hidden") arm();
+    else {
+      const onVis = () => { if (document.visibilityState !== "hidden"){ document.removeEventListener("visibilitychange", onVis); arm(); } };
+      document.addEventListener("visibilitychange", onVis);
+    }
+  } else rescue();
 })();

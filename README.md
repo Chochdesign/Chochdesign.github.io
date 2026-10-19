@@ -6,7 +6,7 @@ No build step, no framework, no dependencies beyond three Google Fonts. Everythi
 
 ## How to use this
 
-Open `index.html` in a browser — that's it, it runs locally with no server needed. To host it, upload the six `.js`/`.html`/`.css` files (plus `CNAME` for GitHub Pages) and the `images/` and `models/` folders to any static host (Netlify, GitHub Pages, Vercel, etc.) keeping the folder structure intact.
+Open `index.html` in a browser — that's it, it runs locally with no server needed. To host it, upload the six `.js`/`.html`/`.css` files (plus `CNAME` for GitHub Pages) and the `images/` and `models/` folders to any static host (Netlify, GitHub Pages, Vercel, etc.) keeping the folder structure intact. After you change `style.css` or one of the `.js` files, change the number after `?v=` where `index.html` links to them (it's just the date), so visitors' browsers load your new files instead of mixing them with old copies they saved earlier.
 
 **To update content, only edit `data.js`.** It's fully commented — name, bio, contact info, and every project's copy, images, and layout options live there. You should never need to touch `index.html`, `style.css`, or `script.js` for a content change.
 
@@ -56,6 +56,7 @@ Before anything else, your CHOCH logo animation plays full screen on neon orange
 - **Files** (in `images/intro/`): made from your `choch-logo-animated-loop.mp4`. `choch-logo-animated-loop.mp4` and `.webm` are the part of it the intro uses (fly in, snap, hold; the loop's reverse is left off) as a pure black logo on pure white (the canvas turns the black into the ink colour), framed so the finished logo sits dead centre. `choch-logo-animated-loop-still.png` is the finished logo, shown instead of the animation when a device asks for reduced motion or a video can't play (some phones in Low Power Mode). To swap in a new animation, export it as a black logo on a white background and send it over, or replace these files keeping the names (then add `?v=2` after the names in `index.html` so browsers fetch the new ones).
 - **Change things:** the orange is `--intro` at the top of `style.css` (any #hex colour). The welcome line is `welcome` in `data.js`. Timings (when the colour changes, when it fades) are at the top of `intro.js`.
 - **Safari's bars on iPhone:** Safari (iOS 26) colours its top and bottom bars from a fixed element at the screen's edge, or else from the page background, and only keeps the page background up to date. So while the intro is up its colour sits on the page background too, and the bars go from orange to the page colour along with it.
+- **It can't get stuck.** If the video is slow to arrive, freezes or can't play at all (iPhones in Low Power Mode don't play website videos, and the same goes for anyone who has Reduce Motion turned on), the finished logo shows on the orange instead, then the colour changes and the site starts as usual. If anything else goes wrong, the intro steps aside and the site starts, at most 10 seconds after the page is opened.
 - Without JavaScript there's no intro and the site shows as normal. If `intro.js` is missing, the site starts straight away.
 
 ## The opening screen
@@ -126,7 +127,7 @@ The opening strip keeps every image sharp on its own: an image is never shown bi
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Geist:wght@900&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=20261018">
 <!-- the intro covers the page from the very first frame (intro.js takes it
      from there). Without JavaScript there's no intro and the site shows as normal. -->
 <script>document.documentElement.classList.add("js", "intro-on", "intro-tint");</script>
@@ -240,10 +241,12 @@ The opening strip keeps every image sharp on its own: an image is never shown bi
   <a href="#top">Back to top ↑</a>
 </footer>
 
-<script src="data.js"></script>
-<script src="intro.js"></script>
-<script src="arsvita-3d.js"></script>
-<script src="script.js"></script>
+<!-- "?v=..." makes browsers fetch these files fresh after an update.
+     When you change style.css or a .js file, change the number here (and on style.css above). -->
+<script src="data.js?v=20261018"></script>
+<script src="intro.js?v=20261018"></script>
+<script src="arsvita-3d.js?v=20261018"></script>
+<script src="script.js?v=20261018"></script>
 </body>
 </html>
 
@@ -376,7 +379,7 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
   background: transparent;         /* the colour is on .intro-bg, see below */
   color: var(--ink);
   /* failsafe: if intro.js never runs, step out of the way */
-  animation: intro-failsafe 0.01s linear 9s forwards;
+  animation: intro-failsafe 0.01s step-start 9s forwards;
 }
 @keyframes intro-failsafe{ to{ visibility: hidden; } }
 .intro-bg{ position: absolute; inset: 0; background: var(--intro); }
@@ -387,7 +390,12 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
    its colour lives on the page background (intro.js keeps the two in
    step), nothing fixed at the edges has a colour of its own, and the
    bars follow the orange into the page colour. */
-.intro-on.intro-tint body{ background-color: var(--intro); }
+.intro-on.intro-tint body{
+  background-color: var(--intro);
+  /* failsafe: if intro.js never runs, the page goes back to its own colour */
+  animation: intro-untint 0.01s step-start 9s forwards;
+}
+@keyframes intro-untint{ to{ background-color: var(--paper); } }
 .intro-on.intro-tint .runhead{ background-color: transparent; }
 .intro-on.intro-tint .backtotop{ display: none; }
 .intro.is-leaving{ opacity: 0; pointer-events: none; transition: opacity var(--intro-fade, 0.7s) var(--easy); }
@@ -1514,16 +1522,28 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
       setStripPaused(stripPaused);
     });
   }
-  // whatever happens, the page colour (and Safari's bars) are back to normal after 10 seconds
-  setTimeout(() => { document.documentElement.classList.remove("intro-tint"); document.body.style.backgroundColor = ""; }, 10000);
-  if (window.Intro && window.Intro.done) window.Intro.done.then(startHero);
-  else {
-    // no intro.js: take the intro screen away and start straight away
+  // the site starts once the intro hands over. If there's no intro.js, or it
+  // ever goes wrong, the intro screen is taken away and the site starts anyway,
+  // at most 10 seconds after the page is first looked at
+  let heroStarted = false;
+  const go = () => { if (heroStarted) return; heroStarted = true; startHero(); };
+  const rescue = () => {
     const introEl = document.getElementById("intro");
     if (introEl) introEl.remove();
     document.documentElement.classList.remove("intro-on", "intro-tint");
-    startHero();
-  }
+    document.body.style.backgroundColor = "";
+    document.body.style.animation = "";
+    go();
+  };
+  if (window.Intro && window.Intro.done){
+    window.Intro.done.then(go);
+    const arm = () => setTimeout(rescue, 10000);
+    if (document.visibilityState !== "hidden") arm();
+    else {
+      const onVis = () => { if (document.visibilityState !== "hidden"){ document.removeEventListener("visibilitychange", onVis); arm(); } };
+      document.addEventListener("visibilitychange", onVis);
+    }
+  } else rescue();
 })();
 
 ```
@@ -1556,6 +1576,10 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
   If you swap in a new version under the same file name, add "?v=2"
   after its name in index.html so browsers fetch the new one.
 
+  It can't get stuck: if the video is slow, freezes or can't play, the
+  still logo shows instead; if anything at all goes wrong, the intro
+  steps aside and the site starts.
+
   Used by script.js:  Intro.done.then(() => ...)  runs once the intro
   has handed over to the site (straight away if there's no intro).
   ────────────────────────────────────────────────────────────
@@ -1569,232 +1593,270 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
 
   const root = document.documentElement;
   const el = document.getElementById("intro");
-  if (!el || !root.classList.contains("intro-on")) { if (el) el.remove(); root.classList.remove("intro-on", "intro-tint"); finish(); return; }
-  el.style.animation = "none";                     // intro.js is running: switch off the CSS failsafe
 
-  // ── timing, in seconds of the logo animation ──
-  const WELCOME_AT = 0.7;        // "Welcome to my site" wipes in once the pieces have flown past it
-  const SNAP_AT = 28.5 / 30;     // frame 29, where the pieces lock together: orange turns to page colour
-  const LEAVE_AT = 2.0;          // a beat after the letters fill in: fade into the site
-  // ── in milliseconds ──
-  const COLOUR_MS = 240;         // orange to page colour
-  const FADE_MS = 700;           // the intro fading away
-  const SKIP_FADE_MS = 350;      // fading away after a click, scroll or key
-  const HAND_OVER = 0.45;        // how far into the fade the site starts its own intro
-  const KICK_MS = 400;           // start playing by now even if the video is still downloading
-  const MAX_WAIT_MS = 2500;      // if the video hasn't started by then, show the still logo instead
-  const STILL_HOLD_MS = 1100;    // how long the still logo shows before the colour changes
-  const GIVE_UP_MS = 9000;       // whatever happens, the site is never kept waiting longer than this
+  // if anything goes wrong, the intro steps aside and the site starts
+  function bail(){
+    try { if (el) el.remove(); } catch (e) {}
+    root.classList.remove("intro-on", "intro-tint");
+    if (document.body){ document.body.style.backgroundColor = ""; document.body.style.animation = ""; }
+    finish();
+  }
+  if (!el || !root.classList.contains("intro-on")) { bail(); return; }
+  try { run(); } catch (e) { bail(); }
 
-  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const data = window.PORTFOLIO_DATA || {};
-  const welcome = el.querySelector(".intro-welcome");
-  if (welcome && data.welcome) welcome.textContent = data.welcome;
+  function run(){
+    // ── timing, in seconds of the logo animation ──
+    const WELCOME_AT = 0.7;        // "Welcome to my site" wipes in once the pieces have flown past it
+    const SNAP_AT = 28.5 / 30;     // frame 29, where the pieces lock together: orange turns to page colour
+    const LEAVE_AT = 2.0;          // a beat after the letters fill in: fade into the site
+    // ── in milliseconds ──
+    const COLOUR_MS = 240;         // orange to page colour
+    const FADE_MS = 700;           // the intro fading away
+    const SKIP_FADE_MS = 350;      // fading away after a click, scroll or key
+    const HAND_OVER = 0.45;        // how far into the fade the site starts its own intro
+    const KICK_MS = 400;           // start playing by now even if the video is still downloading
+    const MAX_WAIT_MS = 2500;      // if the video hasn't started by then, show the still logo instead
+    const STALL_MS = 1200;         // if the video stops moving for this long (slow connection), same
+    const STILL_HOLD_MS = 1100;    // how long the still logo shows before the colour changes
+    const GIVE_UP_MS = 9000;       // whatever happens, the site is never kept waiting longer than this
 
-  const bgLayer = el.querySelector(".intro-bg") || el;
-  const video = el.querySelector(".intro-video");
-  const canvas = el.querySelector(".intro-canvas");
-  const box = el.querySelector(".intro-logo");
-  const ctx = canvas && canvas.getContext ? canvas.getContext("2d", { alpha: false }) : null;
-  const themeMeta = document.querySelector('meta[name="theme-color"]');
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const data = window.PORTFOLIO_DATA || {};
+    const welcome = el.querySelector(".intro-welcome");
+    if (welcome && data.welcome) welcome.textContent = data.welcome;
 
-  // colours come from style.css so they always match the page
-  const css = getComputedStyle(root);
-  function hex(v, fallback){
-    let s = (v || "").trim().replace("#", "");
-    if (s.length === 3) s = s.split("").map(c => c + c).join("");
-    if (!/^[0-9a-f]{6}$/i.test(s)) return fallback;
-    return [0, 2, 4].map(i => parseInt(s.slice(i, i + 2), 16));
-  }
-  const INK = hex(css.getPropertyValue("--ink"), [18, 18, 18]);
-  const FROM = hex(css.getPropertyValue("--intro"), [255, 95, 31]);
-  const TO = hex(css.getPropertyValue("--paper"), [240, 239, 233]);
-  const toHex = c => "#" + c.map(n => Math.round(n).toString(16).padStart(2, "0")).join("");
+    const bgLayer = el.querySelector(".intro-bg") || el;
+    const video = el.querySelector(".intro-video");
+    const canvas = el.querySelector(".intro-canvas");
+    const box = el.querySelector(".intro-logo");
+    const ctx = canvas && canvas.getContext ? canvas.getContext("2d", { alpha: false }) : null;
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
 
-  let bg = FROM.slice(), colourFrom = FROM, colourT0 = 0, colourMs = 0, colouring = false;
-  let phase = "wait", raf = 0, leaving = false, handedOver = false, waitTimer = 0, playing = false;
-
-  // ── the canvas: page colour, with the logo in the exact ink colour ──
-  // colour x video  +  ink x (1 - video)   =   the colour where the video
-  // is white, ink where it's black, and a clean blend along every edge.
-  // Plain canvas blending, so it also works when the site is opened from disk.
-  const rgb = c => `rgb(${c[0]},${c[1]},${c[2]})`;
-  const frame = document.createElement("canvas"), off = document.createElement("canvas");
-  const fctx = frame.getContext ? frame.getContext("2d", { alpha: false }) : null;
-  const octx = off.getContext ? off.getContext("2d", { alpha: false }) : null;
-  let W = 0, H = 0;
-  function sizeCanvas(){
-    if (!ctx || !box) return;
-    const r = box.getBoundingClientRect();
-    const src = (video && video.videoWidth) || 1052;
-    const scale = Math.min(window.devicePixelRatio || 1, src / Math.max(1, r.width));
-    const w = Math.max(1, Math.round(r.width * scale)), h = Math.max(1, Math.round(r.height * scale));
-    if (w !== W || h !== H){ canvas.width = frame.width = off.width = W = w; canvas.height = frame.height = off.height = H = h; }
-  }
-  function draw(){
-    if (!ctx || !W) return;
-    ctx.globalCompositeOperation = "source-over";
-    ctx.fillStyle = rgb(bg);
-    ctx.fillRect(0, 0, W, H);
-    if (!playing || video.readyState < 2 || !octx || !fctx) return;
-    // one copy of the video's current frame, so every step below uses the same frame
-    fctx.imageSmoothingQuality = "high";
-    fctx.drawImage(video, 0, 0, W, H);
-    // the page colour, kept where the video is white
-    ctx.globalCompositeOperation = "multiply";
-    ctx.drawImage(frame, 0, 0);
-    // the ink, kept where the video is black
-    octx.globalCompositeOperation = "source-over";
-    octx.drawImage(frame, 0, 0);
-    octx.globalCompositeOperation = "difference";
-    octx.fillStyle = "#fff";
-    octx.fillRect(0, 0, W, H);
-    octx.globalCompositeOperation = "multiply";
-    octx.fillStyle = rgb(INK);
-    octx.fillRect(0, 0, W, H);
-    // the two added together
-    ctx.globalCompositeOperation = "lighter";
-    ctx.drawImage(off, 0, 0);
-    ctx.globalCompositeOperation = "source-over";
-  }
-  // the intro's colour, and the page background behind it: Safari on
-  // iPhone colours its top and bottom bars from the page background
-  function setBg(c){
-    bg = c.map(Math.round);
-    bgLayer.style.backgroundColor = rgb(bg);
-    if (root.classList.contains("intro-tint")) document.body.style.backgroundColor = rgb(bg);
-  }
-  // the bars and the page go back to the page colour
-  function untint(){
-    root.classList.remove("intro-tint");
-    document.body.style.backgroundColor = "";
-  }
-
-  // orange -> page colour, eased out, in step with the canvas
-  function startColour(){
-    if (colouring || bg.join() === TO.join()) return;
-    colouring = true; colourFrom = bg.slice(); colourT0 = performance.now(); colourMs = reduced ? 0 : COLOUR_MS;
-    if (themeMeta) themeMeta.setAttribute("content", toHex(TO));
-    el.classList.add("is-snapped");
-  }
-  function stepColour(now){
-    if (!colouring) return;
-    const t = colourMs ? Math.min(1, (now - colourT0) / colourMs) : 1;
-    const e = 1 - Math.pow(1 - t, 3);
-    setBg(colourFrom.map((v, i) => v + (TO[i] - v) * e));
-    if (t >= 1) colouring = false;
-  }
-
-  // ── fade into the site ──
-  function leave(fast){
-    if (leaving) return;
-    leaving = true;
-    stopListening();
-    clearTimeout(waitTimer);
-    const ms = reduced ? 0 : (fast ? SKIP_FADE_MS : FADE_MS);
-    if (themeMeta) themeMeta.setAttribute("content", toHex(TO));
-    untint();
-    el.style.setProperty("--intro-fade", ms + "ms");
-    el.classList.add("is-leaving");
-    setTimeout(handOver, ms * HAND_OVER);
-    setTimeout(cleanUp, ms + 60);
-  }
-  function handOver(){ if (handedOver) return; handedOver = true; finish(); }
-  function cleanUp(){
-    cancelAnimationFrame(raf);
-    handOver();
-    if (video){ try { video.pause(); video.removeAttribute("src"); Array.from(video.querySelectorAll("source")).forEach(s => s.remove()); video.load(); } catch (e) {} }
-    el.remove();
-    untint();
-    root.classList.remove("intro-on");
-    window.removeEventListener("resize", sizeCanvas);
-  }
-
-  // ── the still logo: reduced motion, autoplay blocked, or a missing video ──
-  function showStill(){
-    if (leaving || phase === "still") return;
-    phase = "still";
-    playing = false;
-    clearTimeout(waitTimer);
-    if (video){ try { video.pause(); } catch (e) {} }
-    el.classList.add("is-still", "is-welcome");
-    draw();
-    if (reduced){ setTimeout(() => { startColour(); stepColour(performance.now()); leave(false); }, STILL_HOLD_MS); return; }
-    setTimeout(startColour, STILL_HOLD_MS);
-    setTimeout(() => leave(false), STILL_HOLD_MS + COLOUR_MS + 450);
-  }
-
-  // ── the animation ──
-  // time of the frame actually on screen where the browser can say
-  // (so the colour change lands exactly on the snap), else the clock
-  const frameCallbacks = !!(video && video.requestVideoFrameCallback);
-  let shownTime = -1;
-  function onVideoFrame(now, meta){
-    shownTime = meta && typeof meta.mediaTime === "number" ? meta.mediaTime : video.currentTime;
-    if (!leaving) video.requestVideoFrameCallback(onVideoFrame);
-  }
-  function loop(now){
-    raf = requestAnimationFrame(loop);
-    if (phase === "play"){
-      const t = frameCallbacks && shownTime >= 0 ? shownTime : video.currentTime;
-      if (t >= WELCOME_AT) el.classList.add("is-welcome");
-      if (t >= SNAP_AT) startColour();
-      if (t >= LEAVE_AT || video.ended) leave(false);
+    // colours come from style.css so they always match the page
+    const css = getComputedStyle(root);
+    function hex(v, fallback){
+      let s = (v || "").trim().replace("#", "");
+      if (s.length === 3) s = s.split("").map(c => c + c).join("");
+      if (!/^[0-9a-f]{6}$/i.test(s)) return fallback;
+      return [0, 2, 4].map(i => parseInt(s.slice(i, i + 2), 16));
     }
-    stepColour(now);
-    draw();
-  }
-  // plays as soon as the whole (small) video is in, or after KICK_MS anyway:
-  // some phones don't download a video at all until it's asked to play
-  function play(){
-    if (phase !== "wait" || leaving) return;
-    phase = "starting";
-    try { if (video.currentTime > 0) video.currentTime = 0; } catch (e) {}
-    let p;
-    video.muted = true;
-    try { p = video.play(); } catch (e) { showStill(); return; }
-    const ok = () => {
-      if (phase !== "starting") return;
-      phase = "play"; playing = true; clearTimeout(waitTimer);
-      if (frameCallbacks) video.requestVideoFrameCallback(onVideoFrame);
-    };
-    if (p && p.then) p.then(ok, showStill); else ok();
-  }
-  function begin(){
-    sizeCanvas();
-    setBg(FROM);
-    draw();
-    el.classList.add("is-ready");                  // canvas on, covering the video underneath it
-    if (themeMeta) themeMeta.setAttribute("content", toHex(FROM));
-    raf = requestAnimationFrame(loop);
-    setTimeout(() => leave(false), GIVE_UP_MS);
-    if (reduced || !ctx || !video || !video.canPlayType){ showStill(); return; }
-    waitTimer = setTimeout(showStill, MAX_WAIT_MS);
-    video.addEventListener("error", showStill);
-    const sources = video.querySelectorAll("source");
-    if (sources.length) sources[sources.length - 1].addEventListener("error", showStill);
-    video.addEventListener("loadedmetadata", sizeCanvas);
-    if (video.readyState >= 4) play();
-    else {
-      video.addEventListener("canplaythrough", play, { once: true });
-      setTimeout(play, KICK_MS);
-      if (video.networkState === 0) video.load();
+    const INK = hex(css.getPropertyValue("--ink"), [18, 18, 18]);
+    const FROM = hex(css.getPropertyValue("--intro"), [255, 95, 31]);
+    const TO = hex(css.getPropertyValue("--paper"), [240, 239, 233]);
+    const toHex = c => "#" + c.map(n => Math.round(n).toString(16).padStart(2, "0")).join("");
+
+    let bg = FROM.slice(), colourFrom = FROM, colourT0 = 0, colourMs = 0, colouring = false;
+    let phase = "wait", raf = 0, leaving = false, handedOver = false, waitTimer = 0, playing = false;
+
+    // ── the canvas: page colour, with the logo in the exact ink colour ──
+    // colour x video  +  ink x (1 - video)   =   the colour where the video
+    // is white, ink where it's black, and a clean blend along every edge.
+    // Plain canvas blending, so it also works when the site is opened from disk.
+    const rgb = c => `rgb(${c[0]},${c[1]},${c[2]})`;
+    const frame = document.createElement("canvas"), off = document.createElement("canvas");
+    const fctx = frame.getContext ? frame.getContext("2d", { alpha: false }) : null;
+    const octx = off.getContext ? off.getContext("2d", { alpha: false }) : null;
+    let W = 0, H = 0;
+    function sizeCanvas(){
+      if (!ctx || !box) return;
+      const r = box.getBoundingClientRect();
+      const src = (video && video.videoWidth) || 1052;
+      const scale = Math.min(window.devicePixelRatio || 1, src / Math.max(1, r.width));
+      const w = Math.max(1, Math.round(r.width * scale)), h = Math.max(1, Math.round(r.height * scale));
+      if (w !== W || h !== H){ canvas.width = frame.width = off.width = W = w; canvas.height = frame.height = off.height = H = h; }
     }
+    function draw(){
+      if (!ctx || !W) return;
+      ctx.globalCompositeOperation = "source-over";
+      ctx.fillStyle = rgb(bg);
+      ctx.fillRect(0, 0, W, H);
+      if (!playing || video.readyState < 2 || !octx || !fctx) return;
+      try {
+        // one copy of the video's current frame, so every step below uses the same frame
+        fctx.imageSmoothingQuality = "high";
+        fctx.drawImage(video, 0, 0, W, H);
+        // the page colour, kept where the video is white
+        ctx.globalCompositeOperation = "multiply";
+        ctx.drawImage(frame, 0, 0);
+        // the ink, kept where the video is black
+        octx.globalCompositeOperation = "source-over";
+        octx.drawImage(frame, 0, 0);
+        octx.globalCompositeOperation = "difference";
+        octx.fillStyle = "#fff";
+        octx.fillRect(0, 0, W, H);
+        octx.globalCompositeOperation = "multiply";
+        octx.fillStyle = rgb(INK);
+        octx.fillRect(0, 0, W, H);
+        // the two added together
+        ctx.globalCompositeOperation = "lighter";
+        ctx.drawImage(off, 0, 0);
+        ctx.globalCompositeOperation = "source-over";
+      } catch (e) {
+        // the browser won't draw this video: show the still logo instead
+        ctx.globalCompositeOperation = "source-over";
+        playing = false;
+        setTimeout(showStill, 0);
+      }
+    }
+    // the intro's colour, and the page background behind it: Safari on
+    // iPhone colours its top and bottom bars from the page background
+    function setBg(c){
+      bg = c.map(Math.round);
+      bgLayer.style.backgroundColor = rgb(bg);
+      if (root.classList.contains("intro-tint")) document.body.style.backgroundColor = rgb(bg);
+    }
+    // the bars and the page go back to the page colour
+    function untint(){
+      root.classList.remove("intro-tint");
+      document.body.style.backgroundColor = "";
+      document.body.style.animation = "";
+    }
+
+    // orange -> page colour, eased out, in step with the canvas
+    function startColour(){
+      if (colouring || bg.join() === TO.join()) return;
+      colouring = true; colourFrom = bg.slice(); colourT0 = performance.now(); colourMs = reduced ? 0 : COLOUR_MS;
+      if (themeMeta) themeMeta.setAttribute("content", toHex(TO));
+      el.classList.add("is-snapped");
+    }
+    function stepColour(now){
+      if (!colouring) return;
+      const t = colourMs ? Math.min(1, (now - colourT0) / colourMs) : 1;
+      const e = 1 - Math.pow(1 - t, 3);
+      setBg(colourFrom.map((v, i) => v + (TO[i] - v) * e));
+      if (t >= 1) colouring = false;
+    }
+
+    // ── fade into the site ──
+    function leave(fast){
+      if (leaving) return;
+      leaving = true;
+      try {
+        stopListening();
+        clearTimeout(waitTimer);
+        if (themeMeta) themeMeta.setAttribute("content", toHex(TO));
+        untint();
+      } catch (e) {}
+      const ms = reduced ? 0 : (fast ? SKIP_FADE_MS : FADE_MS);
+      el.style.setProperty("--intro-fade", ms + "ms");
+      el.classList.add("is-leaving");
+      setTimeout(handOver, ms * HAND_OVER);
+      setTimeout(cleanUp, ms + 60);
+    }
+    function handOver(){ if (handedOver) return; handedOver = true; finish(); }
+    function cleanUp(){
+      cancelAnimationFrame(raf);
+      handOver();
+      if (video){ try { video.pause(); video.removeAttribute("src"); Array.from(video.querySelectorAll("source")).forEach(s => s.remove()); video.load(); } catch (e) {} }
+      el.remove();
+      untint();
+      root.classList.remove("intro-on");
+      window.removeEventListener("resize", sizeCanvas);
+    }
+
+    // ── the still logo: reduced motion, autoplay blocked, or a video that's missing, slow or frozen ──
+    function showStill(){
+      if (leaving || phase === "still") return;
+      phase = "still";
+      playing = false;
+      clearTimeout(waitTimer);
+      if (video){ try { video.pause(); } catch (e) {} }
+      el.classList.add("is-still", "is-welcome");
+      draw();
+      if (reduced){ setTimeout(() => { startColour(); stepColour(performance.now()); leave(false); }, STILL_HOLD_MS); return; }
+      setTimeout(startColour, STILL_HOLD_MS);
+      setTimeout(() => leave(false), STILL_HOLD_MS + COLOUR_MS + 450);
+    }
+
+    // ── the animation ──
+    // time of the frame actually on screen where the browser can say
+    // (so the colour change lands exactly on the snap), else the clock
+    const frameCallbacks = !!(video && video.requestVideoFrameCallback);
+    let shownTime = -1, lastT = -1, lastMove = 0, lastTick = 0;
+    function onVideoFrame(now, meta){
+      shownTime = meta && typeof meta.mediaTime === "number" ? meta.mediaTime : video.currentTime;
+      if (!leaving) video.requestVideoFrameCallback(onVideoFrame);
+    }
+    function loop(now){
+      raf = requestAnimationFrame(loop);
+      // a long gap between frames means the page wasn't on screen: that isn't the video freezing
+      if (now - lastTick > 250) lastMove = now;
+      lastTick = now;
+      if (phase === "play" && !leaving){
+        const ct = video.currentTime;
+        const t = frameCallbacks && shownTime >= 0 ? Math.max(shownTime, ct - 0.15) : ct;
+        if (t >= WELCOME_AT) el.classList.add("is-welcome");
+        if (t >= SNAP_AT) startColour();
+        if (t >= LEAVE_AT || video.ended) leave(false);
+        else if (ct > lastT){ lastT = ct; lastMove = now; }
+        else if (now - lastMove > STALL_MS){ if (t < SNAP_AT) showStill(); else leave(false); }
+      }
+      stepColour(now);
+      draw();
+    }
+    // plays as soon as the whole (small) video is in, or after KICK_MS anyway:
+    // some phones don't download a video at all until it's asked to play
+    function play(){
+      if (phase !== "wait" || leaving) return;
+      phase = "starting";
+      try { if (video.currentTime > 0) video.currentTime = 0; } catch (e) {}
+      let p;
+      video.muted = true;
+      try { p = video.play(); } catch (e) { showStill(); return; }
+      const ok = () => {
+        if (phase !== "starting") return;
+        phase = "play"; playing = true; clearTimeout(waitTimer);
+        lastT = -1; lastMove = performance.now();
+        if (frameCallbacks) video.requestVideoFrameCallback(onVideoFrame);
+      };
+      if (p && p.then) p.then(ok, showStill); else ok();
+    }
+    function begin(){
+      sizeCanvas();
+      setBg(FROM);
+      draw();
+      el.classList.add("is-ready");                  // canvas on, covering the video underneath it
+      if (themeMeta) themeMeta.setAttribute("content", toHex(FROM));
+      raf = requestAnimationFrame(loop);
+      setTimeout(() => leave(false), GIVE_UP_MS);
+      if (reduced || !ctx || !video || !video.canPlayType){ showStill(); return; }
+      waitTimer = setTimeout(showStill, MAX_WAIT_MS);
+      video.addEventListener("error", showStill);
+      const sources = video.querySelectorAll("source");
+      if (sources.length) sources[sources.length - 1].addEventListener("error", showStill);
+      video.addEventListener("loadedmetadata", sizeCanvas);
+      // the end of the animation, even if the page isn't drawing frames right now
+      video.addEventListener("timeupdate", () => { if (phase === "play" && video.currentTime >= LEAVE_AT) leave(false); });
+      video.addEventListener("ended", () => { if (phase === "play") leave(false); });
+      if (video.readyState >= 4) play();
+      else {
+        video.addEventListener("canplaythrough", play, { once: true });
+        setTimeout(play, KICK_MS);
+        if (video.networkState === 0) video.load();
+      }
+    }
+    function safeBegin(){ try { begin(); } catch (e) { bail(); } }
+
+    // ── skipping: click, tap, scroll or any key ──
+    const SKIP_EVENTS = ["pointerdown", "keydown", "wheel", "touchmove"];
+    const MODIFIERS = ["Meta", "Control", "Alt", "Shift", "CapsLock", "Fn", "OS"];
+    function skip(e){ if (e.type === "keydown" && MODIFIERS.indexOf(e.key) > -1) return; leave(true); }
+    function stopListening(){ SKIP_EVENTS.forEach(t => window.removeEventListener(t, skip, true)); }
+    SKIP_EVENTS.forEach(t => window.addEventListener(t, skip, { capture: true, passive: true }));
+    window.addEventListener("resize", sizeCanvas);
+    // coming back to the page (the back button, or reopening the tab) mid-intro: just finish it
+    window.addEventListener("pageshow", e => { if (e.persisted && !leaving) leave(true); });
+
+    // intro.js is running: it takes over from the failsafes in style.css
+    el.style.animation = "none";
+    document.body.style.animation = "none";
+
+    // if the page opened in a background tab, wait until it's looked at
+    if (document.visibilityState === "hidden"){
+      const onVis = () => { if (document.visibilityState !== "hidden"){ document.removeEventListener("visibilitychange", onVis); safeBegin(); } };
+      document.addEventListener("visibilitychange", onVis);
+    } else begin();
   }
-
-  // ── skipping: click, tap, scroll or any key ──
-  const SKIP_EVENTS = ["pointerdown", "keydown", "wheel", "touchmove"];
-  const MODIFIERS = ["Meta", "Control", "Alt", "Shift", "CapsLock", "Fn", "OS"];
-  function skip(e){ if (e.type === "keydown" && MODIFIERS.indexOf(e.key) > -1) return; leave(true); }
-  function stopListening(){ SKIP_EVENTS.forEach(t => window.removeEventListener(t, skip, true)); }
-  SKIP_EVENTS.forEach(t => window.addEventListener(t, skip, { capture: true, passive: true }));
-  window.addEventListener("resize", sizeCanvas);
-
-  // if the page opened in a background tab, wait until it's looked at
-  if (document.visibilityState === "hidden"){
-    const onVis = () => { if (document.visibilityState !== "hidden"){ document.removeEventListener("visibilitychange", onVis); begin(); } };
-    document.addEventListener("visibilitychange", onVis);
-  } else begin();
 })();
 
 ```
