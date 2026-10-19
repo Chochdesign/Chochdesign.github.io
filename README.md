@@ -55,7 +55,8 @@ Before anything else, your CHOCH logo animation plays full screen on neon orange
 - **The logo is the site's exact black.** The animation is drawn onto a canvas that blends it with the page colour, so the logo is exactly `#121212` (the `--ink` colour) on the orange and on the page colour, with clean edges and motion blur. It works the same hosted or opened straight from disk.
 - **Files** (in `images/intro/`): made from your `choch-logo-animated-loop.mp4`. `choch-logo-animated-loop.mp4` and `.webm` are the part of it the intro uses (fly in, snap, hold; the loop's reverse is left off) as a pure black logo on pure white (the canvas turns the black into the ink colour), framed so the finished logo sits dead centre. `choch-logo-animated-loop-still.png` is the finished logo, shown instead of the animation when a device asks for reduced motion or a video can't play (some phones in Low Power Mode). To swap in a new animation, export it as a black logo on a white background and send it over, or replace these files keeping the names (then add `?v=2` after the names in `index.html` so browsers fetch the new ones).
 - **Change things:** the orange is `--intro` at the top of `style.css` (any #hex colour). The welcome line is `welcome` in `data.js`. Timings (when the colour changes, when it fades) are at the top of `intro.js`.
-- **Safari's bars on iPhone:** Safari (iOS 26) colours its top and bottom bars from a fixed element at the screen's edge, or else from the page background, and only keeps the page background up to date. So while the intro is up its colour sits on the page background too, and the bars go from orange to the page colour along with it.
+- **Safari's bars on iPhone stay the page colour.** Safari colours the bars at the top and bottom of the screen from what it finds at the top of the page in the very first frame, and from anything fixed to the screen's edges, and then keeps that colour for the whole visit. An orange intro fixed to the screen left both bars orange. So the intro isn't fixed to the screen: it sits at the top of the page (the page always opens at the top while it plays), and while it's up, Safari's one look at the top of the page comes back empty on purpose (the slow do-nothing animation on `.intro-bg` in `style.css`), so the bars take the page colour instead. Don't take that animation out.
+- A link straight to a section (like `morganchoch.art/#work`) skips the intro and goes straight there. Scrolling, clicking, tapping or pressing a key skips it too.
 - **It can't get stuck.** If the video is slow to arrive, freezes or can't play at all (iPhones in Low Power Mode don't play website videos, and the same goes for anyone who has Reduce Motion turned on), the finished logo shows on the orange instead, then the colour changes and the site starts as usual. If anything else goes wrong, the intro steps aside and the site starts, at most 10 seconds after the page is opened.
 - Without JavaScript there's no intro and the site shows as normal. If `intro.js` is missing, the site starts straight away.
 
@@ -127,10 +128,19 @@ The opening strip keeps every image sharp on its own: an image is never shown bi
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Geist:wght@900&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261018">
+<link rel="stylesheet" href="style.css?v=20261019">
 <!-- the intro covers the page from the very first frame (intro.js takes it
-     from there). Without JavaScript there's no intro and the site shows as normal. -->
-<script>document.documentElement.classList.add("js", "intro-on", "intro-tint");</script>
+     from there). It plays when the page opens at the top, so a link straight
+     to a section (…/#work) goes straight there, and a reload starts at the top.
+     Without JavaScript there's no intro and the site shows as normal. -->
+<script>
+(function(r){
+  r.classList.add("js");
+  if (location.hash) return;
+  r.classList.add("intro-on");
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+})(document.documentElement);
+</script>
 </head>
 <body>
 
@@ -243,10 +253,10 @@ The opening strip keeps every image sharp on its own: an image is never shown bi
 
 <!-- "?v=..." makes browsers fetch these files fresh after an update.
      When you change style.css or a .js file, change the number here (and on style.css above). -->
-<script src="data.js?v=20261018"></script>
-<script src="intro.js?v=20261018"></script>
-<script src="arsvita-3d.js?v=20261018"></script>
-<script src="script.js?v=20261018"></script>
+<script src="data.js?v=20261019"></script>
+<script src="intro.js?v=20261019"></script>
+<script src="arsvita-3d.js?v=20261019"></script>
+<script src="script.js?v=20261019"></script>
 </body>
 </html>
 
@@ -372,32 +382,40 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
    screen fades into the site. Only shown when JavaScript runs.
    ──────────────────────────────────────────────────────────── */
 .intro{ display: none; }
+/* Safari on iPhone colours the bars at the top and bottom of the screen
+   from what it finds there, and then keeps that colour: it takes a sample
+   of the top of the page once, from the first frame, and it holds on to
+   the colour of anything fixed to the screen's edges. An orange intro
+   fixed to the screen would leave both bars orange for the whole visit.
+   So the intro is never fixed to the screen: it sits at the top of the
+   page, covering it until it fades away (the page always opens at the
+   top while it plays). And while it's up, Safari's one-time sample of the
+   top of the page is spoiled on purpose (the slow do-nothing animation on
+   .intro-bg below), so Safari falls back to the page colour instead.
+   Result: the bars are always the page colour, never orange. */
 .intro-on .intro{
-  position: fixed; inset: 0; z-index: 1000;
+  position: absolute; top: 0; left: 0; z-index: 1000;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;                  /* the screen with the browser's bars showing: the logo centres in what you see */
   display: grid; place-items: center;
   padding: var(--gutter);
-  background: transparent;         /* the colour is on .intro-bg, see below */
+  background: transparent;         /* the colour is on .intro-bg */
   color: var(--ink);
   /* failsafe: if intro.js never runs, step out of the way */
   animation: intro-failsafe 0.01s step-start 9s forwards;
 }
 @keyframes intro-failsafe{ to{ visibility: hidden; } }
-.intro-bg{ position: absolute; inset: 0; background: var(--intro); }
-.intro-stage{ z-index: 1; }
-/* Safari on iPhone (iOS 26) colours its top and bottom bars from a fixed
-   element at the screen's edge, or else from the page background, and
-   only keeps the page background up to date. So while the intro is up,
-   its colour lives on the page background (intro.js keeps the two in
-   step), nothing fixed at the edges has a colour of its own, and the
-   bars follow the orange into the page colour. */
-.intro-on.intro-tint body{
-  background-color: var(--intro);
-  /* failsafe: if intro.js never runs, the page goes back to its own colour */
-  animation: intro-untint 0.01s step-start 9s forwards;
+.intro-bg{
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 100vh;
+  height: 100lvh;                  /* reaches all the way down, behind the browser's bottom bar */
+  background: var(--intro);
+  animation: intro-hold 2s linear infinite;
 }
-@keyframes intro-untint{ to{ background-color: var(--paper); } }
-.intro-on.intro-tint .runhead{ background-color: transparent; }
-.intro-on.intro-tint .backtotop{ display: none; }
+@keyframes intro-hold{ from, to{ opacity: 1; } }
+.intro-stage{ z-index: 1; }
+.intro-on .backtotop{ display: none; }
 .intro.is-leaving{ opacity: 0; pointer-events: none; transition: opacity var(--intro-fade, 0.7s) var(--easy); }
 .intro-stage{ position: relative; width: min(100%, 32.875rem); }
 .intro-logo{ position: relative; aspect-ratio: 1052 / 838; }   /* the animation's frame size */
@@ -1530,9 +1548,7 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
   const rescue = () => {
     const introEl = document.getElementById("intro");
     if (introEl) introEl.remove();
-    document.documentElement.classList.remove("intro-on", "intro-tint");
-    document.body.style.backgroundColor = "";
-    document.body.style.animation = "";
+    document.documentElement.classList.remove("intro-on");
     go();
   };
   if (window.Intro && window.Intro.done){
@@ -1580,6 +1596,12 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
   still logo shows instead; if anything at all goes wrong, the intro
   steps aside and the site starts.
 
+  The intro sits at the top of the page rather than being fixed to the
+  screen, so Safari on iPhone never takes its orange for the colour of its
+  bars (see the INTRO notes in style.css). It only plays when the page
+  opens at the top: a link straight to a section (morganchoch.art/#work)
+  goes straight there.
+
   Used by script.js:  Intro.done.then(() => ...)  runs once the intro
   has handed over to the site (straight away if there's no intro).
   ────────────────────────────────────────────────────────────
@@ -1597,8 +1619,7 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
   // if anything goes wrong, the intro steps aside and the site starts
   function bail(){
     try { if (el) el.remove(); } catch (e) {}
-    root.classList.remove("intro-on", "intro-tint");
-    if (document.body){ document.body.style.backgroundColor = ""; document.body.style.animation = ""; }
+    root.classList.remove("intro-on");
     finish();
   }
   if (!el || !root.classList.contains("intro-on")) { bail(); return; }
@@ -1630,7 +1651,6 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
     const canvas = el.querySelector(".intro-canvas");
     const box = el.querySelector(".intro-logo");
     const ctx = canvas && canvas.getContext ? canvas.getContext("2d", { alpha: false }) : null;
-    const themeMeta = document.querySelector('meta[name="theme-color"]');
 
     // colours come from style.css so they always match the page
     const css = getComputedStyle(root);
@@ -1643,7 +1663,6 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
     const INK = hex(css.getPropertyValue("--ink"), [18, 18, 18]);
     const FROM = hex(css.getPropertyValue("--intro"), [255, 95, 31]);
     const TO = hex(css.getPropertyValue("--paper"), [240, 239, 233]);
-    const toHex = c => "#" + c.map(n => Math.round(n).toString(16).padStart(2, "0")).join("");
 
     let bg = FROM.slice(), colourFrom = FROM, colourT0 = 0, colourMs = 0, colouring = false;
     let phase = "wait", raf = 0, leaving = false, handedOver = false, waitTimer = 0, playing = false;
@@ -1698,25 +1717,16 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
         setTimeout(showStill, 0);
       }
     }
-    // the intro's colour, and the page background behind it: Safari on
-    // iPhone colours its top and bottom bars from the page background
+    // the intro's colour
     function setBg(c){
       bg = c.map(Math.round);
       bgLayer.style.backgroundColor = rgb(bg);
-      if (root.classList.contains("intro-tint")) document.body.style.backgroundColor = rgb(bg);
-    }
-    // the bars and the page go back to the page colour
-    function untint(){
-      root.classList.remove("intro-tint");
-      document.body.style.backgroundColor = "";
-      document.body.style.animation = "";
     }
 
     // orange -> page colour, eased out, in step with the canvas
     function startColour(){
       if (colouring || bg.join() === TO.join()) return;
       colouring = true; colourFrom = bg.slice(); colourT0 = performance.now(); colourMs = reduced ? 0 : COLOUR_MS;
-      if (themeMeta) themeMeta.setAttribute("content", toHex(TO));
       el.classList.add("is-snapped");
     }
     function stepColour(now){
@@ -1734,8 +1744,6 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
       try {
         stopListening();
         clearTimeout(waitTimer);
-        if (themeMeta) themeMeta.setAttribute("content", toHex(TO));
-        untint();
       } catch (e) {}
       const ms = reduced ? 0 : (fast ? SKIP_FADE_MS : FADE_MS);
       el.style.setProperty("--intro-fade", ms + "ms");
@@ -1749,7 +1757,6 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
       handOver();
       if (video){ try { video.pause(); video.removeAttribute("src"); Array.from(video.querySelectorAll("source")).forEach(s => s.remove()); video.load(); } catch (e) {} }
       el.remove();
-      untint();
       root.classList.remove("intro-on");
       window.removeEventListener("resize", sizeCanvas);
     }
@@ -1812,11 +1819,13 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
       if (p && p.then) p.then(ok, showStill); else ok();
     }
     function begin(){
+      // the intro covers the top of the page: if the page isn't at the top
+      // (it was scrolled while loading), go straight to the site
+      if ((window.scrollY || window.pageYOffset || 0) > 2) { bail(); return; }
       sizeCanvas();
       setBg(FROM);
       draw();
       el.classList.add("is-ready");                  // canvas on, covering the video underneath it
-      if (themeMeta) themeMeta.setAttribute("content", toHex(FROM));
       raf = requestAnimationFrame(loop);
       setTimeout(() => leave(false), GIVE_UP_MS);
       if (reduced || !ctx || !video || !video.canPlayType){ showStill(); return; }
@@ -1841,15 +1850,17 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
     const SKIP_EVENTS = ["pointerdown", "keydown", "wheel", "touchmove"];
     const MODIFIERS = ["Meta", "Control", "Alt", "Shift", "CapsLock", "Fn", "OS"];
     function skip(e){ if (e.type === "keydown" && MODIFIERS.indexOf(e.key) > -1) return; leave(true); }
-    function stopListening(){ SKIP_EVENTS.forEach(t => window.removeEventListener(t, skip, true)); }
+    // the page moving any other way (dragging the scrollbar, say) also ends it
+    function onScroll(){ if ((window.scrollY || window.pageYOffset || 0) > 2) leave(true); }
+    function stopListening(){ SKIP_EVENTS.forEach(t => window.removeEventListener(t, skip, true)); window.removeEventListener("scroll", onScroll); }
     SKIP_EVENTS.forEach(t => window.addEventListener(t, skip, { capture: true, passive: true }));
+    window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", sizeCanvas);
     // coming back to the page (the back button, or reopening the tab) mid-intro: just finish it
     window.addEventListener("pageshow", e => { if (e.persisted && !leaving) leave(true); });
 
-    // intro.js is running: it takes over from the failsafes in style.css
+    // intro.js is running: it takes over from the failsafe in style.css
     el.style.animation = "none";
-    document.body.style.animation = "none";
 
     // if the page opened in a background tab, wait until it's looked at
     if (document.visibilityState === "hidden"){

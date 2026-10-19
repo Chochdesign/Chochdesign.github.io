@@ -704,9 +704,7 @@
   const rescue = () => {
     const introEl = document.getElementById("intro");
     if (introEl) introEl.remove();
-    document.documentElement.classList.remove("intro-on", "intro-tint");
-    document.body.style.backgroundColor = "";
-    document.body.style.animation = "";
+    document.documentElement.classList.remove("intro-on");
     go();
   };
   if (window.Intro && window.Intro.done){

@@ -115,32 +115,40 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
    screen fades into the site. Only shown when JavaScript runs.
    ──────────────────────────────────────────────────────────── */
 .intro{ display: none; }
+/* Safari on iPhone colours the bars at the top and bottom of the screen
+   from what it finds there, and then keeps that colour: it takes a sample
+   of the top of the page once, from the first frame, and it holds on to
+   the colour of anything fixed to the screen's edges. An orange intro
+   fixed to the screen would leave both bars orange for the whole visit.
+   So the intro is never fixed to the screen: it sits at the top of the
+   page, covering it until it fades away (the page always opens at the
+   top while it plays). And while it's up, Safari's one-time sample of the
+   top of the page is spoiled on purpose (the slow do-nothing animation on
+   .intro-bg below), so Safari falls back to the page colour instead.
+   Result: the bars are always the page colour, never orange. */
 .intro-on .intro{
-  position: fixed; inset: 0; z-index: 1000;
+  position: absolute; top: 0; left: 0; z-index: 1000;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;                  /* the screen with the browser's bars showing: the logo centres in what you see */
   display: grid; place-items: center;
   padding: var(--gutter);
-  background: transparent;         /* the colour is on .intro-bg, see below */
+  background: transparent;         /* the colour is on .intro-bg */
   color: var(--ink);
   /* failsafe: if intro.js never runs, step out of the way */
   animation: intro-failsafe 0.01s step-start 9s forwards;
 }
 @keyframes intro-failsafe{ to{ visibility: hidden; } }
-.intro-bg{ position: absolute; inset: 0; background: var(--intro); }
-.intro-stage{ z-index: 1; }
-/* Safari on iPhone (iOS 26) colours its top and bottom bars from a fixed
-   element at the screen's edge, or else from the page background, and
-   only keeps the page background up to date. So while the intro is up,
-   its colour lives on the page background (intro.js keeps the two in
-   step), nothing fixed at the edges has a colour of its own, and the
-   bars follow the orange into the page colour. */
-.intro-on.intro-tint body{
-  background-color: var(--intro);
-  /* failsafe: if intro.js never runs, the page goes back to its own colour */
-  animation: intro-untint 0.01s step-start 9s forwards;
+.intro-bg{
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 100vh;
+  height: 100lvh;                  /* reaches all the way down, behind the browser's bottom bar */
+  background: var(--intro);
+  animation: intro-hold 2s linear infinite;
 }
-@keyframes intro-untint{ to{ background-color: var(--paper); } }
-.intro-on.intro-tint .runhead{ background-color: transparent; }
-.intro-on.intro-tint .backtotop{ display: none; }
+@keyframes intro-hold{ from, to{ opacity: 1; } }
+.intro-stage{ z-index: 1; }
+.intro-on .backtotop{ display: none; }
 .intro.is-leaving{ opacity: 0; pointer-events: none; transition: opacity var(--intro-fade, 0.7s) var(--easy); }
 .intro-stage{ position: relative; width: min(100%, 32.875rem); }
 .intro-logo{ position: relative; aspect-ratio: 1052 / 838; }   /* the animation's frame size */

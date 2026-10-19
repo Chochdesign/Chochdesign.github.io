@@ -27,6 +27,12 @@
   still logo shows instead; if anything at all goes wrong, the intro
   steps aside and the site starts.
 
+  The intro sits at the top of the page rather than being fixed to the
+  screen, so Safari on iPhone never takes its orange for the colour of its
+  bars (see the INTRO notes in style.css). It only plays when the page
+  opens at the top: a link straight to a section (morganchoch.art/#work)
+  goes straight there.
+
   Used by script.js:  Intro.done.then(() => ...)  runs once the intro
   has handed over to the site (straight away if there's no intro).
   ────────────────────────────────────────────────────────────
@@ -44,8 +50,7 @@
   // if anything goes wrong, the intro steps aside and the site starts
   function bail(){
     try { if (el) el.remove(); } catch (e) {}
-    root.classList.remove("intro-on", "intro-tint");
-    if (document.body){ document.body.style.backgroundColor = ""; document.body.style.animation = ""; }
+    root.classList.remove("intro-on");
     finish();
   }
   if (!el || !root.classList.contains("intro-on")) { bail(); return; }
@@ -77,7 +82,6 @@
     const canvas = el.querySelector(".intro-canvas");
     const box = el.querySelector(".intro-logo");
     const ctx = canvas && canvas.getContext ? canvas.getContext("2d", { alpha: false }) : null;
-    const themeMeta = document.querySelector('meta[name="theme-color"]');
 
     // colours come from style.css so they always match the page
     const css = getComputedStyle(root);
@@ -90,7 +94,6 @@
     const INK = hex(css.getPropertyValue("--ink"), [18, 18, 18]);
     const FROM = hex(css.getPropertyValue("--intro"), [255, 95, 31]);
     const TO = hex(css.getPropertyValue("--paper"), [240, 239, 233]);
-    const toHex = c => "#" + c.map(n => Math.round(n).toString(16).padStart(2, "0")).join("");
 
     let bg = FROM.slice(), colourFrom = FROM, colourT0 = 0, colourMs = 0, colouring = false;
     let phase = "wait", raf = 0, leaving = false, handedOver = false, waitTimer = 0, playing = false;
@@ -145,25 +148,16 @@
         setTimeout(showStill, 0);
       }
     }
-    // the intro's colour, and the page background behind it: Safari on
-    // iPhone colours its top and bottom bars from the page background
+    // the intro's colour
     function setBg(c){
       bg = c.map(Math.round);
       bgLayer.style.backgroundColor = rgb(bg);
-      if (root.classList.contains("intro-tint")) document.body.style.backgroundColor = rgb(bg);
-    }
-    // the bars and the page go back to the page colour
-    function untint(){
-      root.classList.remove("intro-tint");
-      document.body.style.backgroundColor = "";
-      document.body.style.animation = "";
     }
 
     // orange -> page colour, eased out, in step with the canvas
     function startColour(){
       if (colouring || bg.join() === TO.join()) return;
       colouring = true; colourFrom = bg.slice(); colourT0 = performance.now(); colourMs = reduced ? 0 : COLOUR_MS;
-      if (themeMeta) themeMeta.setAttribute("content", toHex(TO));
       el.classList.add("is-snapped");
     }
     function stepColour(now){
@@ -181,8 +175,6 @@
       try {
         stopListening();
         clearTimeout(waitTimer);
-        if (themeMeta) themeMeta.setAttribute("content", toHex(TO));
-        untint();
       } catch (e) {}
       const ms = reduced ? 0 : (fast ? SKIP_FADE_MS : FADE_MS);
       el.style.setProperty("--intro-fade", ms + "ms");
@@ -196,7 +188,6 @@
       handOver();
       if (video){ try { video.pause(); video.removeAttribute("src"); Array.from(video.querySelectorAll("source")).forEach(s => s.remove()); video.load(); } catch (e) {} }
       el.remove();
-      untint();
       root.classList.remove("intro-on");
       window.removeEventListener("resize", sizeCanvas);
     }
@@ -259,11 +250,13 @@
       if (p && p.then) p.then(ok, showStill); else ok();
     }
     function begin(){
+      // the intro covers the top of the page: if the page isn't at the top
+      // (it was scrolled while loading), go straight to the site
+      if ((window.scrollY || window.pageYOffset || 0) > 2) { bail(); return; }
       sizeCanvas();
       setBg(FROM);
       draw();
       el.classList.add("is-ready");                  // canvas on, covering the video underneath it
-      if (themeMeta) themeMeta.setAttribute("content", toHex(FROM));
       raf = requestAnimationFrame(loop);
       setTimeout(() => leave(false), GIVE_UP_MS);
       if (reduced || !ctx || !video || !video.canPlayType){ showStill(); return; }
@@ -288,15 +281,17 @@
     const SKIP_EVENTS = ["pointerdown", "keydown", "wheel", "touchmove"];
     const MODIFIERS = ["Meta", "Control", "Alt", "Shift", "CapsLock", "Fn", "OS"];
     function skip(e){ if (e.type === "keydown" && MODIFIERS.indexOf(e.key) > -1) return; leave(true); }
-    function stopListening(){ SKIP_EVENTS.forEach(t => window.removeEventListener(t, skip, true)); }
+    // the page moving any other way (dragging the scrollbar, say) also ends it
+    function onScroll(){ if ((window.scrollY || window.pageYOffset || 0) > 2) leave(true); }
+    function stopListening(){ SKIP_EVENTS.forEach(t => window.removeEventListener(t, skip, true)); window.removeEventListener("scroll", onScroll); }
     SKIP_EVENTS.forEach(t => window.addEventListener(t, skip, { capture: true, passive: true }));
+    window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", sizeCanvas);
     // coming back to the page (the back button, or reopening the tab) mid-intro: just finish it
     window.addEventListener("pageshow", e => { if (e.persisted && !leaving) leave(true); });
 
-    // intro.js is running: it takes over from the failsafes in style.css
+    // intro.js is running: it takes over from the failsafe in style.css
     el.style.animation = "none";
-    document.body.style.animation = "none";
 
     // if the page opened in a background tab, wait until it's looked at
     if (document.visibilityState === "hidden"){
