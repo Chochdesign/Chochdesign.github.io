@@ -1,8 +1,8 @@
 # Morgan Chochinov — Portfolio Site
 
-A static portfolio website built around a single design concept: the book *S, M, L, XL* by Rem Koolhaas and Bruce Mau. The site treats itself like a printed book: a running head, numbered chapters, and one consistent sidebar alongside each project's work. It opens with your CHOCH logo animation on neon orange; when the pieces snap together the orange turns into the page colour and fades into the site. Then the name types itself out and every photo from every project slides past underneath, sized so the first project already shows on the first screen.
+A static portfolio website built around a single design concept: the book *S, M, L, XL* by Rem Koolhaas and Bruce Mau. The site treats itself like a printed book: a running head, numbered chapters, and one consistent sidebar alongside each project's work. It opens with your CHOCH logo animation on neon orange (on phones and tablets, on the page colour); when the pieces snap together the orange turns into the page colour and fades into the site. Then the name types itself out and every photo from every project slides past underneath, sized so the first project already shows on the first screen.
 
-No build step, no framework, no dependencies beyond three Google Fonts. Everything renders from a single data file.
+No build step, no framework, no dependencies beyond two Google Fonts. Everything renders from a single data file.
 
 ## How to use this
 
@@ -40,7 +40,7 @@ Open `index.html` in a browser — that's it, it runs locally with no server nee
 ## Design system quick reference
 
 - **Palette:** paper `#F0EFE9`, ink `#121212`, grey `#6E6D67`, line `#C7C5BB`, plus the intro's neon orange `#FF5F1F` — all defined as CSS custom properties at the top of `style.css`.
-- **Type:** Geist Black (900), a plain sans serif at its heaviest weight, for your name, the section numbers, the project names, the numbers in the opening index, the About text and your email. Bricolage Grotesque for everything else you read, from the summaries down to body text (plus the condensed capitals of Dozer's "As seen with" names). Geist Mono for small labels, info lines, buttons and the intro's welcome line. Every piece of text uses one of six roles, defined once at the top of `style.css`: display, lede, body, label, meta, button.
+- **Type:** just one sans serif and one mono. Geist for everything you read: its heaviest weight (Black, 900) for your name, the section numbers, the project names, the numbers in the opening index, the About text and your email, and regular weights for the summaries and body text. Geist Mono for small labels, info lines, buttons and the intro's welcome line. Every piece of text uses one of six roles, defined once at the top of `style.css`: display, lede, body, label, meta, button.
 - **Chapter numbering:** projects are numbered 01/02/03 in the order they appear in the `projects` array in `data.js`.
 - **One grid everywhere:** every project, About and Contact use the same two columns: a sidebar (a quarter of the width) for the text and the work (three quarters) as big as it can be. The opening screen's tagline and index line up with the same columns. On phones everything stacks and the imagery runs edge to edge, and each project runs number and name, then its main visual, then its text, then the rest of the work.
 - **One sidebar format:** number, name, small info (year, role, specs), a one- or two-sentence summary, then Challenge / Approach / Outcome, then an optional detail block. On wide screens the sidebar stays beside the work while you scroll; if it's taller than the window, it scrolls until its last line is showing and stays there.
@@ -50,12 +50,12 @@ Open `index.html` in a browser — that's it, it runs locally with no server nee
 
 ## The intro
 
-Before anything else, your CHOCH logo animation plays full screen on neon orange, with "Welcome to my site" wiping in underneath once the pieces have flown into place. The moment they snap together, the orange turns into the page colour; a beat later the logo fades away and the site does its own intro (your name typing itself out). It takes about three seconds, and clicking, tapping, scrolling or pressing a key skips it.
+Before anything else, your CHOCH logo animation plays full screen on neon orange (on phones and tablets it plays on the page colour, see below), with "Welcome to my site" wiping in underneath once the pieces have flown into place. The moment they snap together, the orange turns into the page colour; a beat later the logo fades away and the site does its own intro (your name typing itself out). It takes about three seconds, and clicking, tapping, scrolling or pressing a key skips it.
 
 - **The logo is the site's exact black.** The animation is drawn onto a canvas that blends it with the page colour, so the logo is exactly `#121212` (the `--ink` colour) on the orange and on the page colour, with clean edges and motion blur. It works the same hosted or opened straight from disk.
 - **Files** (in `images/intro/`): made from your `choch-logo-animated-loop.mp4`. `choch-logo-animated-loop.mp4` and `.webm` are the part of it the intro uses (fly in, snap, hold; the loop's reverse is left off) as a pure black logo on pure white (the canvas turns the black into the ink colour), framed so the finished logo sits dead centre. `choch-logo-animated-loop-still.png` is the finished logo, shown instead of the animation when a device asks for reduced motion or a video can't play (some phones in Low Power Mode). To swap in a new animation, export it as a black logo on a white background and send it over, or replace these files keeping the names (then add `?v=2` after the names in `index.html` so browsers fetch the new ones).
-- **Change things:** the orange is `--intro` at the top of `style.css` (any #hex colour). The welcome line is `welcome` in `data.js`. Timings (when the colour changes, when it fades) are at the top of `intro.js`.
-- **Safari's bars on iPhone stay the page colour.** Safari colours the bars at the top and bottom of the screen from what it finds at the top of the page in the very first frame, and from anything fixed to the screen's edges, and then keeps that colour for the whole visit. An orange intro fixed to the screen left both bars orange. So the intro isn't fixed to the screen: it sits at the top of the page (the page always opens at the top while it plays), and while it's up, Safari's one look at the top of the page comes back empty on purpose (the slow do-nothing animation on `.intro-bg` in `style.css`), so the bars take the page colour instead. Don't take that animation out.
+- **Change things:** the orange is `--intro` at the top of `style.css` (any #hex colour); just below it, phones and tablets set it to the page colour. The welcome line is `welcome` in `data.js`. Timings (when the colour changes, when it fades) are at the top of `intro.js`.
+- **Safari's bars on iPhone stay the page colour.** Safari colours the bars at the top and bottom of the screen from what it finds in the very first frame and from anything fixed to the screen's edges, and then keeps that colour for the whole visit. So on phones and tablets the intro plays on the page colour: there's no orange for Safari to pick up at all. On computers it's orange; the intro still sits at the top of the page rather than being fixed to the screen, and while it's up, Safari's one look at the top of the page comes back empty on purpose (the slow do-nothing animation on `.intro-bg` in `style.css`), so the bars and tab colour take the page colour. Don't take that animation out.
 - A link straight to a section (like `morganchoch.art/#work`) skips the intro and goes straight there. Scrolling, clicking, tapping or pressing a key skips it too.
 - **It can't get stuck.** If the video is slow to arrive, freezes or can't play at all (iPhones in Low Power Mode don't play website videos, and the same goes for anyone who has Reduce Motion turned on), the finished logo shows on the orange instead, then the colour changes and the site starts as usual. If anything else goes wrong, the intro steps aside and the site starts, at most 10 seconds after the page is opened.
 - Without JavaScript there's no intro and the site shows as normal. If `intro.js` is missing, the site starts straight away.
@@ -127,8 +127,8 @@ The opening strip keeps every image sharp on its own: an image is never shown bi
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Geist:wght@900&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261019">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=20261020">
 <!-- the intro covers the page from the very first frame (intro.js takes it
      from there). It plays when the page opens at the top, so a link straight
      to a section (…/#work) goes straight there, and a reload starts at the top.
@@ -253,10 +253,10 @@ The opening strip keeps every image sharp on its own: an image is never shown bi
 
 <!-- "?v=..." makes browsers fetch these files fresh after an update.
      When you change style.css or a .js file, change the number here (and on style.css above). -->
-<script src="data.js?v=20261019"></script>
-<script src="intro.js?v=20261019"></script>
-<script src="arsvita-3d.js?v=20261019"></script>
-<script src="script.js?v=20261019"></script>
+<script src="data.js?v=20261020"></script>
+<script src="intro.js?v=20261020"></script>
+<script src="arsvita-3d.js?v=20261020"></script>
+<script src="script.js?v=20261020"></script>
 </body>
 </html>
 
@@ -274,12 +274,14 @@ The opening strip keeps every image sharp on its own: an image is never shown bi
   --grey: #6E6D67;
   --line: #C7C5BB;
   --viewer-bg: #121212;
-  --intro: #FF5F1F;              /* the neon orange behind your logo at the start (any #hex colour) */
+  --intro: #FF5F1F;              /* the neon orange behind your logo at the start (any #hex colour); phones use the page colour, see below */
 
-  /* a plain, heavy sans serif for your name, numbers and project names,
-     one family for everything you read, one mono for small info */
+  /* just one sans serif and one mono: Geist for everything you read
+     (its heaviest weight for your name, numbers, project names, the About
+     text and your email; regular weights for the rest), Geist Mono for
+     small labels and info */
   --f-display: "Geist", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --f-text: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+  --f-text: "Geist", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --f-mono: "Geist Mono", "IBM Plex Mono", ui-monospace, Menlo, monospace;
 
   --gutter: clamp(1rem, 2.2vw, 2rem);
@@ -292,6 +294,11 @@ The opening strip keeps every image sharp on its own: an image is never shown bi
   /* the grid: sidebar (text) + main (the work) */
   --col-rail: minmax(17.5rem, 1fr);
   --col-main: minmax(0, 3fr);
+}
+/* phones and tablets: the intro plays on the page colour instead of orange,
+   so there's no orange anywhere for Safari to colour its bars with */
+@media (hover: none) and (pointer: coarse), (max-width: 599px){
+  :root{ --intro: var(--paper); }
 }
 
 *{ box-sizing: border-box; }
@@ -309,7 +316,6 @@ body{
   font-size: 16px;
   font-weight: 400;
   line-height: 1.55;
-  font-optical-sizing: auto;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
@@ -664,7 +670,7 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
 .rail-label{ color: var(--grey); margin-bottom: 0.4rem; }
 .rail-detail{ margin-top: 1.75rem; padding-top: 1rem; border-top: 1px solid var(--line); }
 /* names that switch by themselves (Dozer's "As seen with"):
-   condensed capitals in the body font */
+   capitals in the body font */
 .switcher{
   position: relative;
   height: 2.05em;
@@ -672,7 +678,6 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
   line-height: 1;
   text-transform: uppercase;
   letter-spacing: -0.01em;
-  font-stretch: 78%;
   overflow: hidden;
 }
 .switcher-item{
@@ -682,7 +687,10 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
 }
 .switcher-item.is-on{ transform: none; }
 .switcher-item.is-off{ transform: translateY(-105%); }
-.switcher.is-static{ height: auto; font-family: var(--f-text); font-size: 1rem; font-weight: 500; text-transform: none; font-stretch: 100%; line-height: 1.5; }
+.switcher.is-static{ height: auto; font-family: var(--f-text); font-size: 1rem; font-weight: 500; text-transform: none; line-height: 1.5; }
+/* in a project's details the names are body-sized, so the window is exactly
+   one line tall (otherwise the top of the next name peeks in underneath) */
+.rail-detail .switcher:not(.is-static){ height: 1.55em; }
 .rail-detail-image{ margin: 0.4rem 0 0.9rem; }
 .rail-detail-image img{ display: block; width: 46%; max-width: 12rem; height: auto; }
 
@@ -1587,7 +1595,8 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
                           the finished logo, shown instead of the
                           animation when the device asks for reduced
                           motion or a video can't play
-  The orange is --intro in style.css. The welcome line is "welcome" in
+  The orange is --intro in style.css (on phones and tablets the intro
+  plays on the page colour instead). The welcome line is "welcome" in
   data.js. Clicking, scrolling or pressing a key skips the intro.
   If you swap in a new version under the same file name, add "?v=2"
   after its name in index.html so browsers fetch the new one.

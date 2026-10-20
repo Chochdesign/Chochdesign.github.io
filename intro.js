@@ -18,7 +18,8 @@
                           the finished logo, shown instead of the
                           animation when the device asks for reduced
                           motion or a video can't play
-  The orange is --intro in style.css. The welcome line is "welcome" in
+  The orange is --intro in style.css (on phones and tablets the intro
+  plays on the page colour instead). The welcome line is "welcome" in
   data.js. Clicking, scrolling or pressing a key skips the intro.
   If you swap in a new version under the same file name, add "?v=2"
   after its name in index.html so browsers fetch the new one.
