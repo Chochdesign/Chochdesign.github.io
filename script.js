@@ -588,7 +588,8 @@
   // 3D MODEL: turns on its own, and its stand fades away and comes
   // back by itself. Drag to turn it; Pause stops all its movement.
   // The model file is a few MB, so it only loads when the project
-  // is about to scroll into view.
+  // is about to scroll into view, and never while the intro is playing
+  // (Arsvita is the first project, right under the opening screen).
   // ────────────────────────────────────────────────────────────
   document.querySelectorAll("[data-model3d]").forEach(wrap => {
     const project = projectById[wrap.dataset.model3d];
@@ -613,10 +614,13 @@
     }
     pause.addEventListener("click", () => setPaused(!paused));
     setPaused(paused);
-    if ("IntersectionObserver" in window) {
-      const io = new IntersectionObserver(es => { if (es.some(en => en.isIntersecting)) { io.disconnect(); start(); } }, { rootMargin: "700px 0px" });
-      io.observe(stage);
-    } else start();
+    const afterIntro = window.Intro && window.Intro.done ? window.Intro.done : Promise.resolve();
+    afterIntro.then(() => {
+      if ("IntersectionObserver" in window) {
+        const io = new IntersectionObserver(es => { if (es.some(en => en.isIntersecting)) { io.disconnect(); start(); } }, { rootMargin: "700px 0px" });
+        io.observe(stage);
+      } else start();
+    });
   });
 
   // ────────────────────────────────────────────────────────────

@@ -95,36 +95,6 @@ const PORTFOLIO_DATA = {
     {
       id: "01",
       scale: "01",
-      title: "Dozer Magazine",
-      year: "2025\u20132026",
-      role: "Editorial design, art direction",
-      dimensions: "Issue 01: 84 pages (2025) \u00b7 Issue 02: 164 pages (2026)",
-
-      summary: "A prep-fashion magazine that opened a traditionally exclusive style up to everyone. Launched in New York with a party hosted by Paul Stuart.",
-      challenge: "Prep culture has long been predominantly white and exclusive. We wanted to widen it without disrespecting its traditions, while meeting commercial print standards for a 1,000+ copy run.",
-      process: "We cast models from many ethnicities, cultures and backgrounds, and made our friend Pete, \u201cPreppy Pete,\u201d the new face of prep.",
-      outcome: "Issue 01 sold over 1,000 copies on release and was stocked at Casa Magazines and Rare Magazines. A limited J.Crew run sold out in under 10 minutes. Issue 02 nearly doubled in length, with press in The New York Times and The Wall Street Journal.",
-
-      detail: {
-        label: "As seen with",
-        switch: true,
-        items: ["The New York Times", "The Wall Street Journal", "Paul Stuart", "J.Crew", "L.L. Bean", "G.H. Bass", "Sperry", "Mount Gay Rum", "Dirty Water Seltzers"]
-      },
-
-      images: [
-        "images/dozer-01-main.jpg",
-        "images/dozer-02.jpg",
-        "images/dozer-03.jpg",
-        "images/dozer-04.jpg",
-        "images/dozer-05.jpg",
-        "images/dozer-06.jpg",
-        "images/dozer-07.jpg"
-      ],
-      processImages: []
-    },
-    {
-      id: "02",
-      scale: "02",
       title: "Arsvita Magazine",
       year: "2026",
       role: "Editorial design, self-published",
@@ -152,6 +122,36 @@ const PORTFOLIO_DATA = {
         "images/arsvita/spread-22.jpg","images/arsvita/spread-23.jpg"
       ],
       images: ["images/arsvita/spread-01.jpg"],
+      processImages: []
+    },
+    {
+      id: "02",
+      scale: "02",
+      title: "Dozer Magazine",
+      year: "2025\u20132026",
+      role: "Editorial design, art direction",
+      dimensions: "Issue 01: 84 pages (2025) \u00b7 Issue 02: 164 pages (2026)",
+
+      summary: "A prep-fashion magazine that opened a traditionally exclusive style up to everyone. Launched in New York with a party hosted by Paul Stuart.",
+      challenge: "Prep culture has long been predominantly white and exclusive. We wanted to widen it without disrespecting its traditions, while meeting commercial print standards for a 1,000+ copy run.",
+      process: "We cast models from many ethnicities, cultures and backgrounds, and made our friend Pete, \u201cPreppy Pete,\u201d the new face of prep.",
+      outcome: "Issue 01 sold over 1,000 copies on release and was stocked at Casa Magazines and Rare Magazines. A limited J.Crew run sold out in under 10 minutes. Issue 02 nearly doubled in length, with press in The New York Times and The Wall Street Journal.",
+
+      detail: {
+        label: "As seen with",
+        switch: true,
+        items: ["The New York Times", "The Wall Street Journal", "Paul Stuart", "J.Crew", "L.L. Bean", "G.H. Bass", "Sperry", "Mount Gay Rum", "Dirty Water Seltzers"]
+      },
+
+      images: [
+        "images/dozer-01-main.jpg",
+        "images/dozer-02.jpg",
+        "images/dozer-03.jpg",
+        "images/dozer-04.jpg",
+        "images/dozer-05.jpg",
+        "images/dozer-06.jpg",
+        "images/dozer-07.jpg"
+      ],
       processImages: []
     },
     {

@@ -62,7 +62,7 @@ Before anything else, your CHOCH logo animation plays full screen on neon orange
 
 ## The opening screen
 
-After the intro, your name types itself out across the full width of the page in Geist Black (it's sized to fit exactly, on any screen). Then the work slides in from the right: every photo from every project, in order (all of Dozer, then Arsvita's spreads, then The Pecking Order's finished birds), each at its own shape, in a gentle rhythm of sizes. It slides along to the next image every 1.5 seconds (change `STRIP_SLIDE_MS` and `STRIP_HOLD_MS` near the top of the strip code in `script.js` to adjust), loops back to the start seamlessly, and can be dragged or swiped. It keeps going round on its own; Pause stops it. Any image that can't be found is simply left out. Each image is captioned with its project and links to it, and the matching project lights up in the index underneath. The whole opening screen is kept shorter than the window so the start of project 01 is always visible below it.
+After the intro, your name types itself out across the full width of the page in Geist Black (it's sized to fit exactly, on any screen). Then the work slides in from the right: every photo from every project, in order (all of Arsvita's spreads, then Dozer, then The Pecking Order's finished birds), each at its own shape, in a gentle rhythm of sizes. It slides along to the next image every 1.5 seconds (change `STRIP_SLIDE_MS` and `STRIP_HOLD_MS` near the top of the strip code in `script.js` to adjust), loops back to the start seamlessly, and can be dragged or swiped. It keeps going round on its own; Pause stops it. Any image that can't be found is simply left out. Each image is captioned with its project and links to it, and the matching project lights up in the index underneath. The whole opening screen is kept shorter than the window so the start of project 01 is always visible below it.
 
 It builds itself from the images in `data.js`, so it stays up to date as you add or remove work. To show a hand-picked set instead, add a `reel` list (see the notes at the top of `data.js`).
 
@@ -1440,7 +1440,8 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
   // 3D MODEL: turns on its own, and its stand fades away and comes
   // back by itself. Drag to turn it; Pause stops all its movement.
   // The model file is a few MB, so it only loads when the project
-  // is about to scroll into view.
+  // is about to scroll into view, and never while the intro is playing
+  // (Arsvita is the first project, right under the opening screen).
   // ────────────────────────────────────────────────────────────
   document.querySelectorAll("[data-model3d]").forEach(wrap => {
     const project = projectById[wrap.dataset.model3d];
@@ -1465,10 +1466,13 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
     }
     pause.addEventListener("click", () => setPaused(!paused));
     setPaused(paused);
-    if ("IntersectionObserver" in window) {
-      const io = new IntersectionObserver(es => { if (es.some(en => en.isIntersecting)) { io.disconnect(); start(); } }, { rootMargin: "700px 0px" });
-      io.observe(stage);
-    } else start();
+    const afterIntro = window.Intro && window.Intro.done ? window.Intro.done : Promise.resolve();
+    afterIntro.then(() => {
+      if ("IntersectionObserver" in window) {
+        const io = new IntersectionObserver(es => { if (es.some(en => en.isIntersecting)) { io.disconnect(); start(); } }, { rootMargin: "700px 0px" });
+        io.observe(stage);
+      } else start();
+    });
   });
 
   // ────────────────────────────────────────────────────────────
@@ -1981,36 +1985,6 @@ const PORTFOLIO_DATA = {
     {
       id: "01",
       scale: "01",
-      title: "Dozer Magazine",
-      year: "2025\u20132026",
-      role: "Editorial design, art direction",
-      dimensions: "Issue 01: 84 pages (2025) \u00b7 Issue 02: 164 pages (2026)",
-
-      summary: "A prep-fashion magazine that opened a traditionally exclusive style up to everyone. Launched in New York with a party hosted by Paul Stuart.",
-      challenge: "Prep culture has long been predominantly white and exclusive. We wanted to widen it without disrespecting its traditions, while meeting commercial print standards for a 1,000+ copy run.",
-      process: "We cast models from many ethnicities, cultures and backgrounds, and made our friend Pete, \u201cPreppy Pete,\u201d the new face of prep.",
-      outcome: "Issue 01 sold over 1,000 copies on release and was stocked at Casa Magazines and Rare Magazines. A limited J.Crew run sold out in under 10 minutes. Issue 02 nearly doubled in length, with press in The New York Times and The Wall Street Journal.",
-
-      detail: {
-        label: "As seen with",
-        switch: true,
-        items: ["The New York Times", "The Wall Street Journal", "Paul Stuart", "J.Crew", "L.L. Bean", "G.H. Bass", "Sperry", "Mount Gay Rum", "Dirty Water Seltzers"]
-      },
-
-      images: [
-        "images/dozer-01-main.jpg",
-        "images/dozer-02.jpg",
-        "images/dozer-03.jpg",
-        "images/dozer-04.jpg",
-        "images/dozer-05.jpg",
-        "images/dozer-06.jpg",
-        "images/dozer-07.jpg"
-      ],
-      processImages: []
-    },
-    {
-      id: "02",
-      scale: "02",
       title: "Arsvita Magazine",
       year: "2026",
       role: "Editorial design, self-published",
@@ -2038,6 +2012,36 @@ const PORTFOLIO_DATA = {
         "images/arsvita/spread-22.jpg","images/arsvita/spread-23.jpg"
       ],
       images: ["images/arsvita/spread-01.jpg"],
+      processImages: []
+    },
+    {
+      id: "02",
+      scale: "02",
+      title: "Dozer Magazine",
+      year: "2025\u20132026",
+      role: "Editorial design, art direction",
+      dimensions: "Issue 01: 84 pages (2025) \u00b7 Issue 02: 164 pages (2026)",
+
+      summary: "A prep-fashion magazine that opened a traditionally exclusive style up to everyone. Launched in New York with a party hosted by Paul Stuart.",
+      challenge: "Prep culture has long been predominantly white and exclusive. We wanted to widen it without disrespecting its traditions, while meeting commercial print standards for a 1,000+ copy run.",
+      process: "We cast models from many ethnicities, cultures and backgrounds, and made our friend Pete, \u201cPreppy Pete,\u201d the new face of prep.",
+      outcome: "Issue 01 sold over 1,000 copies on release and was stocked at Casa Magazines and Rare Magazines. A limited J.Crew run sold out in under 10 minutes. Issue 02 nearly doubled in length, with press in The New York Times and The Wall Street Journal.",
+
+      detail: {
+        label: "As seen with",
+        switch: true,
+        items: ["The New York Times", "The Wall Street Journal", "Paul Stuart", "J.Crew", "L.L. Bean", "G.H. Bass", "Sperry", "Mount Gay Rum", "Dirty Water Seltzers"]
+      },
+
+      images: [
+        "images/dozer-01-main.jpg",
+        "images/dozer-02.jpg",
+        "images/dozer-03.jpg",
+        "images/dozer-04.jpg",
+        "images/dozer-05.jpg",
+        "images/dozer-06.jpg",
+        "images/dozer-07.jpg"
+      ],
       processImages: []
     },
     {
