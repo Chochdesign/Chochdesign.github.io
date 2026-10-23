@@ -128,7 +128,7 @@ The opening strip keeps every image sharp on its own: an image is never shown bi
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261020">
+<link rel="stylesheet" href="style.css?v=20261023">
 <!-- the intro covers the page from the very first frame (intro.js takes it
      from there). It plays when the page opens at the top, so a link straight
      to a section (…/#work) goes straight there, and a reload starts at the top.
@@ -253,10 +253,10 @@ The opening strip keeps every image sharp on its own: an image is never shown bi
 
 <!-- "?v=..." makes browsers fetch these files fresh after an update.
      When you change style.css or a .js file, change the number here (and on style.css above). -->
-<script src="data.js?v=20261020"></script>
-<script src="intro.js?v=20261020"></script>
-<script src="arsvita-3d.js?v=20261020"></script>
-<script src="script.js?v=20261020"></script>
+<script src="data.js?v=20261023"></script>
+<script src="intro.js?v=20261023"></script>
+<script src="arsvita-3d.js?v=20261023"></script>
+<script src="script.js?v=20261023"></script>
 </body>
 </html>
 
@@ -692,7 +692,7 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
    one line tall (otherwise the top of the next name peeks in underneath) */
 .rail-detail .switcher:not(.is-static){ height: 1.55em; }
 .rail-detail-image{ margin: 0.4rem 0 0.9rem; }
-.rail-detail-image img{ display: block; width: 46%; max-width: 12rem; height: auto; }
+.rail-detail-image img{ display: block; width: 46%; max-width: 12rem; height: auto; margin: 0 auto; }   /* centred in the sidebar */
 
 /* ────────────────────────────────────────────────────────────
    THE WORK: full width of the main column, stacked, never cropped

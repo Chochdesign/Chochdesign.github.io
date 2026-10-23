@@ -425,7 +425,7 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
    one line tall (otherwise the top of the next name peeks in underneath) */
 .rail-detail .switcher:not(.is-static){ height: 1.55em; }
 .rail-detail-image{ margin: 0.4rem 0 0.9rem; }
-.rail-detail-image img{ display: block; width: 46%; max-width: 12rem; height: auto; }
+.rail-detail-image img{ display: block; width: 46%; max-width: 12rem; height: auto; margin: 0 auto; }   /* centred in the sidebar */
 
 /* ────────────────────────────────────────────────────────────
    THE WORK: full width of the main column, stacked, never cropped
