@@ -1,6 +1,6 @@
 # Morgan Chochinov — Portfolio Site
 
-A static portfolio website built around a single design concept: the book *S, M, L, XL* by Rem Koolhaas and Bruce Mau. The site treats itself like a printed book: a running head, numbered chapters, and one consistent sidebar alongside each project's work. It opens with your CHOCH logo animation on neon orange (on phones and tablets, on the page colour); when the pieces snap together the orange turns into the page colour and fades into the site. Then the name types itself out and every photo from every project slides past underneath, sized so the first project already shows on the first screen.
+A static portfolio website built around a single design concept: the book *S, M, L, XL* by Rem Koolhaas and Bruce Mau. The site treats itself like a printed book: a running head, numbered chapters, and one consistent sidebar alongside each project's work. It opens with your CHOCH logo animation on neon orange (on phones and tablets, on the page colour); when the pieces snap together the orange turns into the page colour and fades into the site. Then the name types itself out and work from every project slides past underneath, sized so the first project already shows on the first screen. Every project then shows its work the same way: each image at the full width of the work column, one under another.
 
 No build step, no framework, no dependencies beyond two Google Fonts. Everything renders from a single data file.
 
@@ -28,6 +28,10 @@ Open `index.html` in a browser — that's it, it runs locally with no server nee
     │   ├── choch-logo-animated-loop.mp4, .webm   Your logo animation (fly in, snap, hold), black on white
     │   └── choch-logo-animated-loop-still.png    The finished logo, for reduced motion / no video
     ├── dozer-*.jpg              7 photos — Dozer Magazine
+    ├── dozer/
+    │   ├── cover.webp, spread-01.webp … spread-81.webp, back-cover.webp
+    │   │                          Issue 02, cover to cover (3000px wide; the covers 1500px)
+    │   └── small/                 The same 83 files at half size, for phones and the opening strip
     ├── logo-full.png            The Pecking Order logo mark
     ├── arsvita/
     │   ├── 3d-poster.webp                   Still of the 3D model (transparent), shown while it loads
@@ -44,8 +48,9 @@ Open `index.html` in a browser — that's it, it runs locally with no server nee
 - **Chapter numbering:** projects are numbered 01/02/03 in the order they appear in the `projects` array in `data.js`.
 - **One grid everywhere:** every project, About and Contact use the same two columns: a sidebar (a quarter of the width) for the text and the work (three quarters) as big as it can be. The opening screen's tagline and index line up with the same columns. On phones everything stacks and the imagery runs edge to edge, and each project runs number and name, then its main visual, then its text, then the rest of the work.
 - **One sidebar format:** number, name, small info (year, role, specs), a one- or two-sentence summary, then Challenge / Approach / Outcome, then an optional detail block. On wide screens the sidebar stays beside the work while you scroll; if it's taller than the window, it scrolls until its last line is showing and stays there.
-- **Imagery is never cropped, boxed or stretched.** Dozer's images stack one under another at the full width of the work column. The spreads show whole. The opening strip shows every image at its own shape.
-- **Motion:** every slide on the site uses the same curve as After Effects' Easy Ease. Nothing fades in; the only fade is the intro handing over to the site. The strip, the 3D model and both sets of spreads move on their own, and each has a Pause button (an accessibility requirement for anything that moves for more than 5 seconds). With "reduce motion" turned on in the device's settings, none of them move by themselves.
+- **Imagery is never cropped, boxed or stretched.** Every project's work stacks one image under another at the full width of the work column: Arsvita's 3D model and spreads, Dozer's photos and the whole of Issue 02, The Pecking Order's birds. The opening strip shows every image at its own shape.
+- **Getting around:** the running head along the top is clickable (your name goes to the top, the section's name lists every section), and a bar along the bottom goes to the previous or next section. See *Getting around* below.
+- **Motion:** every slide on the site uses the same curve as After Effects' Easy Ease. Nothing fades in; the only fade is the intro handing over to the site. The strip and the 3D model move on their own, and each has a Pause button (an accessibility requirement for anything that moves for more than 5 seconds). With "reduce motion" turned on in the device's settings, none of them move by themselves.
 - All of the content options are documented in the comment block at the top of `data.js`.
 
 ## The intro
@@ -62,15 +67,26 @@ Before anything else, your CHOCH logo animation plays full screen on neon orange
 
 ## The opening screen
 
-After the intro, your name types itself out across the full width of the page in Geist Black (it's sized to fit exactly, on any screen). Then the work slides in from the right: every photo from every project, in order (all of Arsvita's spreads, then Dozer, then The Pecking Order's finished birds), each at its own shape, in a gentle rhythm of sizes. It slides along to the next image every 1.5 seconds (change `STRIP_SLIDE_MS` and `STRIP_HOLD_MS` near the top of the strip code in `script.js` to adjust), loops back to the start seamlessly, and can be dragged or swiped. It keeps going round on its own; Pause stops it. Any image that can't be found is simply left out. Each image is captioned with its project and links to it, and the matching project lights up in the index underneath. The whole opening screen is kept shorter than the window so the start of project 01 is always visible below it.
+After the intro, your name types itself out across the full width of the page in Geist Black (it's sized to fit exactly, on any screen). Then the work slides in from the right: work from every project, in order (all of Arsvita's spreads, then 24 of Dozer's photos and spreads picked evenly from start to finish, then The Pecking Order's finished birds), each at its own shape, in a gentle rhythm of sizes. It slides along to the next image every 1.5 seconds (change `STRIP_SLIDE_MS` and `STRIP_HOLD_MS` near the top of the strip code in `script.js` to adjust), loops back to the start seamlessly, and can be dragged or swiped. It keeps going round on its own; Pause stops it. Any image that can't be found is simply left out. Each image is captioned with its project and links to it, and the matching project lights up in the index underneath. The whole opening screen is kept shorter than the window so the start of project 01 is always visible below it.
 
 It builds itself from the images in `data.js`, so it stays up to date as you add or remove work. To show a hand-picked set instead, add a `reel` list (see the notes at the top of `data.js`).
+
+## Getting around
+
+The running head along the top of the screen works like a breadcrumb. **Your name** goes back to the top of the page. **The section's name** (with the small arrow) opens a list of every section: the three projects with their numbers and years, then About and Contact, with the one you're in marked by a bar at its left. Escape, a click anywhere else, or tabbing out of it closes it.
+
+Once you've scrolled past the opening screen, a bar along the bottom of the screen shows **← the previous section**, **Back to top** and **the next section →**, so you can step from one project straight to the next without scrolling through all of it. Both update themselves as you scroll, from the projects in `data.js`.
+
+- Going to a section covers most of the distance in one go and glides the last stretch, so the browser doesn't load every spread it would pass on the way (Dozer alone has 83).
+- Every spread's space is held at its final shape before it loads, so nothing above the section you land on can push it out of place. Browsers that can't keep the page still on their own get a hand from `script.js` for a few seconds after you arrive.
+- Keyboard and screen reader users carry on from the section they went to. On touch screens the top bar is taller, so its links are easy to tap.
+- Contact fills the last screen, so every section, the last ones included, can come up to the top when you go to it.
 
 ## The 3D model (Arsvita)
 
 Arsvita opens on a 3D model of the book in its laser-cut acrylic stand, floating on the page with no floor or shadow. The 3D area is transparent, so the model sits straight on the page's own background colour (and stays matched if you change `--paper` in `style.css`). The cover is colour-matched to the printed blue, `#7FBFE9`.
 
-The model turns slowly on its own, and every 5 seconds the stand fades away and comes back. There are no stand buttons. Visitors can drag it to turn it themselves (that holds the automatic movement until it's left alone again), and Pause stops all of its movement. The spreads sit directly underneath.
+The model turns slowly on its own, and every 5 seconds the stand fades away and comes back. There are no stand buttons. Visitors can drag it to turn it themselves (that holds the automatic movement until it's left alone again), and Pause stops all of its movement. All 23 spreads follow underneath, at full size.
 
 **Where the files go** (paths are relative to `index.html`):
 
@@ -90,15 +106,20 @@ images/arsvita/3d-poster.webp   with the Arsvita spreads
 
 ## The spreads
 
-Arsvita and The Pecking Order show their spreads the same way: one at a time, sliding to the next. There are several ways to move through them, so nobody has to guess: drag or swipe, click the left or right half, use **Previous** / **Next** (or the arrow keys), or drag the bar underneath. The count between the buttons says where you are: "Spread 3 of 23", or for the birds "Shoebill, spread 2 of 6". Left alone, the spreads slide on by themselves (hovering holds them, Pause stops them), and after the last one they carry on to the first without jumping back.
+Every spread shows at the full width of the work column, one under another, the same way Dozer's photos do: no sliders, nothing to click through. Each run starts with a small heading: "Inside the book" for Arsvita (under the 3D model), "Issue 02, cover to cover" for Dozer (after the photos), and each bird's name for The Pecking Order. Change a heading with `spreadsLabel` in `data.js`.
 
-The Pecking Order runs through every bird in a row (the `birds` list in `data.js`). A bird with `status: "in-progress"`, currently the Hoatzin, is greyed out and labelled "Work in progress", and it's left out of the opening strip. When it's finished, change its status to `"complete"` and add its spreads.
+- **The page never jumps.** Each spread's space is held at the project's `aspect` (the width ÷ height of one spread) while it loads, in a soft placeholder tone until the picture arrives. Spreads load as they come near the screen, not all at once.
+- **Covers sit centred at the same height as the spreads,** the size of one page. Put `cover` in the file's name (`cover.webp`, `back-cover.webp`) and screen readers call it the front or back cover; every other spread is read out as "spread 12 of 81".
+- **Dozer's Issue 02** is the whole magazine, made from `handbookversionfinalforprint.pdf`: the front cover, all 81 spreads and the back cover, cut to the trim (no bleed). The few CMYK pictures and the black text were converted to screen colour with a U.S. Web Coated (SWOP) profile, InDesign's North American default, so they match what InDesign shows on screen. Each spread is 3000px wide (the covers 1500px), with a half-size copy in `images/dozer/small/` (`smallCopies: true` in `data.js`) that phones and smaller screens load instead, about a third of the data.
+- **The Pecking Order** runs through every bird (the `birds` list in `data.js`). A bird with `status: "in-progress"`, currently the Hoatzin, is greyed out and labelled "Work in progress", and it's left out of the opening strip. When it's finished, change its status to `"complete"` and add its spreads.
 
 ## Images
 
 Export images at least 3000px wide (spreads included). A high-resolution (Retina) screen needs twice as many pixels as the size an image is shown at, and the spreads fill the whole work column, so anything smaller looks soft. Nothing on the site is cropped, so you can export at each image's natural shape.
 
-The opening strip keeps every image sharp on its own: an image is never shown bigger than its file has pixels for on the screen it's on, so a small file shows a little smaller instead of blurry, and grows back by itself once a bigger file replaces it. Right now the Arsvita spreads (1600px wide) and The Pecking Order spreads (1200px wide) are the ones held back; the spreads inside each project still show at full size, so those files are the next thing to re-export.
+Dozer's spreads are 3000px wide. The Arsvita spreads (1600px wide) and The Pecking Order spreads (1200px wide) now fill the work column too, so they look soft on high-resolution screens: they're the next thing to re-export. Export them 3000px wide (or send over the PDFs) with the same names and they sharpen up with no other change. For a big set, half-size copies in a `small` folder next to them (plus `smallCopies: true`) keep phones fast, like Dozer's.
+
+The opening strip keeps every image sharp on its own: an image is never shown bigger than its file has pixels for on the screen it's on, so a small file shows a little smaller instead of blurry, and grows back by itself once a bigger file replaces it.
 
 ## The code
 
@@ -128,7 +149,7 @@ The opening strip keeps every image sharp on its own: an image is never shown bi
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261023">
+<link rel="stylesheet" href="style.css?v=20261104">
 <!-- the intro covers the page from the very first frame (intro.js takes it
      from there). It plays when the page opens at the top, so a link straight
      to a section (…/#work) goes straight there, and a reload starts at the top.
@@ -164,16 +185,24 @@ The opening strip keeps every image sharp on its own: an image is never shown bi
 
 <a class="skip-link" href="#work">Skip to the work</a>
 
-<!-- running head, like a book's: names the section you're in -->
-<div class="runhead" aria-hidden="true">
-  <span id="runhead-name"></span>
-  <span class="runhead-mid">/</span>
-  <span id="runhead-section">Portfolio</span>
-  <span class="runhead-progress-track"><span id="scroll-progress" class="runhead-progress-fill"></span></span>
-</div>
+<!-- running head, like a book's: names the section you're in. Your name goes
+     back to the top; the section's name opens a list of every section. -->
+<nav class="runhead" aria-label="Breadcrumb">
+  <a class="runhead-name" href="#top"><span id="runhead-name"></span><span class="sr-only">, back to the top</span></a>
+  <span class="runhead-mid" aria-hidden="true">/</span>
+  <div class="runhead-menu">
+    <button type="button" class="runhead-section" id="runhead-section" aria-expanded="false" aria-controls="section-menu">
+      <span class="runhead-section-label" id="runhead-section-label">Portfolio</span><span class="sr-only">, all sections</span><span class="runhead-caret" aria-hidden="true"></span>
+    </button>
+    <div class="section-menu" id="section-menu" hidden>
+      <ol class="section-menu-list" id="section-menu-list"></ol>
+    </div>
+  </div>
+  <span class="runhead-progress-track" aria-hidden="true"><span id="scroll-progress" class="runhead-progress-fill"></span></span>
+</nav>
 
 <!-- HERO: your name types itself out across the page, then the work
-     slides in underneath it: every image from every project, in order,
+     slides in underneath it: work from every project, in order,
      each at its own shape and size, sliding along to the next one.
      Kept shorter than the screen so the first project shows below. -->
 <header class="hero" id="top">
@@ -247,16 +276,20 @@ The opening strip keeps every image sharp on its own: an image is never shown bi
 
 </main>
 
-<footer class="backtotop">
-  <a href="#top">Back to top ↑</a>
-</footer>
+<!-- along the bottom once you've scrolled down: the previous section, back
+     to the top, the next section (script.js fills them in as you scroll) -->
+<nav class="pager" aria-label="Previous and next">
+  <a class="pager-link pager-prev" id="pager-prev" href="#top" hidden><span class="pager-arrow" aria-hidden="true">←</span><span class="pager-text"></span></a>
+  <a class="pager-link pager-top" href="#top" aria-label="Back to top"><span class="pager-wide">Back to </span>top <span aria-hidden="true">↑</span></a>
+  <a class="pager-link pager-next" id="pager-next" href="#top" hidden><span class="pager-text"></span><span class="pager-arrow" aria-hidden="true">→</span></a>
+</nav>
 
 <!-- "?v=..." makes browsers fetch these files fresh after an update.
      When you change style.css or a .js file, change the number here (and on style.css above). -->
-<script src="data.js?v=20261023"></script>
-<script src="intro.js?v=20261023"></script>
-<script src="arsvita-3d.js?v=20261023"></script>
-<script src="script.js?v=20261023"></script>
+<script src="data.js?v=20261104"></script>
+<script src="intro.js?v=20261104"></script>
+<script src="arsvita-3d.js?v=20261104"></script>
+<script src="script.js?v=20261104"></script>
 </body>
 </html>
 
@@ -284,6 +317,8 @@ The opening strip keeps every image sharp on its own: an image is never shown bi
   --f-text: "Geist", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --f-mono: "Geist Mono", "IBM Plex Mono", ui-monospace, Menlo, monospace;
 
+  --placeholder: #E6E4DC;        /* where a spread will show, while it loads */
+
   --gutter: clamp(1rem, 2.2vw, 2rem);
   --runhead-h: 2rem;
   --tap: 2.75rem;                /* 44px minimum touch target */
@@ -300,6 +335,10 @@ The opening strip keeps every image sharp on its own: an image is never shown bi
 @media (hover: none) and (pointer: coarse), (max-width: 599px){
   :root{ --intro: var(--paper); }
 }
+/* touch screens: a taller bar along the top, so its links are easy to tap */
+@media (pointer: coarse){
+  :root{ --runhead-h: 2.75rem; }
+}
 
 *{ box-sizing: border-box; }
 html{ scroll-behavior: smooth; scroll-padding-top: var(--runhead-h); }
@@ -309,7 +348,7 @@ html{ scroll-behavior: smooth; scroll-padding-top: var(--runhead-h); }
 }
 body{
   margin: 0;
-  padding-bottom: 3.25rem;       /* room for the back-to-top bar */
+  padding-bottom: 3.25rem;       /* room for the bar along the bottom */
   background: var(--paper);
   color: var(--ink);
   font-family: var(--f-text);
@@ -328,6 +367,10 @@ a:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-vis
 }
 [data-pointer]:focus-visible{ outline: none; }
 h1, h2, h3, p, ol, ul, figure{ margin: 0; }
+[hidden]{ display: none !important; }
+/* a section you've gone to takes focus (so the keyboard carries on from
+   there), but it isn't a control, so it gets no focus ring */
+.section:focus, .hero:focus, .work:focus{ outline: none; }
 .sr-only{
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
@@ -351,7 +394,7 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
 }
 .hero-name{ letter-spacing: -0.04em; }
 /* 2. lede: tagline, summaries, about */
-.hero-tagline, .rail-summary, .section-lede, .book-how{
+.hero-tagline, .rail-summary, .section-lede{
   font-family: var(--f-text);
   font-weight: 500;
   letter-spacing: -0.005em;
@@ -364,7 +407,7 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
   line-height: 1.55;
 }
 /* 4. label: small headings, nav, buttons, the intro's welcome line */
-.rail-label, .book-label, .hero-nav a, .ctl-btn, .wip-badge, .backtotop a, .skip-link, .intro-welcome{
+.rail-label, .media-label, .hero-nav a, .ctl-btn, .wip-badge, .pager-link, .skip-link, .intro-welcome{
   font-family: var(--f-mono);
   font-weight: 500;
   font-size: 0.72rem;
@@ -373,8 +416,8 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
   text-transform: uppercase;
 }
 /* 5. meta: small info lines, counters, captions */
-.rail-facts, .hero-role, .hero-index-year, .strip-cap, .book-count, .model3d-note,
-.runhead, .contact-social, .model3d-loading, .slider-hint, .model3d-hint{
+.rail-facts, .hero-role, .hero-index-year, .strip-cap, .model3d-note, .section-menu-year,
+.runhead, .contact-social, .model3d-loading, .model3d-hint{
   font-family: var(--f-mono);
   font-weight: 400;
   font-size: 0.78rem;
@@ -421,7 +464,7 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
 }
 @keyframes intro-hold{ from, to{ opacity: 1; } }
 .intro-stage{ z-index: 1; }
-.intro-on .backtotop{ display: none; }
+.intro-on .pager{ display: none; }
 .intro.is-leaving{ opacity: 0; pointer-events: none; transition: opacity var(--intro-fade, 0.7s) var(--easy); }
 .intro-stage{ position: relative; width: min(100%, 32.875rem); }
 .intro-logo{ position: relative; aspect-ratio: 1052 / 838; }   /* the animation's frame size */
@@ -445,7 +488,8 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
 }
 
 /* ────────────────────────────────────────────────────────────
-   RUNNING HEAD
+   RUNNING HEAD: your name goes back to the top; the section's name
+   is a button that opens a list of every section
    ──────────────────────────────────────────────────────────── */
 .runhead{
   position: sticky; top: 0; z-index: 20;
@@ -455,11 +499,79 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
   font-size: 0.72rem;
   background: var(--paper);
   color: var(--grey);
-  white-space: nowrap; overflow: hidden;
+  white-space: nowrap;
 }
+.runhead-name, .runhead-section{
+  display: inline-flex; align-items: center;
+  height: var(--runhead-h);
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.35s var(--easy);
+}
+.runhead-name{ flex: 0 0 auto; }
+.runhead-name:hover{ color: var(--ink); }
 .runhead-mid{ opacity: 0.6; }
+.runhead-menu{ display: flex; min-width: 0; }      /* the list hangs from the whole bar, see .section-menu */
+.runhead-section{
+  gap: 0.55em;
+  min-width: 0;
+  margin: 0; padding: 0;
+  font: inherit; letter-spacing: inherit;
+  color: var(--ink);
+  background: none; border: 0; border-radius: 0;
+  cursor: pointer;
+}
+.runhead-section-label{ overflow: hidden; text-overflow: ellipsis; }
+.runhead-section:hover .runhead-section-label,
+.runhead-section[aria-expanded="true"] .runhead-section-label{ text-decoration: underline; text-underline-offset: 0.25em; }
+/* a small chevron that turns over while the list is open */
+.runhead-caret{
+  flex: 0 0 auto;
+  width: 0.45em; height: 0.45em;
+  margin-top: -0.25em;
+  border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 0.35s var(--easy), margin-top 0.35s var(--easy);
+}
+.runhead-section[aria-expanded="true"] .runhead-caret{ transform: rotate(225deg); margin-top: 0.2em; }
 .runhead-progress-track{ position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--line); }
 .runhead-progress-fill{ display: block; height: 100%; width: 0%; background: var(--ink); }
+
+/* the list of sections, laid out like the index on the opening screen */
+.section-menu{
+  position: absolute; top: 100%; left: var(--gutter);
+  width: min(27rem, calc(100% - 2 * var(--gutter)));
+  max-height: calc(100vh - var(--runhead-h) - 1rem);
+  max-height: calc(100dvh - var(--runhead-h) - 1rem);
+  overflow-y: auto;
+  background: var(--paper);
+  border: 1px solid var(--ink);
+  white-space: normal;
+}
+.section-menu-list{ list-style: none; padding: 0; }
+.section-menu-list li + li .section-menu-row{ border-top: 1px solid var(--line); }
+.section-menu-row{
+  display: grid;
+  grid-template-columns: 2.6rem minmax(0, 1fr) auto;
+  column-gap: 0.75rem;
+  align-items: baseline;
+  min-height: var(--tap);
+  padding: 0.7rem 1rem;
+  color: var(--grey);
+  text-decoration: none;
+  transition: color 0.35s var(--easy), background-color 0.35s var(--easy);
+}
+.section-menu-row:hover, .section-menu-row[aria-current="true"]{ color: var(--ink); }
+.section-menu-row:hover{ background: var(--placeholder); }
+.section-menu-num{ font-family: var(--f-display); font-weight: 900; font-size: 1.35rem; line-height: 0.9; letter-spacing: -0.03em; }
+.section-menu-title{ font-family: var(--f-text); font-weight: 600; font-size: 1rem; line-height: 1.2; }
+.section-menu-year{ text-align: right; }
+/* the section you're in is marked with a short bar at its left */
+.section-menu-row[aria-current="true"]{ box-shadow: inset 3px 0 0 var(--ink); }
+@media (max-width: 599px){
+  .section-menu{ left: 0; width: 100%; border-left: 0; border-right: 0; }
+  .section-menu-row{ padding-left: var(--gutter); padding-right: var(--gutter); }
+}
 
 /* ────────────────────────────────────────────────────────────
    SHARED CONTROLS
@@ -478,7 +590,6 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
 }
 .ctl-btn:hover:not(:disabled),
 .ctl-btn[aria-pressed="true"]{ background: var(--ink); color: var(--paper); }
-.controls{ display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-top: 0.75rem; }
 
 /* ────────────────────────────────────────────────────────────
    HERO: your name types itself out, then the work slides in
@@ -631,7 +742,6 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   border-bottom: 1px solid var(--line);
-  scroll-margin-top: var(--runhead-h);
 }
 .rail{ padding: var(--gutter); }
 .section-main{ padding: var(--gutter); display: flex; flex-direction: column; gap: 3rem; min-width: 0; }
@@ -643,9 +753,8 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
 .project .rail-head{ grid-area: head; padding: 2.25rem var(--gutter) 1.25rem; }
 .project .media-primary{ grid-area: primary; min-width: 0; }
 .project .rail-body{ grid-area: body; padding: 1.75rem var(--gutter) 2.5rem; }
-.project .media-secondary{ grid-area: secondary; min-width: 0; padding-bottom: 2.5rem; display: flex; flex-direction: column; gap: 2.5rem; }
-.project .book-head, .project .controls, .project .model3d-foot, .project .book-progress{ margin-left: var(--gutter); margin-right: var(--gutter); }
-.project .book-progress{ width: calc(100% - 2 * var(--gutter)); }
+.project .media-secondary{ grid-area: secondary; min-width: 0; padding-bottom: 2.5rem; display: flex; flex-direction: column; gap: 1rem; }
+.project .model3d-foot, .project .media-label{ margin-left: var(--gutter); margin-right: var(--gutter); }
 
 @media (min-width: 900px){
   .section{ grid-template-columns: var(--col-rail) var(--col-main); }
@@ -654,10 +763,9 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
   .project .rail{ display: block; grid-area: rail; }
   .project .rail-head, .project .rail-body{ padding: 0; }
   .project .rail-body{ margin-top: 1.75rem; }
-  .project .section-main{ display: flex; grid-area: main; }
-  .project .media-secondary{ padding-bottom: 0; gap: 3rem; }
-  .project .book-head, .project .controls, .project .model3d-foot, .project .book-progress{ margin-left: 0; margin-right: 0; }
-  .project .book-progress{ width: 100%; }
+  .project .section-main{ display: flex; grid-area: main; gap: 1rem; }
+  .project .media-secondary{ padding-bottom: 0; }
+  .project .model3d-foot, .project .media-label{ margin-left: 0; margin-right: 0; }
 }
 
 /* ---- sidebar: identical for every section ---- */
@@ -695,40 +803,35 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
 .rail-detail-image img{ display: block; width: 46%; max-width: 12rem; height: auto; margin: 0 auto; }   /* centred in the sidebar */
 
 /* ────────────────────────────────────────────────────────────
-   THE WORK: full width of the main column, stacked, never cropped
+   THE WORK: every image at the full width of the main column, one
+   under another, never cropped. Each run (the spreads, each bird, the
+   process) starts with a small heading.
    ──────────────────────────────────────────────────────────── */
 .media-stack{ display: flex; flex-direction: column; gap: 1rem; }
-.section-main.is-stacked{ gap: 1rem; }              /* Dozer: one continuous column of images */
-.project .section-main.is-stacked .media-secondary{ gap: 1rem; }
-.media-stack img{ display: block; width: 100%; height: auto; }
-.media-process .rail-label{ margin-bottom: 0.75rem; }
+.media-stack > img, .media-stack .spread-img{ display: block; width: 100%; height: auto; }
+.media-run{ display: flex; flex-direction: column; }
+.media-label{
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--line);
+  color: var(--grey);
+}
+.media-primary > .media-label{ margin-top: 0; }   /* a project that opens with a heading */
 .media-placeholder{
   aspect-ratio: 16 / 10; display: flex; align-items: flex-end; justify-content: flex-end; padding: 0.75rem;
   font-family: var(--f-mono); font-size: 0.78rem; color: var(--grey);
   background: repeating-linear-gradient(135deg, var(--paper) 0 2px, var(--line) 2px 3px);
 }
 
-/* ---- spreads: one at a time, sliding to the next ---- */
-.book-head{ margin-bottom: 0.8rem; }
-.book-label{ color: var(--grey); }
-.book-how{ margin-top: 0.35rem; font-size: 1.05rem; line-height: 1.35; }
-.slider{
-  position: relative;
-  width: 100%;
-  aspect-ratio: var(--aspect, 1.414);
-  max-height: calc(100svh - 12rem);
-  overflow: hidden;
-  cursor: grab;
-  touch-action: pan-y;
-  -webkit-user-select: none; user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-.slider.is-dragging{ cursor: grabbing; }
-.slider-track{ display: flex; height: 100%; }
-.slide{ position: relative; flex: 0 0 100%; height: 100%; }
-.slide img{ display: block; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
-/* unfinished section: greyed out and labelled */
-.slide.is-wip img{ filter: grayscale(1); opacity: 0.4; }
+/* ---- spreads: each one's space is held at the project's shape ("aspect"
+   in data.js) while it loads, so the page never jumps. A single page,
+   like a cover, sits centred in that space at the same height. ---- */
+.spread-img{ object-fit: contain; background: var(--placeholder); }
+.spread-img.is-loaded{ background: none; }
+.spread{ position: relative; }
+/* unfinished work: greyed out and labelled */
+.spread.is-wip .spread-img{ filter: grayscale(1); opacity: 0.4; }
 .wip-badge{
   position: absolute; left: 50%; top: 50%;
   transform: translate(-50%, -50%);
@@ -737,32 +840,6 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
   color: var(--paper);
   background: var(--ink);
   white-space: nowrap;
-}
-.slider-hint{
-  position: absolute; right: 0.75rem; bottom: 0.75rem;
-  padding: 0.3rem 0.6rem;
-  color: var(--paper);
-  background: rgba(18,18,18,0.72);
-  pointer-events: none;
-  transition: opacity 0.6s var(--easy);
-}
-.slider-hint.is-hidden{ opacity: 0; }
-.book-count{ flex: 1 1 9rem; text-align: center; }
-.book-progress{
-  -webkit-appearance: none; appearance: none;
-  display: block; width: 100%;
-  height: var(--tap);
-  margin-top: 0.15rem;
-  background: transparent;
-  cursor: pointer;
-}
-.book-progress::-webkit-slider-runnable-track{ height: 2px; background: var(--line); }
-.book-progress::-moz-range-track{ height: 2px; background: var(--line); }
-.book-progress::-webkit-slider-thumb{ -webkit-appearance: none; appearance: none; width: 4px; height: 1.2rem; margin-top: -0.6rem; background: var(--ink); border-radius: 0; }
-.book-progress::-moz-range-thumb{ width: 4px; height: 1.2rem; background: var(--ink); border: none; border-radius: 0; }
-@media (max-width: 599px){
-  .book .controls .book-count{ order: -1; flex-basis: 100%; text-align: left; }
-  .book .controls .ctl-btn{ flex: 1 1 auto; }
 }
 
 /* ---- 3D model (Arsvita): floats on the page, no floor, no shadow ---- */
@@ -808,6 +885,10 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
    ──────────────────────────────────────────────────────────── */
 .section--text .section-main{ padding-top: 0; }
 @media (min-width: 900px){ .section--text .section-main{ padding-top: var(--gutter); } }
+/* the last section fills the screen, so that like every other section it
+   can come up to the top: going to it (or to About) lands right on it */
+#contact{ min-height: calc(100vh - var(--runhead-h) - 3.25rem); align-content: start; }
+@supports (height: 100svh){ #contact{ min-height: calc(100svh - var(--runhead-h) - 3.25rem); } }
 /* the About text and your email: the same heavy sans serif as your name */
 .section-lede{
   max-width: 30ch; font-size: clamp(1.35rem, 2.4vw, 2.1rem); line-height: 1.25;
@@ -828,22 +909,41 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
 .contact-social a{ display: inline-block; padding: 0.55rem 0; text-decoration: underline; text-underline-offset: 0.2em; }
 
 /* ────────────────────────────────────────────────────────────
-   BACK TO TOP: only appears once you've scrolled down
+   ALONG THE BOTTOM: only appears once you've scrolled down. The
+   previous section, back to the top, the next section.
    ──────────────────────────────────────────────────────────── */
-.backtotop{
+.pager{
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
-  padding: 0.6rem var(--gutter);
-  padding-bottom: calc(0.6rem + env(safe-area-inset-bottom, 0px));
-  text-align: center;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 1.25rem;
+  padding: 0 var(--gutter);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   background: var(--paper);
   border-top: 1px solid var(--ink);
   transform: translateY(100%);
   visibility: hidden;
   transition: transform 0.6s var(--easy), visibility 0s linear 0.6s;
 }
-body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: transform 0.6s var(--easy), visibility 0s; }
-.backtotop a{ display: inline-block; text-decoration: none; padding: 0.35rem 0; border-bottom: 1px solid var(--ink); }
-.backtotop a:hover{ color: var(--grey); border-bottom-color: var(--grey); }
+body.is-scrolled .pager{ transform: none; visibility: visible; transition: transform 0.6s var(--easy), visibility 0s; }
+.pager-link{
+  display: flex; align-items: center; gap: 0.6em;
+  min-width: 0; max-width: 100%;
+  min-height: var(--tap);
+  text-decoration: none;
+  transition: color 0.35s var(--easy);
+}
+.pager-prev{ grid-column: 1; justify-self: start; }
+.pager-top{ grid-column: 2; }
+.pager-next{ grid-column: 3; justify-self: end; }
+.pager-text{ overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pager-arrow{ flex: 0 0 auto; }
+.pager-link:hover{ color: var(--grey); }
+@media (max-width: 599px){
+  .pager{ column-gap: 0.75rem; }
+  .pager-wide{ display: none; }
+}
 
 ```
 
@@ -864,6 +964,11 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
   }
   const projectById = {};
   d.projects.forEach(p => { projectById[p.id] = p; });
+  // the half-size copy of an image: same name, in a "small" folder next to it
+  function smallCopy(src){
+    const i = String(src).lastIndexOf("/");
+    return src.slice(0, i + 1) + "small/" + src.slice(i + 1);
+  }
 
   // waits for a transform transition to finish (with a safety timeout)
   function afterSlide(el, ms, cb){
@@ -944,7 +1049,7 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
   }
 
   // ────────────────────────────────────────────────────────────
-  // THE STRIP: every photo from every project, in order, each at its
+  // THE STRIP: work from every project, in order, each image at its
   // own shape and size (never cropped), sliding along to the next one
   // with Easy Ease. Loops seamlessly. Drag or swipe to move it
   // yourself; hover or Pause to stop it. Each image links to its project.
@@ -958,14 +1063,22 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
   const pauseBtn = document.getElementById("strip-pause");
   const SIZES = [1, 0.8, 0.92, 0.74, 1, 0.86];          // gentle rhythm of image sizes
   const LOAD_AHEAD = 14;                                // images loaded ahead of the one on screen
+  const STRIP_PER_PROJECT = 24;                         // most images any one project shows in the strip
 
+  // every photo and spread of every project, in order. A project with more
+  // than STRIP_PER_PROJECT shows that many, picked evenly from start to
+  // finish. Spreads with half-size copies use those (the strip is small).
   function autoReel(){
     const out = [];
     d.projects.forEach(p => {
-      const hasBook = p.spreads && p.spreads.length > 1;
-      (hasBook ? p.spreads : (p.images || [])).forEach(src => out.push({ src, project: p.id }));
-      (p.birds || []).filter(b => b.status !== "in-progress")
-        .forEach(b => b.spreads.forEach(src => out.push({ src, project: p.id })));
+      const spreads = p.spreads || [];
+      const all = [];
+      (p.images || []).forEach(src => { if (spreads.indexOf(src) < 0) all.push(src); });
+      spreads.forEach(src => all.push(p.smallCopies ? smallCopy(src) : src));
+      (p.birds || []).filter(b => b.status !== "in-progress").forEach(b => b.spreads.forEach(src => all.push(src)));
+      const n = all.length, max = STRIP_PER_PROJECT;
+      const pick = n <= max ? all : Array.from({ length: max }, (_, k) => all[Math.floor(k * n / max)]);
+      pick.forEach(src => out.push({ src, project: p.id }));
     });
     return out;
   }
@@ -1155,86 +1268,82 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
       </div>`;
   }
 
-  // spreads, one at a time; pages = [{src, alt, section, wip}]
-  function bookMarkup(p, pages, label){
-    const n = pages.length;
-    const how = finePointer
-      ? `Drag, click or use the arrows to go through all ${n} spreads.`
-      : `Swipe or use the arrows to go through all ${n} spreads.`;
+  function model3dMarkup(p){
+    const poster = p.model3d.poster ? `<img class="model3d-poster" src="${esc(p.model3d.poster)}" alt="" loading="lazy" decoding="async">` : "";
     return `
-      <figure class="book" data-book style="--aspect:${p.aspect || 1.412}">
-        <figcaption class="book-head">
-          <span class="book-label">${esc(label || "Inside the book")}</span>
-          <p class="book-how">${how}</p>
-        </figcaption>
-        <div class="slider" tabindex="0" role="region" aria-roledescription="carousel"
-             aria-label="${esc(p.title)}, ${n} spreads. Use the left and right arrow keys to move between them.">
-          <div class="slider-track">
-            ${pages.map((pg, i) => `
-              <div class="slide${pg.wip ? " is-wip" : ""}" role="group" aria-roledescription="slide"
-                   aria-label="${esc(pg.alt)}"${pg.section ? ` data-section="${esc(pg.section)}"` : ""}>
-                <img src="${esc(pg.src)}" alt="${esc(pg.alt)}" loading="${i < 2 ? "eager" : "lazy"}" decoding="async" draggable="false">
-                ${pg.wip ? `<span class="wip-badge">Work in progress</span>` : ""}
-              </div>`).join("")}
-          </div>
-          <span class="slider-hint" aria-hidden="true">${finePointer ? "Drag" : "Swipe"} \u2194</span>
+      <div class="model3d" data-model3d="${esc(p.id)}">
+        <div class="model3d-stage" tabindex="0" role="group" aria-roledescription="3D viewer"
+             aria-label="${esc(p.title)} in 3D. It turns on its own and its stand comes off and goes back on. Drag, or use the left and right arrow keys, to turn it yourself.">
+          ${poster}
+          <span class="model3d-loading" aria-hidden="true">Loading 3D model\u2026</span>
+          <span class="model3d-hint" aria-hidden="true">${finePointer ? "Drag" : "Swipe"} to turn \u2194</span>
         </div>
-        <div class="controls">
-          <button type="button" class="ctl-btn book-prev">\u2190 Previous</button>
-          <span class="book-count" aria-live="polite"></span>
-          <button type="button" class="ctl-btn book-next">Next \u2192</button>
-          <button type="button" class="ctl-btn book-pause" aria-pressed="false">Pause</button>
+        <div class="model3d-foot">
+          <p class="model3d-note">The stand comes off and goes back on by itself.</p>
+          <button type="button" class="ctl-btn model3d-pause" aria-pressed="false">Pause</button>
         </div>
-        <input type="range" class="book-progress" min="0" max="${n - 1}" value="0" step="1" aria-label="Jump to a spread">
-      </figure>`;
+      </div>`;
   }
 
-  // returns {primary, secondary, stacked}: the main visual, and the rest
+  // One spread. Its space is held at the project's "aspect" while it loads,
+  // so the page never jumps; a single page (a cover) sits centred in that
+  // space, at the same height as the spreads. With "smallCopies", phones
+  // and smaller screens load the half-size copy instead of the full one.
+  const SPREAD_SIZES = "(min-width: 900px) 75vw, 100vw";
+  function spreadImg(p, src, alt){
+    const set = p.smallCopies ? ` srcset="${esc(smallCopy(src))} 1500w, ${esc(src)} 3000w" sizes="${SPREAD_SIZES}"` : "";
+    return `<img class="spread-img" src="${esc(src)}"${set} alt="${esc(alt)}" style="aspect-ratio:${+p.aspect || 1.414}" loading="lazy" decoding="async">`;
+  }
+  // what a screen reader says for each spread: covers by name, the rest counted
+  function spreadAlts(title, list){
+    const isCover = src => /(^|[\/_-])(back-?)?cover[^\/]*$/i.test(src);
+    const inner = list.filter(src => !isCover(src)).length;
+    let k = 0;
+    return list.map(src => {
+      if (isCover(src)) return `${title}, ${/back-?cover[^\/]*$/i.test(src) ? "back cover" : "front cover"}`;
+      k++;
+      return `${title}, spread ${k} of ${inner}`;
+    });
+  }
+
+  // The work, as runs of images: the 3D model, the photos, the spreads,
+  // each bird, the process, each run under its own small heading (the
+  // photos have none). The very first image is the "primary": on
+  // phones it sits between the project's name and its text, and everything
+  // else follows the text. Every image runs the full width of the column,
+  // one under another, never cropped.
   function mediaMarkup(p){
-    const parts = [];
-    if (p.model3d && p.model3d.src) {
-      const poster = p.model3d.poster ? `<img class="model3d-poster" src="${esc(p.model3d.poster)}" alt="" loading="lazy" decoding="async">` : "";
-      parts.push(`
-        <div class="model3d" data-model3d="${esc(p.id)}">
-          <div class="model3d-stage" tabindex="0" role="group" aria-roledescription="3D viewer"
-               aria-label="${esc(p.title)} in 3D. It turns on its own and its stand comes off and goes back on. Drag, or use the left and right arrow keys, to turn it yourself.">
-            ${poster}
-            <span class="model3d-loading" aria-hidden="true">Loading 3D model\u2026</span>
-            <span class="model3d-hint" aria-hidden="true">${finePointer ? "Drag" : "Swipe"} to turn \u2194</span>
-          </div>
-          <div class="model3d-foot">
-            <p class="model3d-note">The stand comes off and goes back on by itself.</p>
-            <button type="button" class="ctl-btn model3d-pause" aria-pressed="false">Pause</button>
-          </div>
-        </div>`);
+    const runs = [];
+    if (p.model3d && p.model3d.src) runs.push({ bare: true, items: [model3dMarkup(p)] });
+    const spreads = p.spreads || [];
+    const photos = (p.images || []).filter(src => spreads.indexOf(src) < 0);
+    if (photos.length) runs.push({ items: photos.map((src, i) =>
+      // the first photo loads straight away, as it's near the top of the project
+      `<img src="${esc(src)}" alt="${esc(p.title)}, photo ${i + 1} of ${photos.length}" loading="${i === 0 ? "eager" : "lazy"}" decoding="async">`) });
+    if (spreads.length) {
+      const alts = spreadAlts(p.title, spreads);
+      runs.push({ label: p.spreadsLabel || p.flipLabel, items: spreads.map((src, i) => spreadImg(p, src, alts[i])) });
     }
-    if (p.spreads && p.spreads.length > 1) {
-      parts.push(bookMarkup(p, p.spreads.map((src, i) => ({ src, alt: `${p.title}, spread ${i + 1} of ${p.spreads.length}` })), p.flipLabel));
-    }
-    if (p.birds && p.birds.length) {
-      const pages = [];
-      p.birds.forEach(b => b.spreads.forEach((src, i) => pages.push({
-        src, section: b.name, wip: b.status === "in-progress",
-        alt: `${p.title}, ${b.name}, spread ${i + 1} of ${b.spreads.length}${b.status === "in-progress" ? ", work in progress" : ""}`
-      })));
-      parts.push(bookMarkup(p, pages, p.flipLabel));
-    }
-    const hasBook = (p.spreads && p.spreads.length > 1) || (p.birds && p.birds.length);
-    const images = (!hasBook && p.images) ? p.images : [];
-    const img = (src, i) => `<img src="${esc(src)}" alt="${esc(p.title)}, image ${i + 1} of ${images.length}" loading="${i === 0 ? "eager" : "lazy"}" decoding="async">`;
-    let stacked = false;
-    if (images.length) {
-      stacked = true;
-      parts.push(`<div class="media-stack">${img(images[0], 0)}</div>`);
-      if (images.length > 1) parts.push(`<div class="media-stack">${images.slice(1).map((src, i) => img(src, i + 1)).join("")}</div>`);
-    }
-    if (!parts.length) parts.push(`<div class="media-placeholder">Images coming soon</div>`);
+    (p.birds || []).forEach(b => {
+      const wip = b.status === "in-progress";
+      runs.push({ label: b.name, items: (b.spreads || []).map((src, i) => {
+        const img = spreadImg(p, src, `${p.title}, ${b.name}, spread ${i + 1} of ${b.spreads.length}${wip ? ", work in progress" : ""}`);
+        return wip ? `<div class="spread is-wip">${img}<span class="wip-badge" aria-hidden="true">Work in progress</span></div>` : img;
+      }) });
+    });
     const proc = p.processImages || [];
-    if (proc.length) {
-      parts.push(`<div class="media-process"><h3 class="rail-label">Process</h3><div class="media-stack">${proc.map(src =>
-        `<img src="${esc(src)}" alt="${esc(p.title)}, process image" loading="lazy" decoding="async">`).join("")}</div></div>`);
-    }
-    return { primary: parts[0], secondary: parts.slice(1).join(""), stacked };
+    if (proc.length) runs.push({ label: "Process", items: proc.map(src =>
+      `<img src="${esc(src)}" alt="${esc(p.title)}, process image" loading="lazy" decoding="async">`) });
+    const filled = runs.filter(r => r.items.length);
+    if (!filled.length) return { primary: `<div class="media-placeholder">Images coming soon</div>`, secondary: "" };
+
+    const head = r => r.label ? `<h3 class="media-label">${esc(r.label)}</h3>` : "";
+    const stack = items => `<div class="media-stack">${items.join("")}</div>`;
+    const first = filled[0];
+    const primary = first.bare ? first.items[0] : head(first) + stack(first.items.slice(0, 1));
+    let secondary = first.items.length > 1 ? stack(first.items.slice(1)) : "";
+    filled.slice(1).forEach(r => { secondary += `<div class="media-run">${head(r)}${r.bare ? r.items.join("") : stack(r.items)}</div>`; });
+    return { primary, secondary };
   }
 
   const workRoot = document.getElementById("work-sections");
@@ -1246,12 +1355,18 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
     const media = mediaMarkup(p);
     section.innerHTML = `
       <div class="rail">${railMarkup(p)}</div>
-      <div class="section-main${media.stacked ? " is-stacked" : ""}">
+      <div class="section-main">
         <div class="media-primary">${media.primary}</div>
         ${media.secondary ? `<div class="media-secondary">${media.secondary}</div>` : ""}
       </div>`;
     section.querySelector(".rail-name").id = "project-title-" + p.id;
     workRoot.appendChild(section);
+  });
+  // spreads show a soft placeholder tone where they'll be, until they've loaded
+  workRoot.querySelectorAll(".spread-img").forEach(img => {
+    const loaded = () => img.classList.add("is-loaded");
+    if (img.complete && img.naturalWidth) loaded();
+    else img.addEventListener("load", loaded, { once: true });
   });
 
   // ---- about + contact ----
@@ -1299,139 +1414,8 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
     document.addEventListener("visibilitychange", schedule);
   });
 
-  // ────────────────────────────────────────────────────────────
-  // SPREADS: one at a time, sliding to the next with Easy Ease.
-  // Drag or swipe it, click its left or right half, use Previous /
-  // Next or the arrow keys, or drag the bar underneath. Left alone
-  // it slides on by itself (hover or Pause to stop it), and it loops
-  // back to the first spread without jumping.
-  // ────────────────────────────────────────────────────────────
-  function initBook(fig){
-    const slider = fig.querySelector(".slider");
-    const strack = slider.querySelector(".slider-track");
-    const real = Array.from(strack.children);
-    const N = real.length;
-    const firstClone = real[0].cloneNode(true), lastClone = real[N - 1].cloneNode(true);
-    [firstClone, lastClone].forEach(c => { c.setAttribute("aria-hidden", "true"); c.removeAttribute("role"); });
-    strack.insertBefore(lastClone, real[0]);
-    strack.appendChild(firstClone);
-    const prevBtn = fig.querySelector(".book-prev"), nextBtn = fig.querySelector(".book-next");
-    const pauseB = fig.querySelector(".book-pause"), countEl = fig.querySelector(".book-count");
-    const progress = fig.querySelector(".book-progress"), hint = slider.querySelector(".slider-hint");
-    const SLIDE_MS = 850, AUTO_MS = 1300, HOLD_MS = 2800;
-    let cur = 0, busy = false, paused = reducedMotion, visible = false, hover = false, lastTouch = -Infinity, timer = null;
-
-    const W = () => slider.clientWidth;
-    function place(pos, ms){
-      strack.style.transition = ms ? `transform ${ms}ms ${EASY}` : "none";
-      strack.style.transform = `translate3d(${-Math.round(pos * W())}px,0,0)`;
-    }
-    function label(i){
-      const name = real[i].dataset.section;
-      if (!name) return `Spread ${i + 1} of ${N}`;
-      const same = real.filter(s => s.dataset.section === name);
-      if (real[i].classList.contains("is-wip")) return `${name}, work in progress`;
-      return `${name}, spread ${same.indexOf(real[i]) + 1} of ${same.length}`;
-    }
-    function update(){
-      countEl.textContent = label(cur);
-      progress.value = String(cur);
-      real.forEach((s, k) => s.setAttribute("aria-hidden", k === cur ? "false" : "true"));
-      for (let k = -1; k <= 2; k++) {
-        const im = real[(cur + k + N) % N].querySelector("img");
-        if (im.loading === "lazy") im.loading = "eager";
-      }
-    }
-    function go(target, ms){
-      if (busy) return;
-      busy = true;
-      const wrap = target >= N || target < 0;
-      place(target + 1, ms || SLIDE_MS);                  // clones sit at 0 and N + 1
-      cur = (target + N) % N;
-      update();
-      afterSlide(strack, ms || SLIDE_MS, () => { if (wrap) place(cur + 1, 0); busy = false; });
-    }
-    function schedule(){
-      clearTimeout(timer);
-      if (paused || hover || !visible || document.hidden) return;
-      const wait = Math.max(HOLD_MS, 4500 - (performance.now() - lastTouch));
-      timer = setTimeout(() => { go(cur + 1, AUTO_MS); schedule(); }, wait);
-    }
-    function touched(){
-      lastTouch = performance.now();
-      if (hint) hint.classList.add("is-hidden");
-      schedule();
-    }
-    function setPaused(p){
-      paused = p;
-      pauseB.setAttribute("aria-pressed", String(p));
-      pauseB.textContent = p ? "Play" : "Pause";
-      schedule();
-    }
-    prevBtn.addEventListener("click", () => { touched(); go(cur - 1); });
-    nextBtn.addEventListener("click", () => { touched(); go(cur + 1); });
-    pauseB.addEventListener("click", () => setPaused(!paused));
-    progress.addEventListener("input", () => {
-      touched();
-      const t = parseInt(progress.value, 10);
-      busy = false; cur = t; place(cur + 1, 450); update();
-    });
-    slider.addEventListener("keydown", (e) => {
-      if (e.key === "ArrowRight") { e.preventDefault(); touched(); go(cur + 1); }
-      else if (e.key === "ArrowLeft") { e.preventDefault(); touched(); go(cur - 1); }
-    });
-    if (finePointer) {
-      slider.addEventListener("pointerenter", () => { hover = true; schedule(); });
-      slider.addEventListener("pointerleave", () => { hover = false; schedule(); });
-    }
-    let drag = null;
-    slider.addEventListener("pointerdown", (e) => {
-      if (busy || (e.button !== undefined && e.button > 0)) return;
-      drag = { x: e.clientX, dx: 0, moved: false, id: e.pointerId };
-    });
-    slider.addEventListener("pointermove", (e) => {
-      if (!drag) return;
-      drag.dx = e.clientX - drag.x;
-      if (!drag.moved && Math.abs(drag.dx) > 6) {
-        drag.moved = true; slider.classList.add("is-dragging");
-        try { slider.setPointerCapture(drag.id); } catch (err) {}
-      }
-      if (drag.moved) {
-        strack.style.transition = "none";
-        strack.style.transform = `translate3d(${-Math.round((cur + 1) * W()) + drag.dx}px,0,0)`;
-      }
-    });
-    function endDrag(e, cancelled){
-      if (!drag) return;
-      const { dx, moved } = drag; drag = null;
-      slider.classList.remove("is-dragging");
-      touched();
-      if (cancelled) { place(cur + 1, 300); return; }
-      if (!moved) {
-        const r = slider.getBoundingClientRect();
-        go(e.clientX > r.left + r.width / 2 ? cur + 1 : cur - 1);
-        return;
-      }
-      const threshold = W() * 0.15;
-      if (dx < -threshold) go(cur + 1, 650);
-      else if (dx > threshold) go(cur - 1, 650);
-      else { busy = true; place(cur + 1, 450); afterSlide(strack, 450, () => { busy = false; }); }
-    }
-    slider.addEventListener("pointerup", (e) => endDrag(e, false));
-    slider.addEventListener("pointercancel", (e) => endDrag(e, true));
-    window.addEventListener("resize", () => place(cur + 1, 0));
-    if ("IntersectionObserver" in window) {
-      new IntersectionObserver(es => { visible = es[0].isIntersecting; schedule(); }, { threshold: 0.35 }).observe(slider);
-    } else { visible = true; }
-    document.addEventListener("visibilitychange", schedule);
-    place(1, 0);
-    update();
-    setPaused(paused);
-  }
-  document.querySelectorAll("[data-book]").forEach(initBook);
-
   // focus rings show for keyboard users only, never after a click or tap
-  document.querySelectorAll(".slider, .model3d-stage, .strip").forEach(el => {
+  document.querySelectorAll(".model3d-stage, .strip").forEach(el => {
     el.addEventListener("pointerdown", () => el.setAttribute("data-pointer", ""));
     el.addEventListener("keydown", () => el.removeAttribute("data-pointer"));
   });
@@ -1490,21 +1474,154 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
   }
 
   // ────────────────────────────────────────────────────────────
-  // RUNNING HEAD, PROGRESS LINE, BACK TO TOP
+  // GETTING AROUND
+  // The bar along the top names the section you're in, like a book's
+  // running head. Your name goes back to the top; the section's name
+  // opens a list of every project, About and Contact. Once you've
+  // scrolled down, the bar along the bottom goes to the previous or next
+  // section, or back to the top. The line under the top bar shows how far
+  // down the page you are.
   // ────────────────────────────────────────────────────────────
-  const runheadSection = document.getElementById("runhead-section");
-  const labelled = Array.from(document.querySelectorAll(".section")).map(s => {
-    const name = s.querySelector(".rail-name");
-    return { el: s, label: name ? name.textContent : "Portfolio" };
+  const root = document.documentElement;
+  const runhead = document.querySelector(".runhead");
+  const sectionLabel = document.getElementById("runhead-section-label");
+  const menuWrap = document.querySelector(".runhead-menu");
+  const menuBtn = document.getElementById("runhead-section");
+  const menu = document.getElementById("section-menu");
+  const pagerPrev = document.getElementById("pager-prev");
+  const pagerNext = document.getElementById("pager-next");
+  const sections = Array.from(document.querySelectorAll(".section")).map(s => {
+    const num = s.querySelector(".rail-num"), name = s.querySelector(".rail-name");
+    const p = s.id.indexOf("project-") === 0 ? projectById[s.id.slice(8)] : null;
+    return { el: s, num: num ? num.textContent : "", label: name ? name.textContent : "", year: p ? p.year : "" };
   });
+  const menuRows = sections.map(s => {
+    const li = document.createElement("li");
+    li.innerHTML = `<a class="section-menu-row" href="#${esc(s.el.id)}"><span class="section-menu-num">${esc(s.num)}</span><span class="section-menu-title">${esc(s.label)}</span>${s.year ? `<span class="section-menu-year">${esc(s.year)}</span>` : ""}</a>`;
+    document.getElementById("section-menu-list").appendChild(li);
+    return li.firstElementChild;
+  });
+
+  // the list opens and closes with its button; Escape, a click anywhere
+  // else, or tabbing out of it closes it too
+  function setMenu(open, refocus){
+    menu.hidden = !open;
+    menuBtn.setAttribute("aria-expanded", String(open));
+    if (!open && refocus) menuBtn.focus();
+  }
+  menuBtn.addEventListener("click", () => setMenu(menu.hidden));
+  menu.addEventListener("click", (e) => { if (e.target.closest("a")) setMenu(false); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !menu.hidden) { e.preventDefault(); setMenu(false, menuWrap.contains(document.activeElement)); }
+  });
+  document.addEventListener("pointerdown", (e) => { if (!menu.hidden && !menuWrap.contains(e.target)) setMenu(false); });
+  menuWrap.addEventListener("focusout", (e) => { if (e.relatedTarget && !menuWrap.contains(e.relatedTarget)) setMenu(false); });
+
+  function setPager(a, s, word){
+    if (!s) { a.hidden = true; return; }
+    a.hidden = false;
+    a.setAttribute("href", "#" + s.el.id);
+    a.querySelector(".pager-text").textContent = `${s.num} ${s.label}`;
+    a.setAttribute("aria-label", `${word}: ${s.num} ${s.label}`);
+  }
+  let current = -2;
+  function setCurrent(i){                                // i = -1 on the opening screen
+    if (i === current) return;
+    current = i;
+    sectionLabel.textContent = sections[i] ? sections[i].label : "Portfolio";
+    menuRows.forEach((a, k) => { if (k === i) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current"); });
+    setPager(pagerPrev, i > 0 ? sections[i - 1] : null, "Previous");
+    setPager(pagerNext, sections[i + 1] || null, "Next");
+  }
+
+  // Going to a section: a long way is covered in one go and then a short
+  // glide, so the page doesn't load every picture it would pass on the way.
+  function scrollInstant(y){
+    const was = root.style.scrollBehavior;
+    root.style.scrollBehavior = "auto";
+    window.scrollTo(0, y);
+    root.style.scrollBehavior = was;
+  }
+  const docTop = el => el.getBoundingClientRect().top + window.scrollY;
+  const targetY = el => Math.max(0, Math.min(root.scrollHeight - window.innerHeight,
+    el === hero ? 0 : Math.round(docTop(el) - runhead.offsetHeight)));
+  // Browsers keep what you're looking at still when something higher up
+  // the page changes size (a picture finishing loading, say). Browsers
+  // that can't do that keep the section you went to in place by hand for
+  // a few seconds after you go to it (or open a link straight to it),
+  // until you scroll yourself.
+  const anchoring = !!(window.CSS && CSS.supports && CSS.supports("overflow-anchor", "auto"));
+  let held = null;
+  function hold(el, gliding){
+    if (anchoring) return;
+    const now = performance.now();
+    held = { el, top: docTop(el), until: now + 5000, glideUntil: gliding ? now + 1200 : 0 };
+  }
+  function keepHeld(){
+    if (!held) return;
+    if (performance.now() > held.until) { held = null; return; }
+    const top = docTop(held.el), shift = Math.round(top - held.top);
+    if (!shift) return;
+    held.top = top;
+    if (performance.now() < held.glideUntil) window.scrollTo({ top: targetY(held.el), behavior: "smooth" });   // still on its way: re-aim
+    else scrollInstant(window.scrollY + shift);
+  }
+  if (!anchoring) {
+    document.addEventListener("load", (e) => { if (held && e.target && e.target.tagName === "IMG") keepHeld(); }, true);
+  }
+  // The section you went to is the one the bars name, even a short one
+  // (like About) that doesn't reach far down the screen, until you scroll
+  // somewhere else yourself.
+  let pinned = null;
+  const letGo = () => { held = null; pinned = null; };
+  ["wheel", "touchstart", "pointerdown"].forEach(t => window.addEventListener(t, letGo, { passive: true, capture: true }));
+  window.addEventListener("keydown", (e) => { if (/^(PageUp|PageDown|Home|End|ArrowUp|ArrowDown| |Spacebar)$/.test(e.key)) letGo(); }, true);
+
+  function jumpTo(el){
+    const y = targetY(el), gap = y - window.scrollY;
+    if (reducedMotion) scrollInstant(y);
+    else {
+      if (Math.abs(gap) > window.innerHeight * 1.5) scrollInstant(y - Math.sign(gap) * Math.round(window.innerHeight * 0.6));
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+    hold(el, !reducedMotion);
+    pinned = { el, arrived: false, until: performance.now() + 2500 };
+    onScroll();
+    // keyboard and screen reader users carry on from the section they went to
+    if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "-1");
+    try { el.focus({ preventScroll: true }); } catch (err) {}
+  }
+  const byHash = hash => { try { return hash ? document.getElementById(decodeURIComponent(hash)) : null; } catch (err) { return null; } };
+  // every link to a part of this page goes through jumpTo
+  document.addEventListener("click", (e) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const a = e.target.closest ? e.target.closest('a[href^="#"]') : null;
+    const el = a ? byHash(a.getAttribute("href").slice(1)) : null;
+    if (!el) return;
+    e.preventDefault();
+    jumpTo(el);
+    try { history.replaceState(null, "", el === hero ? location.pathname + location.search : "#" + el.id); } catch (err) {}
+  });
+  // a link straight to a section (…/#project-02) is held in place the same way
+  if (location.hash) {
+    const el = byHash(location.hash.slice(1));
+    if (el) { hold(el); pinned = { el, arrived: false, until: performance.now() + 2500 }; }
+  }
+
   const progressBar = document.getElementById("scroll-progress");
   let ticking = false;
   function onScroll(){
+    if (pinned) {
+      // once it's arrived, scrolling away from it (with the scroll bar, say) lets go
+      const off = Math.abs(window.scrollY - targetY(pinned.el));
+      if (off < 2) pinned.arrived = true;
+      if ((pinned.arrived && off > 4) || (!pinned.arrived && performance.now() > pinned.until)) pinned = null;
+    }
     const line = window.innerHeight * 0.4;
-    const hit = labelled.find(({ el }) => { const r = el.getBoundingClientRect(); return r.top <= line && r.bottom > line; });
-    const text = hit ? hit.label : "Portfolio";
-    if (runheadSection.textContent !== text) runheadSection.textContent = text;
-    const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+    setCurrent(pinned
+      ? sections.findIndex(({ el }) => el === pinned.el || pinned.el.contains(el))
+      : sections.findIndex(({ el }) => { const r = el.getBoundingClientRect(); return r.top <= line && r.bottom > line; }));
+    const scrollable = root.scrollHeight - window.innerHeight;
     if (progressBar) progressBar.style.width = (scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0) + "%";
     document.body.classList.toggle("is-scrolled", window.scrollY > window.innerHeight * 0.8);
     ticking = false;
@@ -1515,7 +1632,7 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
   // START: size everything, wait for the intro (intro.js) to hand
   // over, then type the name and bring in the work
   // ────────────────────────────────────────────────────────────
-  function layoutAll(){ fitName(); sizeStrip(); fitRails(); }
+  function layoutAll(){ fitName(); sizeStrip(); fitRails(); keepHeld(); }
   // Phones change their reported height as the browser bar hides while
   // scrolling; only a real width change (e.g. rotating) re-sizes the
   // strip there, so the page never jumps under your thumb.
@@ -1913,33 +2030,47 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
                     when there's nothing worth adding.
   Keep each block to a sentence or two. Reviewers skim.
 
-  The main column holds the imagery, using whichever of these the
-  project has:
+  The main column holds the imagery: every image at the full width of
+  the column, one under another, never cropped. A project shows
+  whichever of these it has, in this order:
     - "model3d"   a 3D model that turns on its own, with its stand
                   fading away and coming back on a timer. Visitors can
                   drag it around to see every side.
                   Needs arsvita-3d.js next to script.js, plus
                   {src: the model file, poster: a still shown while
                   it loads}. Used by Arsvita.
-    - "spreads"   the book's spreads, one at a time, sliding from one
-                  to the next, with Previous / Next buttons. If the
-                  project also has a 3D model, the spreads sit
-                  directly under it. Used by Arsvita.
-    - "birds"     one run of spreads through several sections in a
-                  row: {name, status, spreads}. A
-                  section with status "in-progress" is greyed out
-                  and labelled "Work in progress". Used by The
-                  Pecking Order.
-    - "images"    the first image is shown large, the rest in rows
-                  below it. Rows fill the full width and every image
-                  keeps its own shape, so nothing is ever cropped.
-                  Export images (and spreads) at least 3000px wide
-                  so they stay sharp on high-resolution screens.
-    - "processImages" (optional) sketches, drafts, files, shown
-                  under the main imagery.
-  "flipLabel" (optional) is the heading above the spreads, e.g.
-  "Inside the book". "aspect" (optional) is the width ÷ height of
-  one spread, so the frame matches your pages exactly.
+    - "images"    photos, each at its own shape. Used by Dozer.
+    - "spreads"   the publication's spreads, in order, under a small
+                  heading ("spreadsLabel", e.g. "Inside the book").
+                  A single page, like a front or back cover, sits
+                  centred at the same height as the spreads; put
+                  "cover" in its file name (cover.webp, back-cover.webp)
+                  and screen readers call it the front or back cover.
+                  "aspect" is the width ÷ height of one spread: the
+                  space for each spread is held at that shape while it
+                  loads, so the page never jumps.
+                  "smallCopies" (optional): true when every spread also
+                  has a half-size copy, with the same name, in a folder
+                  called "small" next to it. Phones, smaller screens and
+                  the opening strip use those, so the page loads faster
+                  and uses less data. Used by Dozer.
+    - "birds"     runs of spreads, each under its bird's name:
+                  {name, status, spreads}. A bird with status
+                  "in-progress" is greyed out and labelled "Work in
+                  progress". Used by The Pecking Order.
+    - "processImages" (optional) sketches, drafts, files, shown last
+                  under a "Process" heading.
+  Export images and spreads (JPEG or WebP) at least 3000px wide so
+  they stay sharp on high-resolution screens.
+  On phones each project shows its number, name and info, then its
+  first image (or the 3D model), then its text, then the rest.
+
+  GETTING AROUND
+  The bar along the top of the screen names the section you're in.
+  Click your name to go back to the top, or the section's name for a
+  list of every project, About and Contact. Once you scroll down, the
+  bar along the bottom of the screen goes to the previous or next
+  section, or back to the top. They update themselves from this file.
 
   THE INTRO
   Before anything else, your logo animation plays on neon orange with
@@ -1949,13 +2080,15 @@ body.is-scrolled .backtotop{ transform: none; visibility: visible; transition: t
   (more in intro.js). Change the orange with --intro in style.css.
 
   THE OPENING STRIP
-  Right after your name types itself out, every photo from every
-  project slides past in order: all of 01's, then 02's, then 03's
-  (work in progress is left out). Each image keeps its own shape,
-  captioned with its project and linked to it. Nothing to edit here:
-  it updates itself when you add or remove images above. To show a
-  hand-picked set instead, add a "reel" list of {src, project}
-  (project = that project's "id") next to "projects".
+  Right after your name types itself out, work from every project
+  slides past in order: 01's, then 02's, then 03's (work in progress
+  is left out). Each project shows all of its photos and spreads, up
+  to 24; one with more (Dozer) shows 24 of them, picked evenly from
+  start to finish. Each image keeps its own shape, captioned with its
+  project and linked to it. Nothing to edit here: it updates itself
+  when you add or remove images above. To show a hand-picked set
+  instead, add a "reel" list of {src, project} (project = that
+  project's "id") next to "projects".
   To stay sharp, an image is never shown bigger than its file allows
   on the screen it's on, so small files show a little smaller. Spreads
   exported 3000px wide or more always show at full size.
@@ -1999,7 +2132,7 @@ const PORTFOLIO_DATA = {
         src: "models/arsvita-3d-model.js",
         poster: "images/arsvita/3d-poster.webp"
       },
-      flipLabel: "Inside the book",
+      spreadsLabel: "Inside the book",
       aspect: 1.412,
       spreads: [
         "images/arsvita/spread-01.jpg","images/arsvita/spread-02.jpg","images/arsvita/spread-03.jpg",
@@ -2011,7 +2144,6 @@ const PORTFOLIO_DATA = {
         "images/arsvita/spread-19.jpg","images/arsvita/spread-20.jpg","images/arsvita/spread-21.jpg",
         "images/arsvita/spread-22.jpg","images/arsvita/spread-23.jpg"
       ],
-      images: ["images/arsvita/spread-01.jpg"],
       processImages: []
     },
     {
@@ -2042,6 +2174,39 @@ const PORTFOLIO_DATA = {
         "images/dozer-06.jpg",
         "images/dozer-07.jpg"
       ],
+      spreadsLabel: "Issue 02, cover to cover",
+      aspect: 1.294,
+      smallCopies: true,
+      spreads: [
+        "images/dozer/cover.webp","images/dozer/spread-01.webp","images/dozer/spread-02.webp",
+        "images/dozer/spread-03.webp","images/dozer/spread-04.webp","images/dozer/spread-05.webp",
+        "images/dozer/spread-06.webp","images/dozer/spread-07.webp","images/dozer/spread-08.webp",
+        "images/dozer/spread-09.webp","images/dozer/spread-10.webp","images/dozer/spread-11.webp",
+        "images/dozer/spread-12.webp","images/dozer/spread-13.webp","images/dozer/spread-14.webp",
+        "images/dozer/spread-15.webp","images/dozer/spread-16.webp","images/dozer/spread-17.webp",
+        "images/dozer/spread-18.webp","images/dozer/spread-19.webp","images/dozer/spread-20.webp",
+        "images/dozer/spread-21.webp","images/dozer/spread-22.webp","images/dozer/spread-23.webp",
+        "images/dozer/spread-24.webp","images/dozer/spread-25.webp","images/dozer/spread-26.webp",
+        "images/dozer/spread-27.webp","images/dozer/spread-28.webp","images/dozer/spread-29.webp",
+        "images/dozer/spread-30.webp","images/dozer/spread-31.webp","images/dozer/spread-32.webp",
+        "images/dozer/spread-33.webp","images/dozer/spread-34.webp","images/dozer/spread-35.webp",
+        "images/dozer/spread-36.webp","images/dozer/spread-37.webp","images/dozer/spread-38.webp",
+        "images/dozer/spread-39.webp","images/dozer/spread-40.webp","images/dozer/spread-41.webp",
+        "images/dozer/spread-42.webp","images/dozer/spread-43.webp","images/dozer/spread-44.webp",
+        "images/dozer/spread-45.webp","images/dozer/spread-46.webp","images/dozer/spread-47.webp",
+        "images/dozer/spread-48.webp","images/dozer/spread-49.webp","images/dozer/spread-50.webp",
+        "images/dozer/spread-51.webp","images/dozer/spread-52.webp","images/dozer/spread-53.webp",
+        "images/dozer/spread-54.webp","images/dozer/spread-55.webp","images/dozer/spread-56.webp",
+        "images/dozer/spread-57.webp","images/dozer/spread-58.webp","images/dozer/spread-59.webp",
+        "images/dozer/spread-60.webp","images/dozer/spread-61.webp","images/dozer/spread-62.webp",
+        "images/dozer/spread-63.webp","images/dozer/spread-64.webp","images/dozer/spread-65.webp",
+        "images/dozer/spread-66.webp","images/dozer/spread-67.webp","images/dozer/spread-68.webp",
+        "images/dozer/spread-69.webp","images/dozer/spread-70.webp","images/dozer/spread-71.webp",
+        "images/dozer/spread-72.webp","images/dozer/spread-73.webp","images/dozer/spread-74.webp",
+        "images/dozer/spread-75.webp","images/dozer/spread-76.webp","images/dozer/spread-77.webp",
+        "images/dozer/spread-78.webp","images/dozer/spread-79.webp","images/dozer/spread-80.webp",
+        "images/dozer/spread-81.webp","images/dozer/back-cover.webp"
+      ],
       processImages: []
     },
     {
@@ -2064,7 +2229,6 @@ const PORTFOLIO_DATA = {
         text: "The rough, hand-cut edges soften the way into a dense subject, so the magazine feels like something to pick up rather than brace for."
       },
 
-      flipLabel: "Inside the magazine",
       aspect: 1.333,
       birds: [
         {
@@ -2541,6 +2705,112 @@ All images referenced below live in the `images/` folder alongside this README, 
 ![dozer-05.jpg](images/dozer-05.jpg)
 ![dozer-06.jpg](images/dozer-06.jpg)
 ![dozer-07.jpg](images/dozer-07.jpg)
+
+### Dozer Magazine — Issue 02, cover to cover
+
+![cover.webp](images/dozer/small/cover.webp)
+![spread-01.webp](images/dozer/small/spread-01.webp)
+![spread-02.webp](images/dozer/small/spread-02.webp)
+![spread-03.webp](images/dozer/small/spread-03.webp)
+
+![spread-04.webp](images/dozer/small/spread-04.webp)
+![spread-05.webp](images/dozer/small/spread-05.webp)
+![spread-06.webp](images/dozer/small/spread-06.webp)
+![spread-07.webp](images/dozer/small/spread-07.webp)
+
+![spread-08.webp](images/dozer/small/spread-08.webp)
+![spread-09.webp](images/dozer/small/spread-09.webp)
+![spread-10.webp](images/dozer/small/spread-10.webp)
+![spread-11.webp](images/dozer/small/spread-11.webp)
+
+![spread-12.webp](images/dozer/small/spread-12.webp)
+![spread-13.webp](images/dozer/small/spread-13.webp)
+![spread-14.webp](images/dozer/small/spread-14.webp)
+![spread-15.webp](images/dozer/small/spread-15.webp)
+
+![spread-16.webp](images/dozer/small/spread-16.webp)
+![spread-17.webp](images/dozer/small/spread-17.webp)
+![spread-18.webp](images/dozer/small/spread-18.webp)
+![spread-19.webp](images/dozer/small/spread-19.webp)
+
+![spread-20.webp](images/dozer/small/spread-20.webp)
+![spread-21.webp](images/dozer/small/spread-21.webp)
+![spread-22.webp](images/dozer/small/spread-22.webp)
+![spread-23.webp](images/dozer/small/spread-23.webp)
+
+![spread-24.webp](images/dozer/small/spread-24.webp)
+![spread-25.webp](images/dozer/small/spread-25.webp)
+![spread-26.webp](images/dozer/small/spread-26.webp)
+![spread-27.webp](images/dozer/small/spread-27.webp)
+
+![spread-28.webp](images/dozer/small/spread-28.webp)
+![spread-29.webp](images/dozer/small/spread-29.webp)
+![spread-30.webp](images/dozer/small/spread-30.webp)
+![spread-31.webp](images/dozer/small/spread-31.webp)
+
+![spread-32.webp](images/dozer/small/spread-32.webp)
+![spread-33.webp](images/dozer/small/spread-33.webp)
+![spread-34.webp](images/dozer/small/spread-34.webp)
+![spread-35.webp](images/dozer/small/spread-35.webp)
+
+![spread-36.webp](images/dozer/small/spread-36.webp)
+![spread-37.webp](images/dozer/small/spread-37.webp)
+![spread-38.webp](images/dozer/small/spread-38.webp)
+![spread-39.webp](images/dozer/small/spread-39.webp)
+
+![spread-40.webp](images/dozer/small/spread-40.webp)
+![spread-41.webp](images/dozer/small/spread-41.webp)
+![spread-42.webp](images/dozer/small/spread-42.webp)
+![spread-43.webp](images/dozer/small/spread-43.webp)
+
+![spread-44.webp](images/dozer/small/spread-44.webp)
+![spread-45.webp](images/dozer/small/spread-45.webp)
+![spread-46.webp](images/dozer/small/spread-46.webp)
+![spread-47.webp](images/dozer/small/spread-47.webp)
+
+![spread-48.webp](images/dozer/small/spread-48.webp)
+![spread-49.webp](images/dozer/small/spread-49.webp)
+![spread-50.webp](images/dozer/small/spread-50.webp)
+![spread-51.webp](images/dozer/small/spread-51.webp)
+
+![spread-52.webp](images/dozer/small/spread-52.webp)
+![spread-53.webp](images/dozer/small/spread-53.webp)
+![spread-54.webp](images/dozer/small/spread-54.webp)
+![spread-55.webp](images/dozer/small/spread-55.webp)
+
+![spread-56.webp](images/dozer/small/spread-56.webp)
+![spread-57.webp](images/dozer/small/spread-57.webp)
+![spread-58.webp](images/dozer/small/spread-58.webp)
+![spread-59.webp](images/dozer/small/spread-59.webp)
+
+![spread-60.webp](images/dozer/small/spread-60.webp)
+![spread-61.webp](images/dozer/small/spread-61.webp)
+![spread-62.webp](images/dozer/small/spread-62.webp)
+![spread-63.webp](images/dozer/small/spread-63.webp)
+
+![spread-64.webp](images/dozer/small/spread-64.webp)
+![spread-65.webp](images/dozer/small/spread-65.webp)
+![spread-66.webp](images/dozer/small/spread-66.webp)
+![spread-67.webp](images/dozer/small/spread-67.webp)
+
+![spread-68.webp](images/dozer/small/spread-68.webp)
+![spread-69.webp](images/dozer/small/spread-69.webp)
+![spread-70.webp](images/dozer/small/spread-70.webp)
+![spread-71.webp](images/dozer/small/spread-71.webp)
+
+![spread-72.webp](images/dozer/small/spread-72.webp)
+![spread-73.webp](images/dozer/small/spread-73.webp)
+![spread-74.webp](images/dozer/small/spread-74.webp)
+![spread-75.webp](images/dozer/small/spread-75.webp)
+
+![spread-76.webp](images/dozer/small/spread-76.webp)
+![spread-77.webp](images/dozer/small/spread-77.webp)
+![spread-78.webp](images/dozer/small/spread-78.webp)
+![spread-79.webp](images/dozer/small/spread-79.webp)
+
+![spread-80.webp](images/dozer/small/spread-80.webp)
+![spread-81.webp](images/dozer/small/spread-81.webp)
+![back-cover.webp](images/dozer/small/back-cover.webp)
 
 ### The Pecking Order — logo
 

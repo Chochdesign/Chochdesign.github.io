@@ -23,33 +23,47 @@
                     when there's nothing worth adding.
   Keep each block to a sentence or two. Reviewers skim.
 
-  The main column holds the imagery, using whichever of these the
-  project has:
+  The main column holds the imagery: every image at the full width of
+  the column, one under another, never cropped. A project shows
+  whichever of these it has, in this order:
     - "model3d"   a 3D model that turns on its own, with its stand
                   fading away and coming back on a timer. Visitors can
                   drag it around to see every side.
                   Needs arsvita-3d.js next to script.js, plus
                   {src: the model file, poster: a still shown while
                   it loads}. Used by Arsvita.
-    - "spreads"   the book's spreads, one at a time, sliding from one
-                  to the next, with Previous / Next buttons. If the
-                  project also has a 3D model, the spreads sit
-                  directly under it. Used by Arsvita.
-    - "birds"     one run of spreads through several sections in a
-                  row: {name, status, spreads}. A
-                  section with status "in-progress" is greyed out
-                  and labelled "Work in progress". Used by The
-                  Pecking Order.
-    - "images"    the first image is shown large, the rest in rows
-                  below it. Rows fill the full width and every image
-                  keeps its own shape, so nothing is ever cropped.
-                  Export images (and spreads) at least 3000px wide
-                  so they stay sharp on high-resolution screens.
-    - "processImages" (optional) sketches, drafts, files, shown
-                  under the main imagery.
-  "flipLabel" (optional) is the heading above the spreads, e.g.
-  "Inside the book". "aspect" (optional) is the width ÷ height of
-  one spread, so the frame matches your pages exactly.
+    - "images"    photos, each at its own shape. Used by Dozer.
+    - "spreads"   the publication's spreads, in order, under a small
+                  heading ("spreadsLabel", e.g. "Inside the book").
+                  A single page, like a front or back cover, sits
+                  centred at the same height as the spreads; put
+                  "cover" in its file name (cover.webp, back-cover.webp)
+                  and screen readers call it the front or back cover.
+                  "aspect" is the width ÷ height of one spread: the
+                  space for each spread is held at that shape while it
+                  loads, so the page never jumps.
+                  "smallCopies" (optional): true when every spread also
+                  has a half-size copy, with the same name, in a folder
+                  called "small" next to it. Phones, smaller screens and
+                  the opening strip use those, so the page loads faster
+                  and uses less data. Used by Dozer.
+    - "birds"     runs of spreads, each under its bird's name:
+                  {name, status, spreads}. A bird with status
+                  "in-progress" is greyed out and labelled "Work in
+                  progress". Used by The Pecking Order.
+    - "processImages" (optional) sketches, drafts, files, shown last
+                  under a "Process" heading.
+  Export images and spreads (JPEG or WebP) at least 3000px wide so
+  they stay sharp on high-resolution screens.
+  On phones each project shows its number, name and info, then its
+  first image (or the 3D model), then its text, then the rest.
+
+  GETTING AROUND
+  The bar along the top of the screen names the section you're in.
+  Click your name to go back to the top, or the section's name for a
+  list of every project, About and Contact. Once you scroll down, the
+  bar along the bottom of the screen goes to the previous or next
+  section, or back to the top. They update themselves from this file.
 
   THE INTRO
   Before anything else, your logo animation plays on neon orange with
@@ -59,13 +73,15 @@
   (more in intro.js). Change the orange with --intro in style.css.
 
   THE OPENING STRIP
-  Right after your name types itself out, every photo from every
-  project slides past in order: all of 01's, then 02's, then 03's
-  (work in progress is left out). Each image keeps its own shape,
-  captioned with its project and linked to it. Nothing to edit here:
-  it updates itself when you add or remove images above. To show a
-  hand-picked set instead, add a "reel" list of {src, project}
-  (project = that project's "id") next to "projects".
+  Right after your name types itself out, work from every project
+  slides past in order: 01's, then 02's, then 03's (work in progress
+  is left out). Each project shows all of its photos and spreads, up
+  to 24; one with more (Dozer) shows 24 of them, picked evenly from
+  start to finish. Each image keeps its own shape, captioned with its
+  project and linked to it. Nothing to edit here: it updates itself
+  when you add or remove images above. To show a hand-picked set
+  instead, add a "reel" list of {src, project} (project = that
+  project's "id") next to "projects".
   To stay sharp, an image is never shown bigger than its file allows
   on the screen it's on, so small files show a little smaller. Spreads
   exported 3000px wide or more always show at full size.
@@ -109,7 +125,7 @@ const PORTFOLIO_DATA = {
         src: "models/arsvita-3d-model.js",
         poster: "images/arsvita/3d-poster.webp"
       },
-      flipLabel: "Inside the book",
+      spreadsLabel: "Inside the book",
       aspect: 1.412,
       spreads: [
         "images/arsvita/spread-01.jpg","images/arsvita/spread-02.jpg","images/arsvita/spread-03.jpg",
@@ -121,7 +137,6 @@ const PORTFOLIO_DATA = {
         "images/arsvita/spread-19.jpg","images/arsvita/spread-20.jpg","images/arsvita/spread-21.jpg",
         "images/arsvita/spread-22.jpg","images/arsvita/spread-23.jpg"
       ],
-      images: ["images/arsvita/spread-01.jpg"],
       processImages: []
     },
     {
@@ -152,6 +167,39 @@ const PORTFOLIO_DATA = {
         "images/dozer-06.jpg",
         "images/dozer-07.jpg"
       ],
+      spreadsLabel: "Issue 02, cover to cover",
+      aspect: 1.294,
+      smallCopies: true,
+      spreads: [
+        "images/dozer/cover.webp","images/dozer/spread-01.webp","images/dozer/spread-02.webp",
+        "images/dozer/spread-03.webp","images/dozer/spread-04.webp","images/dozer/spread-05.webp",
+        "images/dozer/spread-06.webp","images/dozer/spread-07.webp","images/dozer/spread-08.webp",
+        "images/dozer/spread-09.webp","images/dozer/spread-10.webp","images/dozer/spread-11.webp",
+        "images/dozer/spread-12.webp","images/dozer/spread-13.webp","images/dozer/spread-14.webp",
+        "images/dozer/spread-15.webp","images/dozer/spread-16.webp","images/dozer/spread-17.webp",
+        "images/dozer/spread-18.webp","images/dozer/spread-19.webp","images/dozer/spread-20.webp",
+        "images/dozer/spread-21.webp","images/dozer/spread-22.webp","images/dozer/spread-23.webp",
+        "images/dozer/spread-24.webp","images/dozer/spread-25.webp","images/dozer/spread-26.webp",
+        "images/dozer/spread-27.webp","images/dozer/spread-28.webp","images/dozer/spread-29.webp",
+        "images/dozer/spread-30.webp","images/dozer/spread-31.webp","images/dozer/spread-32.webp",
+        "images/dozer/spread-33.webp","images/dozer/spread-34.webp","images/dozer/spread-35.webp",
+        "images/dozer/spread-36.webp","images/dozer/spread-37.webp","images/dozer/spread-38.webp",
+        "images/dozer/spread-39.webp","images/dozer/spread-40.webp","images/dozer/spread-41.webp",
+        "images/dozer/spread-42.webp","images/dozer/spread-43.webp","images/dozer/spread-44.webp",
+        "images/dozer/spread-45.webp","images/dozer/spread-46.webp","images/dozer/spread-47.webp",
+        "images/dozer/spread-48.webp","images/dozer/spread-49.webp","images/dozer/spread-50.webp",
+        "images/dozer/spread-51.webp","images/dozer/spread-52.webp","images/dozer/spread-53.webp",
+        "images/dozer/spread-54.webp","images/dozer/spread-55.webp","images/dozer/spread-56.webp",
+        "images/dozer/spread-57.webp","images/dozer/spread-58.webp","images/dozer/spread-59.webp",
+        "images/dozer/spread-60.webp","images/dozer/spread-61.webp","images/dozer/spread-62.webp",
+        "images/dozer/spread-63.webp","images/dozer/spread-64.webp","images/dozer/spread-65.webp",
+        "images/dozer/spread-66.webp","images/dozer/spread-67.webp","images/dozer/spread-68.webp",
+        "images/dozer/spread-69.webp","images/dozer/spread-70.webp","images/dozer/spread-71.webp",
+        "images/dozer/spread-72.webp","images/dozer/spread-73.webp","images/dozer/spread-74.webp",
+        "images/dozer/spread-75.webp","images/dozer/spread-76.webp","images/dozer/spread-77.webp",
+        "images/dozer/spread-78.webp","images/dozer/spread-79.webp","images/dozer/spread-80.webp",
+        "images/dozer/spread-81.webp","images/dozer/back-cover.webp"
+      ],
       processImages: []
     },
     {
@@ -174,7 +222,6 @@ const PORTFOLIO_DATA = {
         text: "The rough, hand-cut edges soften the way into a dense subject, so the magazine feels like something to pick up rather than brace for."
       },
 
-      flipLabel: "Inside the magazine",
       aspect: 1.333,
       birds: [
         {

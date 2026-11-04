@@ -12,6 +12,11 @@
   }
   const projectById = {};
   d.projects.forEach(p => { projectById[p.id] = p; });
+  // the half-size copy of an image: same name, in a "small" folder next to it
+  function smallCopy(src){
+    const i = String(src).lastIndexOf("/");
+    return src.slice(0, i + 1) + "small/" + src.slice(i + 1);
+  }
 
   // waits for a transform transition to finish (with a safety timeout)
   function afterSlide(el, ms, cb){
@@ -92,7 +97,7 @@
   }
 
   // ────────────────────────────────────────────────────────────
-  // THE STRIP: every photo from every project, in order, each at its
+  // THE STRIP: work from every project, in order, each image at its
   // own shape and size (never cropped), sliding along to the next one
   // with Easy Ease. Loops seamlessly. Drag or swipe to move it
   // yourself; hover or Pause to stop it. Each image links to its project.
@@ -106,14 +111,22 @@
   const pauseBtn = document.getElementById("strip-pause");
   const SIZES = [1, 0.8, 0.92, 0.74, 1, 0.86];          // gentle rhythm of image sizes
   const LOAD_AHEAD = 14;                                // images loaded ahead of the one on screen
+  const STRIP_PER_PROJECT = 24;                         // most images any one project shows in the strip
 
+  // every photo and spread of every project, in order. A project with more
+  // than STRIP_PER_PROJECT shows that many, picked evenly from start to
+  // finish. Spreads with half-size copies use those (the strip is small).
   function autoReel(){
     const out = [];
     d.projects.forEach(p => {
-      const hasBook = p.spreads && p.spreads.length > 1;
-      (hasBook ? p.spreads : (p.images || [])).forEach(src => out.push({ src, project: p.id }));
-      (p.birds || []).filter(b => b.status !== "in-progress")
-        .forEach(b => b.spreads.forEach(src => out.push({ src, project: p.id })));
+      const spreads = p.spreads || [];
+      const all = [];
+      (p.images || []).forEach(src => { if (spreads.indexOf(src) < 0) all.push(src); });
+      spreads.forEach(src => all.push(p.smallCopies ? smallCopy(src) : src));
+      (p.birds || []).filter(b => b.status !== "in-progress").forEach(b => b.spreads.forEach(src => all.push(src)));
+      const n = all.length, max = STRIP_PER_PROJECT;
+      const pick = n <= max ? all : Array.from({ length: max }, (_, k) => all[Math.floor(k * n / max)]);
+      pick.forEach(src => out.push({ src, project: p.id }));
     });
     return out;
   }
@@ -303,86 +316,82 @@
       </div>`;
   }
 
-  // spreads, one at a time; pages = [{src, alt, section, wip}]
-  function bookMarkup(p, pages, label){
-    const n = pages.length;
-    const how = finePointer
-      ? `Drag, click or use the arrows to go through all ${n} spreads.`
-      : `Swipe or use the arrows to go through all ${n} spreads.`;
+  function model3dMarkup(p){
+    const poster = p.model3d.poster ? `<img class="model3d-poster" src="${esc(p.model3d.poster)}" alt="" loading="lazy" decoding="async">` : "";
     return `
-      <figure class="book" data-book style="--aspect:${p.aspect || 1.412}">
-        <figcaption class="book-head">
-          <span class="book-label">${esc(label || "Inside the book")}</span>
-          <p class="book-how">${how}</p>
-        </figcaption>
-        <div class="slider" tabindex="0" role="region" aria-roledescription="carousel"
-             aria-label="${esc(p.title)}, ${n} spreads. Use the left and right arrow keys to move between them.">
-          <div class="slider-track">
-            ${pages.map((pg, i) => `
-              <div class="slide${pg.wip ? " is-wip" : ""}" role="group" aria-roledescription="slide"
-                   aria-label="${esc(pg.alt)}"${pg.section ? ` data-section="${esc(pg.section)}"` : ""}>
-                <img src="${esc(pg.src)}" alt="${esc(pg.alt)}" loading="${i < 2 ? "eager" : "lazy"}" decoding="async" draggable="false">
-                ${pg.wip ? `<span class="wip-badge">Work in progress</span>` : ""}
-              </div>`).join("")}
-          </div>
-          <span class="slider-hint" aria-hidden="true">${finePointer ? "Drag" : "Swipe"} \u2194</span>
+      <div class="model3d" data-model3d="${esc(p.id)}">
+        <div class="model3d-stage" tabindex="0" role="group" aria-roledescription="3D viewer"
+             aria-label="${esc(p.title)} in 3D. It turns on its own and its stand comes off and goes back on. Drag, or use the left and right arrow keys, to turn it yourself.">
+          ${poster}
+          <span class="model3d-loading" aria-hidden="true">Loading 3D model\u2026</span>
+          <span class="model3d-hint" aria-hidden="true">${finePointer ? "Drag" : "Swipe"} to turn \u2194</span>
         </div>
-        <div class="controls">
-          <button type="button" class="ctl-btn book-prev">\u2190 Previous</button>
-          <span class="book-count" aria-live="polite"></span>
-          <button type="button" class="ctl-btn book-next">Next \u2192</button>
-          <button type="button" class="ctl-btn book-pause" aria-pressed="false">Pause</button>
+        <div class="model3d-foot">
+          <p class="model3d-note">The stand comes off and goes back on by itself.</p>
+          <button type="button" class="ctl-btn model3d-pause" aria-pressed="false">Pause</button>
         </div>
-        <input type="range" class="book-progress" min="0" max="${n - 1}" value="0" step="1" aria-label="Jump to a spread">
-      </figure>`;
+      </div>`;
   }
 
-  // returns {primary, secondary, stacked}: the main visual, and the rest
+  // One spread. Its space is held at the project's "aspect" while it loads,
+  // so the page never jumps; a single page (a cover) sits centred in that
+  // space, at the same height as the spreads. With "smallCopies", phones
+  // and smaller screens load the half-size copy instead of the full one.
+  const SPREAD_SIZES = "(min-width: 900px) 75vw, 100vw";
+  function spreadImg(p, src, alt){
+    const set = p.smallCopies ? ` srcset="${esc(smallCopy(src))} 1500w, ${esc(src)} 3000w" sizes="${SPREAD_SIZES}"` : "";
+    return `<img class="spread-img" src="${esc(src)}"${set} alt="${esc(alt)}" style="aspect-ratio:${+p.aspect || 1.414}" loading="lazy" decoding="async">`;
+  }
+  // what a screen reader says for each spread: covers by name, the rest counted
+  function spreadAlts(title, list){
+    const isCover = src => /(^|[\/_-])(back-?)?cover[^\/]*$/i.test(src);
+    const inner = list.filter(src => !isCover(src)).length;
+    let k = 0;
+    return list.map(src => {
+      if (isCover(src)) return `${title}, ${/back-?cover[^\/]*$/i.test(src) ? "back cover" : "front cover"}`;
+      k++;
+      return `${title}, spread ${k} of ${inner}`;
+    });
+  }
+
+  // The work, as runs of images: the 3D model, the photos, the spreads,
+  // each bird, the process, each run under its own small heading (the
+  // photos have none). The very first image is the "primary": on
+  // phones it sits between the project's name and its text, and everything
+  // else follows the text. Every image runs the full width of the column,
+  // one under another, never cropped.
   function mediaMarkup(p){
-    const parts = [];
-    if (p.model3d && p.model3d.src) {
-      const poster = p.model3d.poster ? `<img class="model3d-poster" src="${esc(p.model3d.poster)}" alt="" loading="lazy" decoding="async">` : "";
-      parts.push(`
-        <div class="model3d" data-model3d="${esc(p.id)}">
-          <div class="model3d-stage" tabindex="0" role="group" aria-roledescription="3D viewer"
-               aria-label="${esc(p.title)} in 3D. It turns on its own and its stand comes off and goes back on. Drag, or use the left and right arrow keys, to turn it yourself.">
-            ${poster}
-            <span class="model3d-loading" aria-hidden="true">Loading 3D model\u2026</span>
-            <span class="model3d-hint" aria-hidden="true">${finePointer ? "Drag" : "Swipe"} to turn \u2194</span>
-          </div>
-          <div class="model3d-foot">
-            <p class="model3d-note">The stand comes off and goes back on by itself.</p>
-            <button type="button" class="ctl-btn model3d-pause" aria-pressed="false">Pause</button>
-          </div>
-        </div>`);
+    const runs = [];
+    if (p.model3d && p.model3d.src) runs.push({ bare: true, items: [model3dMarkup(p)] });
+    const spreads = p.spreads || [];
+    const photos = (p.images || []).filter(src => spreads.indexOf(src) < 0);
+    if (photos.length) runs.push({ items: photos.map((src, i) =>
+      // the first photo loads straight away, as it's near the top of the project
+      `<img src="${esc(src)}" alt="${esc(p.title)}, photo ${i + 1} of ${photos.length}" loading="${i === 0 ? "eager" : "lazy"}" decoding="async">`) });
+    if (spreads.length) {
+      const alts = spreadAlts(p.title, spreads);
+      runs.push({ label: p.spreadsLabel || p.flipLabel, items: spreads.map((src, i) => spreadImg(p, src, alts[i])) });
     }
-    if (p.spreads && p.spreads.length > 1) {
-      parts.push(bookMarkup(p, p.spreads.map((src, i) => ({ src, alt: `${p.title}, spread ${i + 1} of ${p.spreads.length}` })), p.flipLabel));
-    }
-    if (p.birds && p.birds.length) {
-      const pages = [];
-      p.birds.forEach(b => b.spreads.forEach((src, i) => pages.push({
-        src, section: b.name, wip: b.status === "in-progress",
-        alt: `${p.title}, ${b.name}, spread ${i + 1} of ${b.spreads.length}${b.status === "in-progress" ? ", work in progress" : ""}`
-      })));
-      parts.push(bookMarkup(p, pages, p.flipLabel));
-    }
-    const hasBook = (p.spreads && p.spreads.length > 1) || (p.birds && p.birds.length);
-    const images = (!hasBook && p.images) ? p.images : [];
-    const img = (src, i) => `<img src="${esc(src)}" alt="${esc(p.title)}, image ${i + 1} of ${images.length}" loading="${i === 0 ? "eager" : "lazy"}" decoding="async">`;
-    let stacked = false;
-    if (images.length) {
-      stacked = true;
-      parts.push(`<div class="media-stack">${img(images[0], 0)}</div>`);
-      if (images.length > 1) parts.push(`<div class="media-stack">${images.slice(1).map((src, i) => img(src, i + 1)).join("")}</div>`);
-    }
-    if (!parts.length) parts.push(`<div class="media-placeholder">Images coming soon</div>`);
+    (p.birds || []).forEach(b => {
+      const wip = b.status === "in-progress";
+      runs.push({ label: b.name, items: (b.spreads || []).map((src, i) => {
+        const img = spreadImg(p, src, `${p.title}, ${b.name}, spread ${i + 1} of ${b.spreads.length}${wip ? ", work in progress" : ""}`);
+        return wip ? `<div class="spread is-wip">${img}<span class="wip-badge" aria-hidden="true">Work in progress</span></div>` : img;
+      }) });
+    });
     const proc = p.processImages || [];
-    if (proc.length) {
-      parts.push(`<div class="media-process"><h3 class="rail-label">Process</h3><div class="media-stack">${proc.map(src =>
-        `<img src="${esc(src)}" alt="${esc(p.title)}, process image" loading="lazy" decoding="async">`).join("")}</div></div>`);
-    }
-    return { primary: parts[0], secondary: parts.slice(1).join(""), stacked };
+    if (proc.length) runs.push({ label: "Process", items: proc.map(src =>
+      `<img src="${esc(src)}" alt="${esc(p.title)}, process image" loading="lazy" decoding="async">`) });
+    const filled = runs.filter(r => r.items.length);
+    if (!filled.length) return { primary: `<div class="media-placeholder">Images coming soon</div>`, secondary: "" };
+
+    const head = r => r.label ? `<h3 class="media-label">${esc(r.label)}</h3>` : "";
+    const stack = items => `<div class="media-stack">${items.join("")}</div>`;
+    const first = filled[0];
+    const primary = first.bare ? first.items[0] : head(first) + stack(first.items.slice(0, 1));
+    let secondary = first.items.length > 1 ? stack(first.items.slice(1)) : "";
+    filled.slice(1).forEach(r => { secondary += `<div class="media-run">${head(r)}${r.bare ? r.items.join("") : stack(r.items)}</div>`; });
+    return { primary, secondary };
   }
 
   const workRoot = document.getElementById("work-sections");
@@ -394,12 +403,18 @@
     const media = mediaMarkup(p);
     section.innerHTML = `
       <div class="rail">${railMarkup(p)}</div>
-      <div class="section-main${media.stacked ? " is-stacked" : ""}">
+      <div class="section-main">
         <div class="media-primary">${media.primary}</div>
         ${media.secondary ? `<div class="media-secondary">${media.secondary}</div>` : ""}
       </div>`;
     section.querySelector(".rail-name").id = "project-title-" + p.id;
     workRoot.appendChild(section);
+  });
+  // spreads show a soft placeholder tone where they'll be, until they've loaded
+  workRoot.querySelectorAll(".spread-img").forEach(img => {
+    const loaded = () => img.classList.add("is-loaded");
+    if (img.complete && img.naturalWidth) loaded();
+    else img.addEventListener("load", loaded, { once: true });
   });
 
   // ---- about + contact ----
@@ -447,139 +462,8 @@
     document.addEventListener("visibilitychange", schedule);
   });
 
-  // ────────────────────────────────────────────────────────────
-  // SPREADS: one at a time, sliding to the next with Easy Ease.
-  // Drag or swipe it, click its left or right half, use Previous /
-  // Next or the arrow keys, or drag the bar underneath. Left alone
-  // it slides on by itself (hover or Pause to stop it), and it loops
-  // back to the first spread without jumping.
-  // ────────────────────────────────────────────────────────────
-  function initBook(fig){
-    const slider = fig.querySelector(".slider");
-    const strack = slider.querySelector(".slider-track");
-    const real = Array.from(strack.children);
-    const N = real.length;
-    const firstClone = real[0].cloneNode(true), lastClone = real[N - 1].cloneNode(true);
-    [firstClone, lastClone].forEach(c => { c.setAttribute("aria-hidden", "true"); c.removeAttribute("role"); });
-    strack.insertBefore(lastClone, real[0]);
-    strack.appendChild(firstClone);
-    const prevBtn = fig.querySelector(".book-prev"), nextBtn = fig.querySelector(".book-next");
-    const pauseB = fig.querySelector(".book-pause"), countEl = fig.querySelector(".book-count");
-    const progress = fig.querySelector(".book-progress"), hint = slider.querySelector(".slider-hint");
-    const SLIDE_MS = 850, AUTO_MS = 1300, HOLD_MS = 2800;
-    let cur = 0, busy = false, paused = reducedMotion, visible = false, hover = false, lastTouch = -Infinity, timer = null;
-
-    const W = () => slider.clientWidth;
-    function place(pos, ms){
-      strack.style.transition = ms ? `transform ${ms}ms ${EASY}` : "none";
-      strack.style.transform = `translate3d(${-Math.round(pos * W())}px,0,0)`;
-    }
-    function label(i){
-      const name = real[i].dataset.section;
-      if (!name) return `Spread ${i + 1} of ${N}`;
-      const same = real.filter(s => s.dataset.section === name);
-      if (real[i].classList.contains("is-wip")) return `${name}, work in progress`;
-      return `${name}, spread ${same.indexOf(real[i]) + 1} of ${same.length}`;
-    }
-    function update(){
-      countEl.textContent = label(cur);
-      progress.value = String(cur);
-      real.forEach((s, k) => s.setAttribute("aria-hidden", k === cur ? "false" : "true"));
-      for (let k = -1; k <= 2; k++) {
-        const im = real[(cur + k + N) % N].querySelector("img");
-        if (im.loading === "lazy") im.loading = "eager";
-      }
-    }
-    function go(target, ms){
-      if (busy) return;
-      busy = true;
-      const wrap = target >= N || target < 0;
-      place(target + 1, ms || SLIDE_MS);                  // clones sit at 0 and N + 1
-      cur = (target + N) % N;
-      update();
-      afterSlide(strack, ms || SLIDE_MS, () => { if (wrap) place(cur + 1, 0); busy = false; });
-    }
-    function schedule(){
-      clearTimeout(timer);
-      if (paused || hover || !visible || document.hidden) return;
-      const wait = Math.max(HOLD_MS, 4500 - (performance.now() - lastTouch));
-      timer = setTimeout(() => { go(cur + 1, AUTO_MS); schedule(); }, wait);
-    }
-    function touched(){
-      lastTouch = performance.now();
-      if (hint) hint.classList.add("is-hidden");
-      schedule();
-    }
-    function setPaused(p){
-      paused = p;
-      pauseB.setAttribute("aria-pressed", String(p));
-      pauseB.textContent = p ? "Play" : "Pause";
-      schedule();
-    }
-    prevBtn.addEventListener("click", () => { touched(); go(cur - 1); });
-    nextBtn.addEventListener("click", () => { touched(); go(cur + 1); });
-    pauseB.addEventListener("click", () => setPaused(!paused));
-    progress.addEventListener("input", () => {
-      touched();
-      const t = parseInt(progress.value, 10);
-      busy = false; cur = t; place(cur + 1, 450); update();
-    });
-    slider.addEventListener("keydown", (e) => {
-      if (e.key === "ArrowRight") { e.preventDefault(); touched(); go(cur + 1); }
-      else if (e.key === "ArrowLeft") { e.preventDefault(); touched(); go(cur - 1); }
-    });
-    if (finePointer) {
-      slider.addEventListener("pointerenter", () => { hover = true; schedule(); });
-      slider.addEventListener("pointerleave", () => { hover = false; schedule(); });
-    }
-    let drag = null;
-    slider.addEventListener("pointerdown", (e) => {
-      if (busy || (e.button !== undefined && e.button > 0)) return;
-      drag = { x: e.clientX, dx: 0, moved: false, id: e.pointerId };
-    });
-    slider.addEventListener("pointermove", (e) => {
-      if (!drag) return;
-      drag.dx = e.clientX - drag.x;
-      if (!drag.moved && Math.abs(drag.dx) > 6) {
-        drag.moved = true; slider.classList.add("is-dragging");
-        try { slider.setPointerCapture(drag.id); } catch (err) {}
-      }
-      if (drag.moved) {
-        strack.style.transition = "none";
-        strack.style.transform = `translate3d(${-Math.round((cur + 1) * W()) + drag.dx}px,0,0)`;
-      }
-    });
-    function endDrag(e, cancelled){
-      if (!drag) return;
-      const { dx, moved } = drag; drag = null;
-      slider.classList.remove("is-dragging");
-      touched();
-      if (cancelled) { place(cur + 1, 300); return; }
-      if (!moved) {
-        const r = slider.getBoundingClientRect();
-        go(e.clientX > r.left + r.width / 2 ? cur + 1 : cur - 1);
-        return;
-      }
-      const threshold = W() * 0.15;
-      if (dx < -threshold) go(cur + 1, 650);
-      else if (dx > threshold) go(cur - 1, 650);
-      else { busy = true; place(cur + 1, 450); afterSlide(strack, 450, () => { busy = false; }); }
-    }
-    slider.addEventListener("pointerup", (e) => endDrag(e, false));
-    slider.addEventListener("pointercancel", (e) => endDrag(e, true));
-    window.addEventListener("resize", () => place(cur + 1, 0));
-    if ("IntersectionObserver" in window) {
-      new IntersectionObserver(es => { visible = es[0].isIntersecting; schedule(); }, { threshold: 0.35 }).observe(slider);
-    } else { visible = true; }
-    document.addEventListener("visibilitychange", schedule);
-    place(1, 0);
-    update();
-    setPaused(paused);
-  }
-  document.querySelectorAll("[data-book]").forEach(initBook);
-
   // focus rings show for keyboard users only, never after a click or tap
-  document.querySelectorAll(".slider, .model3d-stage, .strip").forEach(el => {
+  document.querySelectorAll(".model3d-stage, .strip").forEach(el => {
     el.addEventListener("pointerdown", () => el.setAttribute("data-pointer", ""));
     el.addEventListener("keydown", () => el.removeAttribute("data-pointer"));
   });
@@ -638,21 +522,154 @@
   }
 
   // ────────────────────────────────────────────────────────────
-  // RUNNING HEAD, PROGRESS LINE, BACK TO TOP
+  // GETTING AROUND
+  // The bar along the top names the section you're in, like a book's
+  // running head. Your name goes back to the top; the section's name
+  // opens a list of every project, About and Contact. Once you've
+  // scrolled down, the bar along the bottom goes to the previous or next
+  // section, or back to the top. The line under the top bar shows how far
+  // down the page you are.
   // ────────────────────────────────────────────────────────────
-  const runheadSection = document.getElementById("runhead-section");
-  const labelled = Array.from(document.querySelectorAll(".section")).map(s => {
-    const name = s.querySelector(".rail-name");
-    return { el: s, label: name ? name.textContent : "Portfolio" };
+  const root = document.documentElement;
+  const runhead = document.querySelector(".runhead");
+  const sectionLabel = document.getElementById("runhead-section-label");
+  const menuWrap = document.querySelector(".runhead-menu");
+  const menuBtn = document.getElementById("runhead-section");
+  const menu = document.getElementById("section-menu");
+  const pagerPrev = document.getElementById("pager-prev");
+  const pagerNext = document.getElementById("pager-next");
+  const sections = Array.from(document.querySelectorAll(".section")).map(s => {
+    const num = s.querySelector(".rail-num"), name = s.querySelector(".rail-name");
+    const p = s.id.indexOf("project-") === 0 ? projectById[s.id.slice(8)] : null;
+    return { el: s, num: num ? num.textContent : "", label: name ? name.textContent : "", year: p ? p.year : "" };
   });
+  const menuRows = sections.map(s => {
+    const li = document.createElement("li");
+    li.innerHTML = `<a class="section-menu-row" href="#${esc(s.el.id)}"><span class="section-menu-num">${esc(s.num)}</span><span class="section-menu-title">${esc(s.label)}</span>${s.year ? `<span class="section-menu-year">${esc(s.year)}</span>` : ""}</a>`;
+    document.getElementById("section-menu-list").appendChild(li);
+    return li.firstElementChild;
+  });
+
+  // the list opens and closes with its button; Escape, a click anywhere
+  // else, or tabbing out of it closes it too
+  function setMenu(open, refocus){
+    menu.hidden = !open;
+    menuBtn.setAttribute("aria-expanded", String(open));
+    if (!open && refocus) menuBtn.focus();
+  }
+  menuBtn.addEventListener("click", () => setMenu(menu.hidden));
+  menu.addEventListener("click", (e) => { if (e.target.closest("a")) setMenu(false); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !menu.hidden) { e.preventDefault(); setMenu(false, menuWrap.contains(document.activeElement)); }
+  });
+  document.addEventListener("pointerdown", (e) => { if (!menu.hidden && !menuWrap.contains(e.target)) setMenu(false); });
+  menuWrap.addEventListener("focusout", (e) => { if (e.relatedTarget && !menuWrap.contains(e.relatedTarget)) setMenu(false); });
+
+  function setPager(a, s, word){
+    if (!s) { a.hidden = true; return; }
+    a.hidden = false;
+    a.setAttribute("href", "#" + s.el.id);
+    a.querySelector(".pager-text").textContent = `${s.num} ${s.label}`;
+    a.setAttribute("aria-label", `${word}: ${s.num} ${s.label}`);
+  }
+  let current = -2;
+  function setCurrent(i){                                // i = -1 on the opening screen
+    if (i === current) return;
+    current = i;
+    sectionLabel.textContent = sections[i] ? sections[i].label : "Portfolio";
+    menuRows.forEach((a, k) => { if (k === i) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current"); });
+    setPager(pagerPrev, i > 0 ? sections[i - 1] : null, "Previous");
+    setPager(pagerNext, sections[i + 1] || null, "Next");
+  }
+
+  // Going to a section: a long way is covered in one go and then a short
+  // glide, so the page doesn't load every picture it would pass on the way.
+  function scrollInstant(y){
+    const was = root.style.scrollBehavior;
+    root.style.scrollBehavior = "auto";
+    window.scrollTo(0, y);
+    root.style.scrollBehavior = was;
+  }
+  const docTop = el => el.getBoundingClientRect().top + window.scrollY;
+  const targetY = el => Math.max(0, Math.min(root.scrollHeight - window.innerHeight,
+    el === hero ? 0 : Math.round(docTop(el) - runhead.offsetHeight)));
+  // Browsers keep what you're looking at still when something higher up
+  // the page changes size (a picture finishing loading, say). Browsers
+  // that can't do that keep the section you went to in place by hand for
+  // a few seconds after you go to it (or open a link straight to it),
+  // until you scroll yourself.
+  const anchoring = !!(window.CSS && CSS.supports && CSS.supports("overflow-anchor", "auto"));
+  let held = null;
+  function hold(el, gliding){
+    if (anchoring) return;
+    const now = performance.now();
+    held = { el, top: docTop(el), until: now + 5000, glideUntil: gliding ? now + 1200 : 0 };
+  }
+  function keepHeld(){
+    if (!held) return;
+    if (performance.now() > held.until) { held = null; return; }
+    const top = docTop(held.el), shift = Math.round(top - held.top);
+    if (!shift) return;
+    held.top = top;
+    if (performance.now() < held.glideUntil) window.scrollTo({ top: targetY(held.el), behavior: "smooth" });   // still on its way: re-aim
+    else scrollInstant(window.scrollY + shift);
+  }
+  if (!anchoring) {
+    document.addEventListener("load", (e) => { if (held && e.target && e.target.tagName === "IMG") keepHeld(); }, true);
+  }
+  // The section you went to is the one the bars name, even a short one
+  // (like About) that doesn't reach far down the screen, until you scroll
+  // somewhere else yourself.
+  let pinned = null;
+  const letGo = () => { held = null; pinned = null; };
+  ["wheel", "touchstart", "pointerdown"].forEach(t => window.addEventListener(t, letGo, { passive: true, capture: true }));
+  window.addEventListener("keydown", (e) => { if (/^(PageUp|PageDown|Home|End|ArrowUp|ArrowDown| |Spacebar)$/.test(e.key)) letGo(); }, true);
+
+  function jumpTo(el){
+    const y = targetY(el), gap = y - window.scrollY;
+    if (reducedMotion) scrollInstant(y);
+    else {
+      if (Math.abs(gap) > window.innerHeight * 1.5) scrollInstant(y - Math.sign(gap) * Math.round(window.innerHeight * 0.6));
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+    hold(el, !reducedMotion);
+    pinned = { el, arrived: false, until: performance.now() + 2500 };
+    onScroll();
+    // keyboard and screen reader users carry on from the section they went to
+    if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "-1");
+    try { el.focus({ preventScroll: true }); } catch (err) {}
+  }
+  const byHash = hash => { try { return hash ? document.getElementById(decodeURIComponent(hash)) : null; } catch (err) { return null; } };
+  // every link to a part of this page goes through jumpTo
+  document.addEventListener("click", (e) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const a = e.target.closest ? e.target.closest('a[href^="#"]') : null;
+    const el = a ? byHash(a.getAttribute("href").slice(1)) : null;
+    if (!el) return;
+    e.preventDefault();
+    jumpTo(el);
+    try { history.replaceState(null, "", el === hero ? location.pathname + location.search : "#" + el.id); } catch (err) {}
+  });
+  // a link straight to a section (…/#project-02) is held in place the same way
+  if (location.hash) {
+    const el = byHash(location.hash.slice(1));
+    if (el) { hold(el); pinned = { el, arrived: false, until: performance.now() + 2500 }; }
+  }
+
   const progressBar = document.getElementById("scroll-progress");
   let ticking = false;
   function onScroll(){
+    if (pinned) {
+      // once it's arrived, scrolling away from it (with the scroll bar, say) lets go
+      const off = Math.abs(window.scrollY - targetY(pinned.el));
+      if (off < 2) pinned.arrived = true;
+      if ((pinned.arrived && off > 4) || (!pinned.arrived && performance.now() > pinned.until)) pinned = null;
+    }
     const line = window.innerHeight * 0.4;
-    const hit = labelled.find(({ el }) => { const r = el.getBoundingClientRect(); return r.top <= line && r.bottom > line; });
-    const text = hit ? hit.label : "Portfolio";
-    if (runheadSection.textContent !== text) runheadSection.textContent = text;
-    const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+    setCurrent(pinned
+      ? sections.findIndex(({ el }) => el === pinned.el || pinned.el.contains(el))
+      : sections.findIndex(({ el }) => { const r = el.getBoundingClientRect(); return r.top <= line && r.bottom > line; }));
+    const scrollable = root.scrollHeight - window.innerHeight;
     if (progressBar) progressBar.style.width = (scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0) + "%";
     document.body.classList.toggle("is-scrolled", window.scrollY > window.innerHeight * 0.8);
     ticking = false;
@@ -663,7 +680,7 @@
   // START: size everything, wait for the intro (intro.js) to hand
   // over, then type the name and bring in the work
   // ────────────────────────────────────────────────────────────
-  function layoutAll(){ fitName(); sizeStrip(); fitRails(); }
+  function layoutAll(){ fitName(); sizeStrip(); fitRails(); keepHeld(); }
   // Phones change their reported height as the browser bar hides while
   // scrolling; only a real width change (e.g. rotating) re-sizes the
   // strip there, so the page never jumps under your thumb.

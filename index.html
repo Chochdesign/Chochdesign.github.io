@@ -21,7 +21,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261023">
+<link rel="stylesheet" href="style.css?v=20261104">
 <!-- the intro covers the page from the very first frame (intro.js takes it
      from there). It plays when the page opens at the top, so a link straight
      to a section (…/#work) goes straight there, and a reload starts at the top.
@@ -57,16 +57,24 @@
 
 <a class="skip-link" href="#work">Skip to the work</a>
 
-<!-- running head, like a book's: names the section you're in -->
-<div class="runhead" aria-hidden="true">
-  <span id="runhead-name"></span>
-  <span class="runhead-mid">/</span>
-  <span id="runhead-section">Portfolio</span>
-  <span class="runhead-progress-track"><span id="scroll-progress" class="runhead-progress-fill"></span></span>
-</div>
+<!-- running head, like a book's: names the section you're in. Your name goes
+     back to the top; the section's name opens a list of every section. -->
+<nav class="runhead" aria-label="Breadcrumb">
+  <a class="runhead-name" href="#top"><span id="runhead-name"></span><span class="sr-only">, back to the top</span></a>
+  <span class="runhead-mid" aria-hidden="true">/</span>
+  <div class="runhead-menu">
+    <button type="button" class="runhead-section" id="runhead-section" aria-expanded="false" aria-controls="section-menu">
+      <span class="runhead-section-label" id="runhead-section-label">Portfolio</span><span class="sr-only">, all sections</span><span class="runhead-caret" aria-hidden="true"></span>
+    </button>
+    <div class="section-menu" id="section-menu" hidden>
+      <ol class="section-menu-list" id="section-menu-list"></ol>
+    </div>
+  </div>
+  <span class="runhead-progress-track" aria-hidden="true"><span id="scroll-progress" class="runhead-progress-fill"></span></span>
+</nav>
 
 <!-- HERO: your name types itself out across the page, then the work
-     slides in underneath it: every image from every project, in order,
+     slides in underneath it: work from every project, in order,
      each at its own shape and size, sliding along to the next one.
      Kept shorter than the screen so the first project shows below. -->
 <header class="hero" id="top">
@@ -140,15 +148,19 @@
 
 </main>
 
-<footer class="backtotop">
-  <a href="#top">Back to top ↑</a>
-</footer>
+<!-- along the bottom once you've scrolled down: the previous section, back
+     to the top, the next section (script.js fills them in as you scroll) -->
+<nav class="pager" aria-label="Previous and next">
+  <a class="pager-link pager-prev" id="pager-prev" href="#top" hidden><span class="pager-arrow" aria-hidden="true">←</span><span class="pager-text"></span></a>
+  <a class="pager-link pager-top" href="#top" aria-label="Back to top"><span class="pager-wide">Back to </span>top <span aria-hidden="true">↑</span></a>
+  <a class="pager-link pager-next" id="pager-next" href="#top" hidden><span class="pager-text"></span><span class="pager-arrow" aria-hidden="true">→</span></a>
+</nav>
 
 <!-- "?v=..." makes browsers fetch these files fresh after an update.
      When you change style.css or a .js file, change the number here (and on style.css above). -->
-<script src="data.js?v=20261023"></script>
-<script src="intro.js?v=20261023"></script>
-<script src="arsvita-3d.js?v=20261023"></script>
-<script src="script.js?v=20261023"></script>
+<script src="data.js?v=20261104"></script>
+<script src="intro.js?v=20261104"></script>
+<script src="arsvita-3d.js?v=20261104"></script>
+<script src="script.js?v=20261104"></script>
 </body>
 </html>
