@@ -1,6 +1,6 @@
 # Morgan Chochinov — Portfolio Site
 
-A static portfolio website built around a single design concept: the book *S, M, L, XL* by Rem Koolhaas and Bruce Mau. The site treats itself like a printed book: a running head, numbered chapters, and one consistent sidebar alongside each project's work. It opens with your CHOCH logo animation on neon orange (on phones and tablets, on the page colour); when the pieces snap together the orange turns into the page colour and fades into the site. Then the name types itself out and work from every project slides past underneath, sized so the first project already shows on the first screen. Every project then shows its work the same way: each image at the full width of the work column, one under another.
+A static portfolio website built around a single design concept: the book *S, M, L, XL* by Rem Koolhaas and Bruce Mau. The site treats itself like a printed book: a running head, numbered chapters, and one consistent sidebar alongside each project's work. It opens with your CHOCH logo animation on neon orange (on phones and tablets, on the page colour); when the pieces snap together the orange turns into the page colour and fades into the site. Then the name types itself out and work from every project slides past underneath, sized so the first project already shows on the first screen. Every project then shows its work at full size: each image at the full width of the work column, one under another, except Dozer's whole issue, which shows one spread at a time with a slider bar under it that runs through every spread.
 
 No build step, no framework, no dependencies beyond two Google Fonts. Everything renders from a single data file.
 
@@ -31,14 +31,17 @@ Open `index.html` in a browser — that's it, it runs locally with no server nee
     ├── dozer/
     │   ├── cover.webp, spread-01.webp … spread-81.webp, back-cover.webp
     │   │                          Issue 02, cover to cover (3000px wide; the covers 1500px)
-    │   └── small/                 The same 83 files at half size, for phones and the opening strip
+    │   ├── small/                 The same 83 files at half size, for phones and the opening strip
+    │   └── flatplan.webp          The whole issue as one strip: the slider bar under the spreads
     ├── logo-full.png            The Pecking Order logo mark
     ├── arsvita/
     │   ├── 3d-poster.webp                   Still of the 3D model (transparent), shown while it loads
-    │   └── spread-01.jpg … spread-23.jpg    All 23 spreads
+    │   ├── spread-01.webp … spread-23.webp  All 23 spreads, 3000px wide
+    │   └── small/                           The same at half size, for phones and the opening strip
     └── pecking-order/
-        └── marabou-*.jpg (6), shoebill-*.jpg (6),
-            kingvulture-*.jpg (5), hoatzin-01.jpg (1)
+        ├── marabou-*.webp (6), shoebill-*.webp (6),
+        │   kingvulture-*.webp (5), hoatzin-01.webp (1)   Every bird's spreads, 3000px wide
+        └── small/                           The same at half size
 ```
 
 ## Design system quick reference
@@ -48,9 +51,9 @@ Open `index.html` in a browser — that's it, it runs locally with no server nee
 - **Chapter numbering:** projects are numbered 01/02/03 in the order they appear in the `projects` array in `data.js`.
 - **One grid everywhere:** every project, About and Contact use the same two columns: a sidebar (a quarter of the width) for the text and the work (three quarters) as big as it can be. The opening screen's tagline and index line up with the same columns. On phones everything stacks and the imagery runs edge to edge, and each project runs number and name, then its main visual, then its text, then the rest of the work.
 - **One sidebar format:** number, name, small info (year, role, specs), a one- or two-sentence summary, then Challenge / Approach / Outcome, then an optional detail block. On wide screens the sidebar stays beside the work while you scroll; if it's taller than the window, it scrolls until its last line is showing and stays there.
-- **Imagery is never cropped, boxed or stretched.** Every project's work stacks one image under another at the full width of the work column: Arsvita's 3D model and spreads, Dozer's photos and the whole of Issue 02, The Pecking Order's birds. The opening strip shows every image at its own shape.
+- **Imagery is never cropped, boxed or stretched.** Every project's work stacks one image under another at the full width of the work column: Arsvita's 3D model and spreads, Dozer's photos, The Pecking Order's birds. Dozer's Issue 02 shows one spread at a time instead, as big as fits the screen, with a slider bar to go through it (see *The spread slider* below). The opening strip shows every image at its own shape.
 - **Getting around:** the running head along the top is clickable (your name goes to the top, the section's name lists every section), and a bar along the bottom goes to the previous or next section. See *Getting around* below.
-- **Motion:** every slide on the site uses the same curve as After Effects' Easy Ease. Nothing fades in; the only fade is the intro handing over to the site. The strip and the 3D model move on their own, and each has a Pause button (an accessibility requirement for anything that moves for more than 5 seconds). With "reduce motion" turned on in the device's settings, none of them move by themselves.
+- **Motion:** every slide on the site uses the same curve as After Effects' Easy Ease. Nothing fades in; the only fade is the intro handing over to the site. The strip and the 3D model move on their own, and each has a Pause button (an accessibility requirement for anything that moves for more than 5 seconds). With "reduce motion" turned on in the device's settings, none of them move by themselves. Dozer's spread slider never animates: each spread simply replaces the last.
 - All of the content options are documented in the comment block at the top of `data.js`.
 
 ## The intro
@@ -77,8 +80,8 @@ The running head along the top of the screen works like a breadcrumb. **Your nam
 
 Once you've scrolled past the opening screen, a bar along the bottom of the screen shows **← the previous section**, **Back to top** and **the next section →**, so you can step from one project straight to the next without scrolling through all of it. Both update themselves as you scroll, from the projects in `data.js`.
 
-- Going to a section covers most of the distance in one go and glides the last stretch, so the browser doesn't load every spread it would pass on the way (Dozer alone has 83).
-- Every spread's space is held at its final shape before it loads, so nothing above the section you land on can push it out of place. Browsers that can't keep the page still on their own get a hand from `script.js` for a few seconds after you arrive.
+- Going to a section covers most of the distance in one go and glides the last stretch, so the browser doesn't load every spread it would pass on the way.
+- Every spread's space is held at its final shape before it loads, so spreads above the section you land on can't push it out of place. Photos can be any shape, so they only take up room once they arrive: if one finishes loading while the page is still gliding to a section, the glide re-aims and still lands on the section. Browsers that can't keep the page still on their own get a hand from `script.js` for a few seconds after you arrive.
 - Keyboard and screen reader users carry on from the section they went to. On touch screens the top bar is taller, so its links are easy to tap.
 - Contact fills the last screen, so every section, the last ones included, can come up to the top when you go to it.
 
@@ -106,18 +109,31 @@ images/arsvita/3d-poster.webp   with the Arsvita spreads
 
 ## The spreads
 
-Every spread shows at the full width of the work column, one under another, the same way Dozer's photos do: no sliders, nothing to click through. Each run starts with a small heading: "Inside the book" for Arsvita (under the 3D model), "Issue 02, cover to cover" for Dozer (after the photos), and each bird's name for The Pecking Order. Change a heading with `spreadsLabel` in `data.js`.
+Arsvita's and The Pecking Order's spreads show at the full width of the work column, one under another, the same way Dozer's photos do. Dozer's whole issue, far longer, is a spread slider instead (below). Each run starts with a small heading: "Inside the book" for Arsvita (under the 3D model), "Issue 02, cover to cover" for Dozer (after the photos), and each bird's name for The Pecking Order. Change a heading with `spreadsLabel` in `data.js`.
 
 - **The page never jumps.** Each spread's space is held at the project's `aspect` (the width ÷ height of one spread) while it loads, in a soft placeholder tone until the picture arrives. Spreads load as they come near the screen, not all at once.
 - **Covers sit centred at the same height as the spreads,** the size of one page. Put `cover` in the file's name (`cover.webp`, `back-cover.webp`) and screen readers call it the front or back cover; every other spread is read out as "spread 12 of 81".
 - **Dozer's Issue 02** is the whole magazine, made from `handbookversionfinalforprint.pdf`: the front cover, all 81 spreads and the back cover, cut to the trim (no bleed). The few CMYK pictures and the black text were converted to screen colour with a U.S. Web Coated (SWOP) profile, InDesign's North American default, so they match what InDesign shows on screen. Each spread is 3000px wide (the covers 1500px), with a half-size copy in `images/dozer/small/` (`smallCopies: true` in `data.js`) that phones and smaller screens load instead, about a third of the data.
 - **The Pecking Order** runs through every bird (the `birds` list in `data.js`). A bird with `status: "in-progress"`, currently the Hoatzin, is greyed out and labelled "Work in progress", and it's left out of the opening strip. When it's finished, change its status to `"complete"` and add its spreads.
 
+## The spread slider
+
+Dozer's Issue 02 is 83 spreads (the front cover, 81 spreads, the back cover), far too many to stack one under another. So it shows one at a time instead (`slider: true` in `data.js`), and the page scrolls past it as usual:
+
+- **One spread at a time, as big as fits** between the bars at the top and bottom of the screen, so every spread is seen whole. On a laptop that's nearly the full width of the work column; on a phone it runs edge to edge. (On a phone turned on its side it's allowed to be a little taller than the screen, so it doesn't shrink to a stamp.) The covers sit centred, the size of one page.
+- **The slider bar** under it is the whole issue, every spread side by side in order (`flatplan` in `data.js`, the file `images/dozer/flatplan.webp`), with a box around the one you're on. Drag along it to go through the issue, or click (or tap) anywhere on it to go straight there. With a mouse, the name of the spread under the pointer shows just above the bar.
+- **One spread forward or back:** the arrows either side of "Spread 12 of 81", clicking the right or left half of the spread, swiping it on a phone, or swiping sideways with two fingers on a trackpad. The arrows grey out at the front and back covers. Nothing animates: each spread simply replaces the last.
+- **Keyboard and screen readers:** with the spread selected, the left and right arrow keys go one spread at a time, and Home and End go to the covers. The bar works as a slider too (arrow keys, Page Up and Page Down jump ten spreads). Screen readers hear which spread they're on.
+- **Sharp, and light on data.** Nothing loads until it's near the screen. On Retina laptops and big screens the full 3000px spreads load, with the ones either side loading ahead so the arrows show the next one straight away; phones and smaller, standard screens use the half-size copies, which are already sharper than those screens need. While you drag along the bar only half-size copies load, and a soft, blown-up copy from the bar stands in for a moment until each arrives.
+- **Using it for another project:** add `slider: true` next to its `spreads`. The bar picture is optional; without one, a plain line shows where you are. If you change Dozer's spreads, the bar picture needs remaking: one image of every spread side by side in order, each an equal share of the width (ask me, or build it in InDesign).
+
 ## Images
 
 Export images at least 3000px wide (spreads included). A high-resolution (Retina) screen needs twice as many pixels as the size an image is shown at, and the spreads fill the whole work column, so anything smaller looks soft. Nothing on the site is cropped, so you can export at each image's natural shape.
 
-Dozer's spreads are 3000px wide. The Arsvita spreads (1600px wide) and The Pecking Order spreads (1200px wide) now fill the work column too, so they look soft on high-resolution screens: they're the next thing to re-export. Export them 3000px wide (or send over the PDFs) with the same names and they sharpen up with no other change. For a big set, half-size copies in a `small` folder next to them (plus `smallCopies: true`) keep phones fast, like Dozer's.
+Every spread on the site is now 3000px wide, made straight from your PDFs: Arsvita from `ARSVITA MAYA.pdf`, The Pecking Order from `TPOMAG1.pdf` (both in Downloads) and Dozer from `handbookversionfinalforprint.pdf`. Each page is drawn at twice the final size and scaled down, so small type stays crisp, and saved as WebP (a sharper, smaller kind of image file every current browser shows). Arsvita and The Pecking Order keep exactly the colours of your earlier exports. Every spread also has a half-size copy in a `small` folder (`smallCopies: true` in `data.js`) for phones, smaller screens and the opening strip. The old 1600px and 1200px JPGs are still in their folders but nothing uses them, so they can be deleted.
+
+Dozer's 7 photos are 2200px wide, enough for most laptop screens; if you have bigger originals, export them 3000px wide with the same names.
 
 The opening strip keeps every image sharp on its own: an image is never shown bigger than its file has pixels for on the screen it's on, so a small file shows a little smaller instead of blurry, and grows back by itself once a bigger file replaces it.
 
@@ -149,7 +165,7 @@ The opening strip keeps every image sharp on its own: an image is never shown bi
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261104">
+<link rel="stylesheet" href="style.css?v=20261107c">
 <!-- the intro covers the page from the very first frame (intro.js takes it
      from there). It plays when the page opens at the top, so a link straight
      to a section (…/#work) goes straight there, and a reload starts at the top.
@@ -286,10 +302,10 @@ The opening strip keeps every image sharp on its own: an image is never shown bi
 
 <!-- "?v=..." makes browsers fetch these files fresh after an update.
      When you change style.css or a .js file, change the number here (and on style.css above). -->
-<script src="data.js?v=20261104"></script>
-<script src="intro.js?v=20261104"></script>
-<script src="arsvita-3d.js?v=20261104"></script>
-<script src="script.js?v=20261104"></script>
+<script src="data.js?v=20261107c"></script>
+<script src="intro.js?v=20261107c"></script>
+<script src="arsvita-3d.js?v=20261107c"></script>
+<script src="script.js?v=20261107c"></script>
 </body>
 </html>
 
@@ -417,7 +433,7 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
 }
 /* 5. meta: small info lines, counters, captions */
 .rail-facts, .hero-role, .hero-index-year, .strip-cap, .model3d-note, .section-menu-year,
-.runhead, .contact-social, .model3d-loading, .model3d-hint{
+.runhead, .contact-social, .model3d-loading, .model3d-hint, .viewer-count, .viewer-tip{
   font-family: var(--f-mono);
   font-weight: 400;
   font-size: 0.78rem;
@@ -842,6 +858,94 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
   white-space: nowrap;
 }
 
+/* ---- the spread slider ("slider" in data.js, used by Dozer): one
+   spread at a time, as big as fits the screen (script.js sizes it), with
+   a bar under it that runs through every spread. The page scrolls past
+   it as usual. ---- */
+.viewer{ display: flex; flex-direction: column; align-items: center; }
+.viewer-frame{
+  position: relative;
+  width: var(--viewer-w, 100%);
+  aspect-ratio: var(--aspect, 1.414);
+  /* until the picture arrives: the spread's tiny copy from the bar, blown up */
+  background: var(--plan, none) no-repeat var(--placeholder);
+  background-size: var(--plan-size, auto);
+  background-position: var(--plan-pos, 0 0);
+  touch-action: pan-y pinch-zoom;          /* swipe sideways for the next spread; up and down still scrolls */
+  -webkit-user-select: none; user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.viewer-frame.is-loaded{ background: none; }
+.viewer-frame:focus-visible{ outline: 3px solid var(--ink); outline-offset: 6px; }
+.viewer-img{
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: contain;                     /* a cover, one page, sits centred */
+  pointer-events: none;
+}
+.viewer-img[hidden]{ display: none; }
+/* click the right half for the next spread, the left half for the one before */
+.viewer-side{ position: absolute; top: 0; bottom: 0; width: 50%; }
+.viewer-side-prev{ left: 0; cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect x='.75' y='.75' width='34.5' height='34.5' fill='%23F0EFE9' stroke='%23121212' stroke-width='1.5'/%3E%3Cpath d='M26 18H11M16 13l-5 5 5 5' fill='none' stroke='%23121212' stroke-width='1.75'/%3E%3C/svg%3E") 18 18, w-resize; }
+.viewer-side-next{ right: 0; cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect x='.75' y='.75' width='34.5' height='34.5' fill='%23F0EFE9' stroke='%23121212' stroke-width='1.5'/%3E%3Cpath d='M10 18h15M20 13l5 5-5 5' fill='none' stroke='%23121212' stroke-width='1.75'/%3E%3C/svg%3E") 18 18, e-resize; }
+.viewer.at-start .viewer-side-prev, .viewer.at-end .viewer-side-next{ cursor: default; }
+/* under it: the arrows either side of "Spread 12 of 81", then the bar */
+.viewer-foot{
+  width: var(--viewer-w, 100%);
+  display: flex; align-items: center; gap: 1.25rem;
+  margin-top: 0.75rem;
+}
+.viewer-nav{ flex: 0 0 auto; display: flex; align-items: center; gap: 0.6rem; }
+.viewer-nav .ctl-btn{ width: var(--tap); padding: 0; font-size: 1rem; }
+.viewer-nav .ctl-btn[aria-disabled="true"],
+.viewer-nav .ctl-btn[aria-disabled="true"]:hover{ opacity: 0.3; cursor: default; background: transparent; color: var(--ink); }
+.viewer-count{ min-width: 8.6em; text-align: center; color: var(--grey); }
+/* the bar: every spread in order, each an equal share of its width */
+.viewer-bar{
+  position: relative;
+  flex: 1 1 auto; min-width: 0;
+  padding: 0.9rem 0;
+  cursor: pointer;
+  touch-action: none;
+  -webkit-user-select: none; user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.viewer-plan{ display: block; width: 100%; height: 12px; object-fit: fill; }
+.viewer-bar.is-line::before{ content: ""; display: block; height: 2px; margin: 5px 0; background: var(--ink); }
+.viewer-bar:focus-visible{ outline: none; }
+.viewer-bar:focus-visible .viewer-knob{ box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--ink); }   /* selected with the keyboard */
+/* the handle: a box around the spread you're on */
+.viewer-knob{
+  position: absolute; top: 50%;
+  left: calc((var(--at, 0) + 0.5) * 100% / var(--n, 1));
+  width: max(calc(100% / var(--n, 1) + 4px), 12px);
+  height: 26px;
+  transform: translate(-50%, -50%);
+  border: 2px solid var(--ink);
+  pointer-events: none;
+}
+.viewer.is-dragging, .viewer.is-dragging .viewer-bar{ cursor: grabbing; }
+/* the name of the spread under the pointer, just above the bar */
+.viewer-tip{
+  position: absolute; bottom: calc(100% - 0.35rem); left: 0;
+  transform: translateX(-50%);
+  padding: 0.25rem 0.5rem;
+  color: var(--paper);
+  background: var(--ink);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s var(--easy);
+}
+.viewer-bar.is-hover .viewer-tip, .viewer.is-dragging .viewer-tip{ opacity: 1; }
+@media (max-width: 599px){
+  /* phones: the bar right under the spread, then the arrows either side of the count */
+  .viewer-foot{ flex-wrap: wrap; row-gap: 0; padding: 0 var(--gutter); }
+  .viewer-foot .viewer-bar{ order: -1; flex-basis: 100%; }
+  .viewer-nav{ flex: 1 1 100%; justify-content: space-between; }
+}
+@media (pointer: coarse){ .viewer-bar{ padding: 1.05rem 0; } }   /* an easy bar to put a thumb on */
+
 /* ---- 3D model (Arsvita): floats on the page, no floor, no shadow ---- */
 .model3d-stage{
   position: relative;
@@ -1075,7 +1179,7 @@ body.is-scrolled .pager{ transform: none; visibility: visible; transition: trans
       const all = [];
       (p.images || []).forEach(src => { if (spreads.indexOf(src) < 0) all.push(src); });
       spreads.forEach(src => all.push(p.smallCopies ? smallCopy(src) : src));
-      (p.birds || []).filter(b => b.status !== "in-progress").forEach(b => b.spreads.forEach(src => all.push(src)));
+      (p.birds || []).filter(b => b.status !== "in-progress").forEach(b => b.spreads.forEach(src => all.push(p.smallCopies ? smallCopy(src) : src)));
       const n = all.length, max = STRIP_PER_PROJECT;
       const pick = n <= max ? all : Array.from({ length: max }, (_, k) => all[Math.floor(k * n / max)]);
       pick.forEach(src => out.push({ src, project: p.id }));
@@ -1306,6 +1410,36 @@ body.is-scrolled .pager{ transform: none; visibility: visible; transition: trans
     });
   }
 
+  // The spread slider ("slider" in data.js): one spread at a time, as big
+  // as fits the screen, with a bar under it that runs through every
+  // spread. It's filled in by the SPREAD SLIDER code below.
+  function viewerMarkup(p, spreads){
+    const n = spreads.length;
+    return `
+      <div class="viewer" data-viewer="${esc(p.id)}" style="--aspect:${+p.aspect || 1.414};--n:${n}">
+        <div class="viewer-frame" tabindex="0" role="region" aria-roledescription="spread viewer"
+             aria-label="${esc(p.title)}, ${n} spreads and covers, one at a time. Use the left and right arrow keys, the arrow buttons or the slider to go through them.">
+          <img class="viewer-img" alt="" decoding="async" draggable="false" hidden>
+          <div class="viewer-side viewer-side-prev" aria-hidden="true"></div>
+          <div class="viewer-side viewer-side-next" aria-hidden="true"></div>
+        </div>
+        <div class="viewer-foot">
+          <div class="viewer-nav">
+            <button type="button" class="ctl-btn viewer-prev" aria-label="Previous spread">←</button>
+            <span class="viewer-count" aria-hidden="true"></span>
+            <button type="button" class="ctl-btn viewer-next" aria-label="Next spread">→</button>
+          </div>
+          <div class="viewer-bar${p.flatplan ? "" : " is-line"}" role="slider" tabindex="0" aria-label="${esc(p.title)}, every spread"
+               aria-valuemin="1" aria-valuemax="${n}" aria-valuenow="1">
+            ${p.flatplan ? `<img class="viewer-plan" src="${esc(p.flatplan)}" alt="" loading="lazy" decoding="async" draggable="false">` : ""}
+            <span class="viewer-knob" aria-hidden="true"></span>
+            <span class="viewer-tip" aria-hidden="true"></span>
+          </div>
+        </div>
+        <p class="sr-only viewer-say" aria-live="polite"></p>
+      </div>`;
+  }
+
   // The work, as runs of images: the 3D model, the photos, the spreads,
   // each bird, the process, each run under its own small heading (the
   // photos have none). The very first image is the "primary": on
@@ -1320,7 +1454,9 @@ body.is-scrolled .pager{ transform: none; visibility: visible; transition: trans
     if (photos.length) runs.push({ items: photos.map((src, i) =>
       // the first photo loads straight away, as it's near the top of the project
       `<img src="${esc(src)}" alt="${esc(p.title)}, photo ${i + 1} of ${photos.length}" loading="${i === 0 ? "eager" : "lazy"}" decoding="async">`) });
-    if (spreads.length) {
+    if (spreads.length > 1 && (p.slider || p.flipThrough)) {
+      runs.push({ label: p.spreadsLabel || p.flipLabel, bare: true, items: [viewerMarkup(p, spreads)] });
+    } else if (spreads.length) {
       const alts = spreadAlts(p.title, spreads);
       runs.push({ label: p.spreadsLabel || p.flipLabel, items: spreads.map((src, i) => spreadImg(p, src, alts[i])) });
     }
@@ -1340,7 +1476,7 @@ body.is-scrolled .pager{ transform: none; visibility: visible; transition: trans
     const head = r => r.label ? `<h3 class="media-label">${esc(r.label)}</h3>` : "";
     const stack = items => `<div class="media-stack">${items.join("")}</div>`;
     const first = filled[0];
-    const primary = first.bare ? first.items[0] : head(first) + stack(first.items.slice(0, 1));
+    const primary = first.bare ? head(first) + first.items[0] : head(first) + stack(first.items.slice(0, 1));
     let secondary = first.items.length > 1 ? stack(first.items.slice(1)) : "";
     filled.slice(1).forEach(r => { secondary += `<div class="media-run">${head(r)}${r.bare ? r.items.join("") : stack(r.items)}</div>`; });
     return { primary, secondary };
@@ -1460,6 +1596,249 @@ body.is-scrolled .pager{ transform: none; visibility: visible; transition: trans
   });
 
   // ────────────────────────────────────────────────────────────
+  // SPREAD SLIDER ("slider" in data.js, used by Dozer): one spread at a
+  // time, as big as fits between the bars at the top and bottom of the
+  // screen, and the page scrolls past it as usual. The bar under it is
+  // the whole issue, every spread in order: drag along it, or click
+  // anywhere on it, to go through them. The arrows go one spread at a
+  // time, and so does clicking the right or left half of the spread,
+  // swiping it (on a phone, or sideways on a trackpad), or the left and
+  // right arrow keys.
+  // ────────────────────────────────────────────────────────────
+  const viewers = [];
+  document.querySelectorAll("[data-viewer]").forEach(root => {
+    const p = projectById[root.dataset.viewer];
+    const aspect = +p.aspect || 1.414;
+    const spreads = p.spreads;
+    const N = spreads.length, last = N - 1;
+    const frame = root.querySelector(".viewer-frame");
+    const img = root.querySelector(".viewer-img");
+    const foot = root.querySelector(".viewer-foot");
+    const count = root.querySelector(".viewer-count");
+    const bar = root.querySelector(".viewer-bar");
+    const planImg = root.querySelector(".viewer-plan");
+    const tip = root.querySelector(".viewer-tip");
+    const say = root.querySelector(".viewer-say");
+    const prevBtn = root.querySelector(".viewer-prev");
+    const nextBtn = root.querySelector(".viewer-next");
+
+    // what each one is called: the covers by name, the rest counted
+    const alts = spreadAlts(p.title, spreads);
+    const isBack = src => /back-?cover[^\/]*$/i.test(src);
+    const isFront = src => !isBack(src) && /(^|[\/_-])cover[^\/]*$/i.test(src);
+    const inner = spreads.filter(src => !isFront(src) && !isBack(src)).length;
+    let k = 0;
+    const labels = spreads.map(src => isFront(src) ? "Front cover" : isBack(src) ? "Back cover" : `Spread ${++k} of ${inner}`);
+
+    // Pictures. Where the spread shows bigger than the half-size copies
+    // (a laptop or desktop), the full-size ones load; phones use the
+    // half-size copies, already sharper than their screens need. The
+    // spread you're on loads first, then the ones either side of it, so
+    // the arrows show the next one straight away. While you drag along the
+    // bar, only the half-size copy of the spread you're on loads, and the
+    // full one once you let go.
+    const small = src => p.smallCopies ? smallCopy(src) : src;
+    let wantFull = !p.smallCopies;
+    const best = src => wantFull ? src : small(src);
+    const ready = new Set(), loading = new Set(), failed = new Set();
+    let queue = [], near = false, at = 0, dragging = false;
+    function pump(){
+      while (loading.size < 2 && queue.length) {
+        const url = queue.shift();
+        if (ready.has(url) || loading.has(url) || failed.has(url)) continue;
+        loading.add(url);
+        const im = new Image();
+        im.decoding = "async";
+        const done = ok => { loading.delete(url); (ok ? ready : failed).add(url); if (ok) show(); pump(); };
+        im.onload = () => { if (im.decode) im.decode().then(() => done(true), () => done(true)); else done(true); };
+        im.onerror = () => done(false);
+        im.src = url;
+      }
+    }
+    function want(){
+      if (!near) return;
+      const list = [];
+      const add = url => { if (!ready.has(url) && !loading.has(url) && !failed.has(url) && list.indexOf(url) < 0) list.push(url); };
+      if (dragging) add(small(spreads[at]));
+      else [at, at + 1, at - 1, at + 2].forEach(j => { if (j >= 0 && j <= last) add(best(spreads[j])); });
+      queue = list;
+      pump();
+    }
+    function show(){
+      const f = spreads[at], s = small(f);
+      const url = !near ? null : ready.has(f) ? f : ready.has(s) ? s : null;
+      if (url) {
+        if (img.getAttribute("src") !== url) img.src = url;
+        img.alt = alts[at];
+        img.hidden = false;
+      } else img.hidden = true;
+      frame.classList.toggle("is-loaded", !!url);
+    }
+
+    // until a spread's picture arrives, its tiny copy from the bar stands
+    // in, blown up to size: soft, but the right spread at once
+    let plan = null;
+    function placePlan(){
+      const W = frame.clientWidth;
+      if (!plan || !W) return;
+      const s = W / (plan.h * aspect);               // in the strip, each spread is the strip's height tall, at its own shape
+      frame.style.setProperty("--plan-size", `${(plan.w * s).toFixed(1)}px ${(plan.h * s).toFixed(1)}px`);
+      frame.style.setProperty("--plan-pos", `${(-at * plan.w / N * s).toFixed(1)}px 0`);
+    }
+    if (planImg) {
+      const got = () => {
+        if (!planImg.naturalWidth) return;
+        plan = { w: planImg.naturalWidth, h: planImg.naturalHeight };
+        frame.style.setProperty("--plan", `url("${planImg.currentSrc || planImg.src}")`);
+        placePlan();
+      };
+      if (planImg.complete) got(); else planImg.addEventListener("load", got, { once: true });
+    }
+
+    // go to spread i: the picture, the count, the handle on the bar
+    function update(){
+      root.style.setProperty("--at", at);
+      count.textContent = labels[at];
+      bar.setAttribute("aria-valuenow", at + 1);
+      bar.setAttribute("aria-valuetext", labels[at]);
+      prevBtn.setAttribute("aria-disabled", at <= 0);
+      nextBtn.setAttribute("aria-disabled", at >= last);
+      root.classList.toggle("at-start", at <= 0);
+      root.classList.toggle("at-end", at >= last);
+      placePlan();
+      show();
+      want();
+    }
+    function go(i, announce){
+      i = Math.max(0, Math.min(last, i));
+      if (i === at) return;
+      at = i;
+      update();
+      if (announce) say.textContent = labels[i];
+    }
+
+    // the arrows, and the right or left half of the spread
+    prevBtn.addEventListener("click", () => go(at - 1, true));
+    nextBtn.addEventListener("click", () => go(at + 1, true));
+    let swipedAt = -1e9;
+    const swipedJustNow = () => performance.now() - swipedAt < 500;
+    root.querySelector(".viewer-side-prev").addEventListener("click", () => { if (!swipedJustNow()) go(at - 1, false); });
+    root.querySelector(".viewer-side-next").addEventListener("click", () => { if (!swipedJustNow()) go(at + 1, false); });
+    // the left and right arrow keys once the spread is selected
+    frame.addEventListener("keydown", (e) => {
+      const to = { ArrowRight: at + 1, ArrowLeft: at - 1, Home: 0, End: last }[e.key];
+      if (to === undefined) return;
+      e.preventDefault();
+      go(to, true);
+    });
+
+    // swiping the spread: sideways on a phone or tablet...
+    let touch = null;
+    frame.addEventListener("pointerdown", (e) => { if (e.pointerType !== "mouse") touch = { x: e.clientX, y: e.clientY }; });
+    frame.addEventListener("pointercancel", () => { touch = null; });
+    frame.addEventListener("pointerup", (e) => {
+      if (!touch || e.pointerType === "mouse") return;
+      const dx = e.clientX - touch.x, dy = e.clientY - touch.y;
+      touch = null;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.2) { swipedAt = performance.now(); go(at + (dx < 0 ? 1 : -1), true); }
+    });
+    // ...or with two fingers on a trackpad: one swipe, one spread
+    // (scrolling up and down over it still scrolls the page)
+    let wheelX = 0, wheelEnd = 0, wheelDone = false;
+    frame.addEventListener("wheel", (e) => {
+      const unit = e.deltaMode === 1 ? 16 : 1;
+      const dx = e.deltaX * unit, dy = e.deltaY * unit;
+      if (Math.abs(dx) <= Math.abs(dy)) return;
+      e.preventDefault();                              // and a sideways swipe doesn't send the browser back a page
+      clearTimeout(wheelEnd);
+      wheelEnd = setTimeout(() => { wheelX = 0; wheelDone = false; }, 200);   // the swipe is over
+      if (wheelDone) return;
+      wheelX += dx;
+      if (Math.abs(wheelX) > 50) { wheelDone = true; swipedAt = performance.now(); go(at + (wheelX > 0 ? 1 : -1), true); }
+    }, { passive: false });
+
+    // the bar: press anywhere on it to go to that spread, and drag along
+    // it to go through them; with a mouse, the name of the spread under
+    // the pointer shows above it
+    const barAt = x => { const r = bar.getBoundingClientRect(); return Math.max(0, Math.min(last, Math.floor((x - r.left) / r.width * N))); };
+    function tipAt(x, i){
+      const r = bar.getBoundingClientRect();
+      tip.textContent = labels[i];
+      const half = tip.offsetWidth / 2;
+      tip.style.left = Math.round(Math.max(half, Math.min(r.width - half, x - r.left))) + "px";
+    }
+    bar.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      wake();
+      bar.focus({ preventScroll: true });
+      try { bar.setPointerCapture(e.pointerId); } catch (err) {}
+      dragging = true;
+      root.classList.add("is-dragging");
+      const move = (ev) => { const i = barAt(ev.clientX); tipAt(ev.clientX, i); go(i, false); };
+      const up = () => {
+        dragging = false;
+        root.classList.remove("is-dragging");
+        bar.removeEventListener("pointermove", move);
+        bar.removeEventListener("pointerup", up);
+        bar.removeEventListener("pointercancel", up);
+        want();                                        // where you let go: its full-size picture, then the ones either side
+      };
+      bar.addEventListener("pointermove", move);
+      bar.addEventListener("pointerup", up);
+      bar.addEventListener("pointercancel", up);
+      move(e);
+    });
+    bar.addEventListener("pointerover", (e) => { if (e.pointerType === "mouse") bar.classList.add("is-hover"); });
+    bar.addEventListener("pointerleave", () => bar.classList.remove("is-hover"));
+    bar.addEventListener("pointermove", (e) => { if (!dragging && e.pointerType === "mouse") tipAt(e.clientX, barAt(e.clientX)); });
+    bar.addEventListener("keydown", (e) => {
+      const to = { ArrowRight: at + 1, ArrowUp: at + 1, ArrowLeft: at - 1, ArrowDown: at - 1,
+                   PageUp: at + 10, PageDown: at - 10, Home: 0, End: last }[e.key];
+      if (to === undefined) return;
+      e.preventDefault();
+      go(to, false);                                   // the slider itself tells screen readers where it is
+    });
+
+    // sized to the screen: as big as fits between the bars at the top and
+    // bottom, with the arrows and the bar underneath (on a very short
+    // screen, like a phone on its side, never smaller than 520px across)
+    function layout(){
+      const vh = window.innerHeight;
+      const top = document.querySelector(".runhead").offsetHeight;
+      const bottom = parseFloat(getComputedStyle(document.body).paddingBottom) || 0;   // room kept for the bottom bar
+      const footH = foot.offsetHeight + (parseFloat(getComputedStyle(foot).marginTop) || 0);
+      const gap = 16;
+      const fit = Math.floor((vh - top - bottom - footH - 2 * gap) * aspect);
+      const w = Math.min(root.clientWidth, Math.max(fit, 520));
+      root.style.setProperty("--viewer-w", w + "px");
+      // the full-size pictures wherever the half-size ones would be only
+      // just big enough (every Retina laptop and desktop)
+      wantFull = !p.smallCopies || w * (window.devicePixelRatio || 1) > 1200;
+      placePlan();
+      show();
+      want();
+    }
+
+    // nothing loads until it's close to the screen
+    function wake(){
+      if (near) return;
+      near = true;
+      if (planImg && planImg.loading === "lazy") planImg.loading = "eager";
+      show();
+      want();
+    }
+    if ("IntersectionObserver" in window) {
+      const io = new IntersectionObserver(es => { if (es.some(en => en.isIntersecting)) { io.disconnect(); wake(); } }, { rootMargin: "150% 0px" });
+      io.observe(root);
+    } else wake();
+
+    update();
+    layout();
+    viewers.push({ layout });
+  });
+
+  // ────────────────────────────────────────────────────────────
   // SIDEBAR stays beside the work on wide screens. One that fits the
   // window pins to the top; a taller one scrolls until its last line
   // is showing and stays there, so the column never goes empty.
@@ -1549,13 +1928,15 @@ body.is-scrolled .pager{ transform: none; visibility: visible; transition: trans
   // the page changes size (a picture finishing loading, say). Browsers
   // that can't do that keep the section you went to in place by hand for
   // a few seconds after you go to it (or open a link straight to it),
-  // until you scroll yourself.
+  // until you scroll yourself. And in every browser, a picture that
+  // finishes loading while the page is still gliding to a section
+  // re-aims the glide, so it still lands on the section.
   const anchoring = !!(window.CSS && CSS.supports && CSS.supports("overflow-anchor", "auto"));
   let held = null;
   function hold(el, gliding){
-    if (anchoring) return;
+    if (anchoring && !gliding) return;
     const now = performance.now();
-    held = { el, top: docTop(el), until: now + 5000, glideUntil: gliding ? now + 1200 : 0 };
+    held = { el, top: docTop(el), until: now + (anchoring ? 1500 : 5000), glideUntil: gliding ? now + 1200 : 0 };
   }
   function keepHeld(){
     if (!held) return;
@@ -1564,11 +1945,9 @@ body.is-scrolled .pager{ transform: none; visibility: visible; transition: trans
     if (!shift) return;
     held.top = top;
     if (performance.now() < held.glideUntil) window.scrollTo({ top: targetY(held.el), behavior: "smooth" });   // still on its way: re-aim
-    else scrollInstant(window.scrollY + shift);
+    else if (!anchoring) scrollInstant(window.scrollY + shift);
   }
-  if (!anchoring) {
-    document.addEventListener("load", (e) => { if (held && e.target && e.target.tagName === "IMG") keepHeld(); }, true);
-  }
+  document.addEventListener("load", (e) => { if (held && e.target && e.target.tagName === "IMG") keepHeld(); }, true);
   // The section you went to is the one the bars name, even a short one
   // (like About) that doesn't reach far down the screen, until you scroll
   // somewhere else yourself.
@@ -1632,7 +2011,7 @@ body.is-scrolled .pager{ transform: none; visibility: visible; transition: trans
   // START: size everything, wait for the intro (intro.js) to hand
   // over, then type the name and bring in the work
   // ────────────────────────────────────────────────────────────
-  function layoutAll(){ fitName(); sizeStrip(); fitRails(); keepHeld(); }
+  function layoutAll(){ fitName(); sizeStrip(); fitRails(); viewers.forEach(v => v.layout()); keepHeld(); }
   // Phones change their reported height as the browser bar hides while
   // scrolling; only a real width change (e.g. rotating) re-sizes the
   // strip there, so the page never jumps under your thumb.
@@ -1641,7 +2020,7 @@ body.is-scrolled .pager{ transform: none; visibility: visible; transition: trans
     const widthChanged = viewW() !== lastW;
     lastW = viewW();
     fitName();
-    if (widthChanged || finePointer) sizeStrip();
+    if (widthChanged || finePointer) { sizeStrip(); viewers.forEach(v => v.layout()); }   // the spread slider too
     fitRails();
   });
   layoutAll();
@@ -2054,6 +2433,17 @@ body.is-scrolled .pager{ transform: none; visibility: visible; transition: trans
                   called "small" next to it. Phones, smaller screens and
                   the opening strip use those, so the page loads faster
                   and uses less data. Used by Dozer.
+                  "slider" (optional): true shows the spreads one at a
+                  time instead of one under another, each as big as fits
+                  the screen, with a slider bar under it that runs
+                  through every spread: drag along it to go through
+                  them. The arrows under it (or clicking the right or
+                  left half of the spread, or swiping it) go one spread
+                  at a time. Good for a long publication. Used by Dozer.
+                  "flatplan" (optional, with slider): one image of every
+                  spread side by side, in order, used as the slider bar,
+                  so you can see the whole issue along it. Each spread
+                  (or cover) takes an equal share of its width.
     - "birds"     runs of spreads, each under its bird's name:
                   {name, status, spreads}. A bird with status
                   "in-progress" is greyed out and labelled "Work in
@@ -2134,15 +2524,16 @@ const PORTFOLIO_DATA = {
       },
       spreadsLabel: "Inside the book",
       aspect: 1.412,
+      smallCopies: true,
       spreads: [
-        "images/arsvita/spread-01.jpg","images/arsvita/spread-02.jpg","images/arsvita/spread-03.jpg",
-        "images/arsvita/spread-04.jpg","images/arsvita/spread-05.jpg","images/arsvita/spread-06.jpg",
-        "images/arsvita/spread-07.jpg","images/arsvita/spread-08.jpg","images/arsvita/spread-09.jpg",
-        "images/arsvita/spread-10.jpg","images/arsvita/spread-11.jpg","images/arsvita/spread-12.jpg",
-        "images/arsvita/spread-13.jpg","images/arsvita/spread-14.jpg","images/arsvita/spread-15.jpg",
-        "images/arsvita/spread-16.jpg","images/arsvita/spread-17.jpg","images/arsvita/spread-18.jpg",
-        "images/arsvita/spread-19.jpg","images/arsvita/spread-20.jpg","images/arsvita/spread-21.jpg",
-        "images/arsvita/spread-22.jpg","images/arsvita/spread-23.jpg"
+        "images/arsvita/spread-01.webp","images/arsvita/spread-02.webp","images/arsvita/spread-03.webp",
+        "images/arsvita/spread-04.webp","images/arsvita/spread-05.webp","images/arsvita/spread-06.webp",
+        "images/arsvita/spread-07.webp","images/arsvita/spread-08.webp","images/arsvita/spread-09.webp",
+        "images/arsvita/spread-10.webp","images/arsvita/spread-11.webp","images/arsvita/spread-12.webp",
+        "images/arsvita/spread-13.webp","images/arsvita/spread-14.webp","images/arsvita/spread-15.webp",
+        "images/arsvita/spread-16.webp","images/arsvita/spread-17.webp","images/arsvita/spread-18.webp",
+        "images/arsvita/spread-19.webp","images/arsvita/spread-20.webp","images/arsvita/spread-21.webp",
+        "images/arsvita/spread-22.webp","images/arsvita/spread-23.webp"
       ],
       processImages: []
     },
@@ -2177,6 +2568,8 @@ const PORTFOLIO_DATA = {
       spreadsLabel: "Issue 02, cover to cover",
       aspect: 1.294,
       smallCopies: true,
+      slider: true,                             // one spread at a time, with a slider bar (see the notes at the top)
+      flatplan: "images/dozer/flatplan.webp",   // the whole issue as a strip: the slider bar
       spreads: [
         "images/dozer/cover.webp","images/dozer/spread-01.webp","images/dozer/spread-02.webp",
         "images/dozer/spread-03.webp","images/dozer/spread-04.webp","images/dozer/spread-05.webp",
@@ -2230,39 +2623,40 @@ const PORTFOLIO_DATA = {
       },
 
       aspect: 1.333,
+      smallCopies: true,
       birds: [
         {
           name: "Marabou Stork",
           status: "complete",
           spreads: [
-            "images/pecking-order/marabou-01.jpg","images/pecking-order/marabou-02.jpg",
-            "images/pecking-order/marabou-03.jpg","images/pecking-order/marabou-04.jpg",
-            "images/pecking-order/marabou-05.jpg","images/pecking-order/marabou-06.jpg"
+            "images/pecking-order/marabou-01.webp","images/pecking-order/marabou-02.webp",
+            "images/pecking-order/marabou-03.webp","images/pecking-order/marabou-04.webp",
+            "images/pecking-order/marabou-05.webp","images/pecking-order/marabou-06.webp"
           ]
         },
         {
           name: "Shoebill",
           status: "complete",
           spreads: [
-            "images/pecking-order/shoebill-01.jpg","images/pecking-order/shoebill-02.jpg",
-            "images/pecking-order/shoebill-03.jpg","images/pecking-order/shoebill-04.jpg",
-            "images/pecking-order/shoebill-05.jpg","images/pecking-order/shoebill-06.jpg"
+            "images/pecking-order/shoebill-01.webp","images/pecking-order/shoebill-02.webp",
+            "images/pecking-order/shoebill-03.webp","images/pecking-order/shoebill-04.webp",
+            "images/pecking-order/shoebill-05.webp","images/pecking-order/shoebill-06.webp"
           ]
         },
         {
           name: "King Vulture",
           status: "complete",
           spreads: [
-            "images/pecking-order/kingvulture-01.jpg","images/pecking-order/kingvulture-02.jpg",
-            "images/pecking-order/kingvulture-03.jpg","images/pecking-order/kingvulture-04.jpg",
-            "images/pecking-order/kingvulture-05.jpg"
+            "images/pecking-order/kingvulture-01.webp","images/pecking-order/kingvulture-02.webp",
+            "images/pecking-order/kingvulture-03.webp","images/pecking-order/kingvulture-04.webp",
+            "images/pecking-order/kingvulture-05.webp"
           ]
         },
         {
           name: "Hoatzin",
           status: "in-progress",
           spreads: [
-            "images/pecking-order/hoatzin-01.jpg"
+            "images/pecking-order/hoatzin-01.webp"
           ]
         }
       ],
@@ -2822,65 +3216,65 @@ All images referenced below live in the `images/` folder alongside this README, 
 
 ### Arsvita Magazine — all 23 spreads
 
-![spread-01.jpg](images/arsvita/spread-01.jpg)
-![spread-02.jpg](images/arsvita/spread-02.jpg)
-![spread-03.jpg](images/arsvita/spread-03.jpg)
-![spread-04.jpg](images/arsvita/spread-04.jpg)
+![spread-01.webp](images/arsvita/small/spread-01.webp)
+![spread-02.webp](images/arsvita/small/spread-02.webp)
+![spread-03.webp](images/arsvita/small/spread-03.webp)
+![spread-04.webp](images/arsvita/small/spread-04.webp)
 
-![spread-05.jpg](images/arsvita/spread-05.jpg)
-![spread-06.jpg](images/arsvita/spread-06.jpg)
-![spread-07.jpg](images/arsvita/spread-07.jpg)
-![spread-08.jpg](images/arsvita/spread-08.jpg)
+![spread-05.webp](images/arsvita/small/spread-05.webp)
+![spread-06.webp](images/arsvita/small/spread-06.webp)
+![spread-07.webp](images/arsvita/small/spread-07.webp)
+![spread-08.webp](images/arsvita/small/spread-08.webp)
 
-![spread-09.jpg](images/arsvita/spread-09.jpg)
-![spread-10.jpg](images/arsvita/spread-10.jpg)
-![spread-11.jpg](images/arsvita/spread-11.jpg)
-![spread-12.jpg](images/arsvita/spread-12.jpg)
+![spread-09.webp](images/arsvita/small/spread-09.webp)
+![spread-10.webp](images/arsvita/small/spread-10.webp)
+![spread-11.webp](images/arsvita/small/spread-11.webp)
+![spread-12.webp](images/arsvita/small/spread-12.webp)
 
-![spread-13.jpg](images/arsvita/spread-13.jpg)
-![spread-14.jpg](images/arsvita/spread-14.jpg)
-![spread-15.jpg](images/arsvita/spread-15.jpg)
-![spread-16.jpg](images/arsvita/spread-16.jpg)
+![spread-13.webp](images/arsvita/small/spread-13.webp)
+![spread-14.webp](images/arsvita/small/spread-14.webp)
+![spread-15.webp](images/arsvita/small/spread-15.webp)
+![spread-16.webp](images/arsvita/small/spread-16.webp)
 
-![spread-17.jpg](images/arsvita/spread-17.jpg)
-![spread-18.jpg](images/arsvita/spread-18.jpg)
-![spread-19.jpg](images/arsvita/spread-19.jpg)
-![spread-20.jpg](images/arsvita/spread-20.jpg)
+![spread-17.webp](images/arsvita/small/spread-17.webp)
+![spread-18.webp](images/arsvita/small/spread-18.webp)
+![spread-19.webp](images/arsvita/small/spread-19.webp)
+![spread-20.webp](images/arsvita/small/spread-20.webp)
 
-![spread-21.jpg](images/arsvita/spread-21.jpg)
-![spread-22.jpg](images/arsvita/spread-22.jpg)
-![spread-23.jpg](images/arsvita/spread-23.jpg)
+![spread-21.webp](images/arsvita/small/spread-21.webp)
+![spread-22.webp](images/arsvita/small/spread-22.webp)
+![spread-23.webp](images/arsvita/small/spread-23.webp)
 
 ### The Pecking Order — Marabou Stork
 
-![marabou-01.jpg](images/pecking-order/marabou-01.jpg)
-![marabou-02.jpg](images/pecking-order/marabou-02.jpg)
-![marabou-03.jpg](images/pecking-order/marabou-03.jpg)
-![marabou-04.jpg](images/pecking-order/marabou-04.jpg)
+![marabou-01.webp](images/pecking-order/small/marabou-01.webp)
+![marabou-02.webp](images/pecking-order/small/marabou-02.webp)
+![marabou-03.webp](images/pecking-order/small/marabou-03.webp)
+![marabou-04.webp](images/pecking-order/small/marabou-04.webp)
 
-![marabou-05.jpg](images/pecking-order/marabou-05.jpg)
-![marabou-06.jpg](images/pecking-order/marabou-06.jpg)
+![marabou-05.webp](images/pecking-order/small/marabou-05.webp)
+![marabou-06.webp](images/pecking-order/small/marabou-06.webp)
 
 ### The Pecking Order — Shoebill
 
-![shoebill-01.jpg](images/pecking-order/shoebill-01.jpg)
-![shoebill-02.jpg](images/pecking-order/shoebill-02.jpg)
-![shoebill-03.jpg](images/pecking-order/shoebill-03.jpg)
-![shoebill-04.jpg](images/pecking-order/shoebill-04.jpg)
+![shoebill-01.webp](images/pecking-order/small/shoebill-01.webp)
+![shoebill-02.webp](images/pecking-order/small/shoebill-02.webp)
+![shoebill-03.webp](images/pecking-order/small/shoebill-03.webp)
+![shoebill-04.webp](images/pecking-order/small/shoebill-04.webp)
 
-![shoebill-05.jpg](images/pecking-order/shoebill-05.jpg)
-![shoebill-06.jpg](images/pecking-order/shoebill-06.jpg)
+![shoebill-05.webp](images/pecking-order/small/shoebill-05.webp)
+![shoebill-06.webp](images/pecking-order/small/shoebill-06.webp)
 
 ### The Pecking Order — King Vulture
 
-![kingvulture-01.jpg](images/pecking-order/kingvulture-01.jpg)
-![kingvulture-02.jpg](images/pecking-order/kingvulture-02.jpg)
-![kingvulture-03.jpg](images/pecking-order/kingvulture-03.jpg)
-![kingvulture-04.jpg](images/pecking-order/kingvulture-04.jpg)
+![kingvulture-01.webp](images/pecking-order/small/kingvulture-01.webp)
+![kingvulture-02.webp](images/pecking-order/small/kingvulture-02.webp)
+![kingvulture-03.webp](images/pecking-order/small/kingvulture-03.webp)
+![kingvulture-04.webp](images/pecking-order/small/kingvulture-04.webp)
 
-![kingvulture-05.jpg](images/pecking-order/kingvulture-05.jpg)
+![kingvulture-05.webp](images/pecking-order/small/kingvulture-05.webp)
 
 ### The Pecking Order — Hoatzin (in progress)
 
-![hoatzin-01.jpg](images/pecking-order/hoatzin-01.jpg)
+![hoatzin-01.webp](images/pecking-order/small/hoatzin-01.webp)
 

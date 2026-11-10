@@ -117,7 +117,7 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
 }
 /* 5. meta: small info lines, counters, captions */
 .rail-facts, .hero-role, .hero-index-year, .strip-cap, .model3d-note, .section-menu-year,
-.runhead, .contact-social, .model3d-loading, .model3d-hint{
+.runhead, .contact-social, .model3d-loading, .model3d-hint, .viewer-count, .viewer-tip{
   font-family: var(--f-mono);
   font-weight: 400;
   font-size: 0.78rem;
@@ -541,6 +541,94 @@ h1, h2, h3, p, ol, ul, figure{ margin: 0; }
   background: var(--ink);
   white-space: nowrap;
 }
+
+/* ---- the spread slider ("slider" in data.js, used by Dozer): one
+   spread at a time, as big as fits the screen (script.js sizes it), with
+   a bar under it that runs through every spread. The page scrolls past
+   it as usual. ---- */
+.viewer{ display: flex; flex-direction: column; align-items: center; }
+.viewer-frame{
+  position: relative;
+  width: var(--viewer-w, 100%);
+  aspect-ratio: var(--aspect, 1.414);
+  /* until the picture arrives: the spread's tiny copy from the bar, blown up */
+  background: var(--plan, none) no-repeat var(--placeholder);
+  background-size: var(--plan-size, auto);
+  background-position: var(--plan-pos, 0 0);
+  touch-action: pan-y pinch-zoom;          /* swipe sideways for the next spread; up and down still scrolls */
+  -webkit-user-select: none; user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.viewer-frame.is-loaded{ background: none; }
+.viewer-frame:focus-visible{ outline: 3px solid var(--ink); outline-offset: 6px; }
+.viewer-img{
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: contain;                     /* a cover, one page, sits centred */
+  pointer-events: none;
+}
+.viewer-img[hidden]{ display: none; }
+/* click the right half for the next spread, the left half for the one before */
+.viewer-side{ position: absolute; top: 0; bottom: 0; width: 50%; }
+.viewer-side-prev{ left: 0; cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect x='.75' y='.75' width='34.5' height='34.5' fill='%23F0EFE9' stroke='%23121212' stroke-width='1.5'/%3E%3Cpath d='M26 18H11M16 13l-5 5 5 5' fill='none' stroke='%23121212' stroke-width='1.75'/%3E%3C/svg%3E") 18 18, w-resize; }
+.viewer-side-next{ right: 0; cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect x='.75' y='.75' width='34.5' height='34.5' fill='%23F0EFE9' stroke='%23121212' stroke-width='1.5'/%3E%3Cpath d='M10 18h15M20 13l5 5-5 5' fill='none' stroke='%23121212' stroke-width='1.75'/%3E%3C/svg%3E") 18 18, e-resize; }
+.viewer.at-start .viewer-side-prev, .viewer.at-end .viewer-side-next{ cursor: default; }
+/* under it: the arrows either side of "Spread 12 of 81", then the bar */
+.viewer-foot{
+  width: var(--viewer-w, 100%);
+  display: flex; align-items: center; gap: 1.25rem;
+  margin-top: 0.75rem;
+}
+.viewer-nav{ flex: 0 0 auto; display: flex; align-items: center; gap: 0.6rem; }
+.viewer-nav .ctl-btn{ width: var(--tap); padding: 0; font-size: 1rem; }
+.viewer-nav .ctl-btn[aria-disabled="true"],
+.viewer-nav .ctl-btn[aria-disabled="true"]:hover{ opacity: 0.3; cursor: default; background: transparent; color: var(--ink); }
+.viewer-count{ min-width: 8.6em; text-align: center; color: var(--grey); }
+/* the bar: every spread in order, each an equal share of its width */
+.viewer-bar{
+  position: relative;
+  flex: 1 1 auto; min-width: 0;
+  padding: 0.9rem 0;
+  cursor: pointer;
+  touch-action: none;
+  -webkit-user-select: none; user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.viewer-plan{ display: block; width: 100%; height: 12px; object-fit: fill; }
+.viewer-bar.is-line::before{ content: ""; display: block; height: 2px; margin: 5px 0; background: var(--ink); }
+.viewer-bar:focus-visible{ outline: none; }
+.viewer-bar:focus-visible .viewer-knob{ box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--ink); }   /* selected with the keyboard */
+/* the handle: a box around the spread you're on */
+.viewer-knob{
+  position: absolute; top: 50%;
+  left: calc((var(--at, 0) + 0.5) * 100% / var(--n, 1));
+  width: max(calc(100% / var(--n, 1) + 4px), 12px);
+  height: 26px;
+  transform: translate(-50%, -50%);
+  border: 2px solid var(--ink);
+  pointer-events: none;
+}
+.viewer.is-dragging, .viewer.is-dragging .viewer-bar{ cursor: grabbing; }
+/* the name of the spread under the pointer, just above the bar */
+.viewer-tip{
+  position: absolute; bottom: calc(100% - 0.35rem); left: 0;
+  transform: translateX(-50%);
+  padding: 0.25rem 0.5rem;
+  color: var(--paper);
+  background: var(--ink);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s var(--easy);
+}
+.viewer-bar.is-hover .viewer-tip, .viewer.is-dragging .viewer-tip{ opacity: 1; }
+@media (max-width: 599px){
+  /* phones: the bar right under the spread, then the arrows either side of the count */
+  .viewer-foot{ flex-wrap: wrap; row-gap: 0; padding: 0 var(--gutter); }
+  .viewer-foot .viewer-bar{ order: -1; flex-basis: 100%; }
+  .viewer-nav{ flex: 1 1 100%; justify-content: space-between; }
+}
+@media (pointer: coarse){ .viewer-bar{ padding: 1.05rem 0; } }   /* an easy bar to put a thumb on */
 
 /* ---- 3D model (Arsvita): floats on the page, no floor, no shadow ---- */
 .model3d-stage{

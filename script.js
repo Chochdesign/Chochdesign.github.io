@@ -123,7 +123,7 @@
       const all = [];
       (p.images || []).forEach(src => { if (spreads.indexOf(src) < 0) all.push(src); });
       spreads.forEach(src => all.push(p.smallCopies ? smallCopy(src) : src));
-      (p.birds || []).filter(b => b.status !== "in-progress").forEach(b => b.spreads.forEach(src => all.push(src)));
+      (p.birds || []).filter(b => b.status !== "in-progress").forEach(b => b.spreads.forEach(src => all.push(p.smallCopies ? smallCopy(src) : src)));
       const n = all.length, max = STRIP_PER_PROJECT;
       const pick = n <= max ? all : Array.from({ length: max }, (_, k) => all[Math.floor(k * n / max)]);
       pick.forEach(src => out.push({ src, project: p.id }));
@@ -354,6 +354,36 @@
     });
   }
 
+  // The spread slider ("slider" in data.js): one spread at a time, as big
+  // as fits the screen, with a bar under it that runs through every
+  // spread. It's filled in by the SPREAD SLIDER code below.
+  function viewerMarkup(p, spreads){
+    const n = spreads.length;
+    return `
+      <div class="viewer" data-viewer="${esc(p.id)}" style="--aspect:${+p.aspect || 1.414};--n:${n}">
+        <div class="viewer-frame" tabindex="0" role="region" aria-roledescription="spread viewer"
+             aria-label="${esc(p.title)}, ${n} spreads and covers, one at a time. Use the left and right arrow keys, the arrow buttons or the slider to go through them.">
+          <img class="viewer-img" alt="" decoding="async" draggable="false" hidden>
+          <div class="viewer-side viewer-side-prev" aria-hidden="true"></div>
+          <div class="viewer-side viewer-side-next" aria-hidden="true"></div>
+        </div>
+        <div class="viewer-foot">
+          <div class="viewer-nav">
+            <button type="button" class="ctl-btn viewer-prev" aria-label="Previous spread">←</button>
+            <span class="viewer-count" aria-hidden="true"></span>
+            <button type="button" class="ctl-btn viewer-next" aria-label="Next spread">→</button>
+          </div>
+          <div class="viewer-bar${p.flatplan ? "" : " is-line"}" role="slider" tabindex="0" aria-label="${esc(p.title)}, every spread"
+               aria-valuemin="1" aria-valuemax="${n}" aria-valuenow="1">
+            ${p.flatplan ? `<img class="viewer-plan" src="${esc(p.flatplan)}" alt="" loading="lazy" decoding="async" draggable="false">` : ""}
+            <span class="viewer-knob" aria-hidden="true"></span>
+            <span class="viewer-tip" aria-hidden="true"></span>
+          </div>
+        </div>
+        <p class="sr-only viewer-say" aria-live="polite"></p>
+      </div>`;
+  }
+
   // The work, as runs of images: the 3D model, the photos, the spreads,
   // each bird, the process, each run under its own small heading (the
   // photos have none). The very first image is the "primary": on
@@ -368,7 +398,9 @@
     if (photos.length) runs.push({ items: photos.map((src, i) =>
       // the first photo loads straight away, as it's near the top of the project
       `<img src="${esc(src)}" alt="${esc(p.title)}, photo ${i + 1} of ${photos.length}" loading="${i === 0 ? "eager" : "lazy"}" decoding="async">`) });
-    if (spreads.length) {
+    if (spreads.length > 1 && (p.slider || p.flipThrough)) {
+      runs.push({ label: p.spreadsLabel || p.flipLabel, bare: true, items: [viewerMarkup(p, spreads)] });
+    } else if (spreads.length) {
       const alts = spreadAlts(p.title, spreads);
       runs.push({ label: p.spreadsLabel || p.flipLabel, items: spreads.map((src, i) => spreadImg(p, src, alts[i])) });
     }
@@ -388,7 +420,7 @@
     const head = r => r.label ? `<h3 class="media-label">${esc(r.label)}</h3>` : "";
     const stack = items => `<div class="media-stack">${items.join("")}</div>`;
     const first = filled[0];
-    const primary = first.bare ? first.items[0] : head(first) + stack(first.items.slice(0, 1));
+    const primary = first.bare ? head(first) + first.items[0] : head(first) + stack(first.items.slice(0, 1));
     let secondary = first.items.length > 1 ? stack(first.items.slice(1)) : "";
     filled.slice(1).forEach(r => { secondary += `<div class="media-run">${head(r)}${r.bare ? r.items.join("") : stack(r.items)}</div>`; });
     return { primary, secondary };
@@ -508,6 +540,249 @@
   });
 
   // ────────────────────────────────────────────────────────────
+  // SPREAD SLIDER ("slider" in data.js, used by Dozer): one spread at a
+  // time, as big as fits between the bars at the top and bottom of the
+  // screen, and the page scrolls past it as usual. The bar under it is
+  // the whole issue, every spread in order: drag along it, or click
+  // anywhere on it, to go through them. The arrows go one spread at a
+  // time, and so does clicking the right or left half of the spread,
+  // swiping it (on a phone, or sideways on a trackpad), or the left and
+  // right arrow keys.
+  // ────────────────────────────────────────────────────────────
+  const viewers = [];
+  document.querySelectorAll("[data-viewer]").forEach(root => {
+    const p = projectById[root.dataset.viewer];
+    const aspect = +p.aspect || 1.414;
+    const spreads = p.spreads;
+    const N = spreads.length, last = N - 1;
+    const frame = root.querySelector(".viewer-frame");
+    const img = root.querySelector(".viewer-img");
+    const foot = root.querySelector(".viewer-foot");
+    const count = root.querySelector(".viewer-count");
+    const bar = root.querySelector(".viewer-bar");
+    const planImg = root.querySelector(".viewer-plan");
+    const tip = root.querySelector(".viewer-tip");
+    const say = root.querySelector(".viewer-say");
+    const prevBtn = root.querySelector(".viewer-prev");
+    const nextBtn = root.querySelector(".viewer-next");
+
+    // what each one is called: the covers by name, the rest counted
+    const alts = spreadAlts(p.title, spreads);
+    const isBack = src => /back-?cover[^\/]*$/i.test(src);
+    const isFront = src => !isBack(src) && /(^|[\/_-])cover[^\/]*$/i.test(src);
+    const inner = spreads.filter(src => !isFront(src) && !isBack(src)).length;
+    let k = 0;
+    const labels = spreads.map(src => isFront(src) ? "Front cover" : isBack(src) ? "Back cover" : `Spread ${++k} of ${inner}`);
+
+    // Pictures. Where the spread shows bigger than the half-size copies
+    // (a laptop or desktop), the full-size ones load; phones use the
+    // half-size copies, already sharper than their screens need. The
+    // spread you're on loads first, then the ones either side of it, so
+    // the arrows show the next one straight away. While you drag along the
+    // bar, only the half-size copy of the spread you're on loads, and the
+    // full one once you let go.
+    const small = src => p.smallCopies ? smallCopy(src) : src;
+    let wantFull = !p.smallCopies;
+    const best = src => wantFull ? src : small(src);
+    const ready = new Set(), loading = new Set(), failed = new Set();
+    let queue = [], near = false, at = 0, dragging = false;
+    function pump(){
+      while (loading.size < 2 && queue.length) {
+        const url = queue.shift();
+        if (ready.has(url) || loading.has(url) || failed.has(url)) continue;
+        loading.add(url);
+        const im = new Image();
+        im.decoding = "async";
+        const done = ok => { loading.delete(url); (ok ? ready : failed).add(url); if (ok) show(); pump(); };
+        im.onload = () => { if (im.decode) im.decode().then(() => done(true), () => done(true)); else done(true); };
+        im.onerror = () => done(false);
+        im.src = url;
+      }
+    }
+    function want(){
+      if (!near) return;
+      const list = [];
+      const add = url => { if (!ready.has(url) && !loading.has(url) && !failed.has(url) && list.indexOf(url) < 0) list.push(url); };
+      if (dragging) add(small(spreads[at]));
+      else [at, at + 1, at - 1, at + 2].forEach(j => { if (j >= 0 && j <= last) add(best(spreads[j])); });
+      queue = list;
+      pump();
+    }
+    function show(){
+      const f = spreads[at], s = small(f);
+      const url = !near ? null : ready.has(f) ? f : ready.has(s) ? s : null;
+      if (url) {
+        if (img.getAttribute("src") !== url) img.src = url;
+        img.alt = alts[at];
+        img.hidden = false;
+      } else img.hidden = true;
+      frame.classList.toggle("is-loaded", !!url);
+    }
+
+    // until a spread's picture arrives, its tiny copy from the bar stands
+    // in, blown up to size: soft, but the right spread at once
+    let plan = null;
+    function placePlan(){
+      const W = frame.clientWidth;
+      if (!plan || !W) return;
+      const s = W / (plan.h * aspect);               // in the strip, each spread is the strip's height tall, at its own shape
+      frame.style.setProperty("--plan-size", `${(plan.w * s).toFixed(1)}px ${(plan.h * s).toFixed(1)}px`);
+      frame.style.setProperty("--plan-pos", `${(-at * plan.w / N * s).toFixed(1)}px 0`);
+    }
+    if (planImg) {
+      const got = () => {
+        if (!planImg.naturalWidth) return;
+        plan = { w: planImg.naturalWidth, h: planImg.naturalHeight };
+        frame.style.setProperty("--plan", `url("${planImg.currentSrc || planImg.src}")`);
+        placePlan();
+      };
+      if (planImg.complete) got(); else planImg.addEventListener("load", got, { once: true });
+    }
+
+    // go to spread i: the picture, the count, the handle on the bar
+    function update(){
+      root.style.setProperty("--at", at);
+      count.textContent = labels[at];
+      bar.setAttribute("aria-valuenow", at + 1);
+      bar.setAttribute("aria-valuetext", labels[at]);
+      prevBtn.setAttribute("aria-disabled", at <= 0);
+      nextBtn.setAttribute("aria-disabled", at >= last);
+      root.classList.toggle("at-start", at <= 0);
+      root.classList.toggle("at-end", at >= last);
+      placePlan();
+      show();
+      want();
+    }
+    function go(i, announce){
+      i = Math.max(0, Math.min(last, i));
+      if (i === at) return;
+      at = i;
+      update();
+      if (announce) say.textContent = labels[i];
+    }
+
+    // the arrows, and the right or left half of the spread
+    prevBtn.addEventListener("click", () => go(at - 1, true));
+    nextBtn.addEventListener("click", () => go(at + 1, true));
+    let swipedAt = -1e9;
+    const swipedJustNow = () => performance.now() - swipedAt < 500;
+    root.querySelector(".viewer-side-prev").addEventListener("click", () => { if (!swipedJustNow()) go(at - 1, false); });
+    root.querySelector(".viewer-side-next").addEventListener("click", () => { if (!swipedJustNow()) go(at + 1, false); });
+    // the left and right arrow keys once the spread is selected
+    frame.addEventListener("keydown", (e) => {
+      const to = { ArrowRight: at + 1, ArrowLeft: at - 1, Home: 0, End: last }[e.key];
+      if (to === undefined) return;
+      e.preventDefault();
+      go(to, true);
+    });
+
+    // swiping the spread: sideways on a phone or tablet...
+    let touch = null;
+    frame.addEventListener("pointerdown", (e) => { if (e.pointerType !== "mouse") touch = { x: e.clientX, y: e.clientY }; });
+    frame.addEventListener("pointercancel", () => { touch = null; });
+    frame.addEventListener("pointerup", (e) => {
+      if (!touch || e.pointerType === "mouse") return;
+      const dx = e.clientX - touch.x, dy = e.clientY - touch.y;
+      touch = null;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.2) { swipedAt = performance.now(); go(at + (dx < 0 ? 1 : -1), true); }
+    });
+    // ...or with two fingers on a trackpad: one swipe, one spread
+    // (scrolling up and down over it still scrolls the page)
+    let wheelX = 0, wheelEnd = 0, wheelDone = false;
+    frame.addEventListener("wheel", (e) => {
+      const unit = e.deltaMode === 1 ? 16 : 1;
+      const dx = e.deltaX * unit, dy = e.deltaY * unit;
+      if (Math.abs(dx) <= Math.abs(dy)) return;
+      e.preventDefault();                              // and a sideways swipe doesn't send the browser back a page
+      clearTimeout(wheelEnd);
+      wheelEnd = setTimeout(() => { wheelX = 0; wheelDone = false; }, 200);   // the swipe is over
+      if (wheelDone) return;
+      wheelX += dx;
+      if (Math.abs(wheelX) > 50) { wheelDone = true; swipedAt = performance.now(); go(at + (wheelX > 0 ? 1 : -1), true); }
+    }, { passive: false });
+
+    // the bar: press anywhere on it to go to that spread, and drag along
+    // it to go through them; with a mouse, the name of the spread under
+    // the pointer shows above it
+    const barAt = x => { const r = bar.getBoundingClientRect(); return Math.max(0, Math.min(last, Math.floor((x - r.left) / r.width * N))); };
+    function tipAt(x, i){
+      const r = bar.getBoundingClientRect();
+      tip.textContent = labels[i];
+      const half = tip.offsetWidth / 2;
+      tip.style.left = Math.round(Math.max(half, Math.min(r.width - half, x - r.left))) + "px";
+    }
+    bar.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      wake();
+      bar.focus({ preventScroll: true });
+      try { bar.setPointerCapture(e.pointerId); } catch (err) {}
+      dragging = true;
+      root.classList.add("is-dragging");
+      const move = (ev) => { const i = barAt(ev.clientX); tipAt(ev.clientX, i); go(i, false); };
+      const up = () => {
+        dragging = false;
+        root.classList.remove("is-dragging");
+        bar.removeEventListener("pointermove", move);
+        bar.removeEventListener("pointerup", up);
+        bar.removeEventListener("pointercancel", up);
+        want();                                        // where you let go: its full-size picture, then the ones either side
+      };
+      bar.addEventListener("pointermove", move);
+      bar.addEventListener("pointerup", up);
+      bar.addEventListener("pointercancel", up);
+      move(e);
+    });
+    bar.addEventListener("pointerover", (e) => { if (e.pointerType === "mouse") bar.classList.add("is-hover"); });
+    bar.addEventListener("pointerleave", () => bar.classList.remove("is-hover"));
+    bar.addEventListener("pointermove", (e) => { if (!dragging && e.pointerType === "mouse") tipAt(e.clientX, barAt(e.clientX)); });
+    bar.addEventListener("keydown", (e) => {
+      const to = { ArrowRight: at + 1, ArrowUp: at + 1, ArrowLeft: at - 1, ArrowDown: at - 1,
+                   PageUp: at + 10, PageDown: at - 10, Home: 0, End: last }[e.key];
+      if (to === undefined) return;
+      e.preventDefault();
+      go(to, false);                                   // the slider itself tells screen readers where it is
+    });
+
+    // sized to the screen: as big as fits between the bars at the top and
+    // bottom, with the arrows and the bar underneath (on a very short
+    // screen, like a phone on its side, never smaller than 520px across)
+    function layout(){
+      const vh = window.innerHeight;
+      const top = document.querySelector(".runhead").offsetHeight;
+      const bottom = parseFloat(getComputedStyle(document.body).paddingBottom) || 0;   // room kept for the bottom bar
+      const footH = foot.offsetHeight + (parseFloat(getComputedStyle(foot).marginTop) || 0);
+      const gap = 16;
+      const fit = Math.floor((vh - top - bottom - footH - 2 * gap) * aspect);
+      const w = Math.min(root.clientWidth, Math.max(fit, 520));
+      root.style.setProperty("--viewer-w", w + "px");
+      // the full-size pictures wherever the half-size ones would be only
+      // just big enough (every Retina laptop and desktop)
+      wantFull = !p.smallCopies || w * (window.devicePixelRatio || 1) > 1200;
+      placePlan();
+      show();
+      want();
+    }
+
+    // nothing loads until it's close to the screen
+    function wake(){
+      if (near) return;
+      near = true;
+      if (planImg && planImg.loading === "lazy") planImg.loading = "eager";
+      show();
+      want();
+    }
+    if ("IntersectionObserver" in window) {
+      const io = new IntersectionObserver(es => { if (es.some(en => en.isIntersecting)) { io.disconnect(); wake(); } }, { rootMargin: "150% 0px" });
+      io.observe(root);
+    } else wake();
+
+    update();
+    layout();
+    viewers.push({ layout });
+  });
+
+  // ────────────────────────────────────────────────────────────
   // SIDEBAR stays beside the work on wide screens. One that fits the
   // window pins to the top; a taller one scrolls until its last line
   // is showing and stays there, so the column never goes empty.
@@ -597,13 +872,15 @@
   // the page changes size (a picture finishing loading, say). Browsers
   // that can't do that keep the section you went to in place by hand for
   // a few seconds after you go to it (or open a link straight to it),
-  // until you scroll yourself.
+  // until you scroll yourself. And in every browser, a picture that
+  // finishes loading while the page is still gliding to a section
+  // re-aims the glide, so it still lands on the section.
   const anchoring = !!(window.CSS && CSS.supports && CSS.supports("overflow-anchor", "auto"));
   let held = null;
   function hold(el, gliding){
-    if (anchoring) return;
+    if (anchoring && !gliding) return;
     const now = performance.now();
-    held = { el, top: docTop(el), until: now + 5000, glideUntil: gliding ? now + 1200 : 0 };
+    held = { el, top: docTop(el), until: now + (anchoring ? 1500 : 5000), glideUntil: gliding ? now + 1200 : 0 };
   }
   function keepHeld(){
     if (!held) return;
@@ -612,11 +889,9 @@
     if (!shift) return;
     held.top = top;
     if (performance.now() < held.glideUntil) window.scrollTo({ top: targetY(held.el), behavior: "smooth" });   // still on its way: re-aim
-    else scrollInstant(window.scrollY + shift);
+    else if (!anchoring) scrollInstant(window.scrollY + shift);
   }
-  if (!anchoring) {
-    document.addEventListener("load", (e) => { if (held && e.target && e.target.tagName === "IMG") keepHeld(); }, true);
-  }
+  document.addEventListener("load", (e) => { if (held && e.target && e.target.tagName === "IMG") keepHeld(); }, true);
   // The section you went to is the one the bars name, even a short one
   // (like About) that doesn't reach far down the screen, until you scroll
   // somewhere else yourself.
@@ -680,7 +955,7 @@
   // START: size everything, wait for the intro (intro.js) to hand
   // over, then type the name and bring in the work
   // ────────────────────────────────────────────────────────────
-  function layoutAll(){ fitName(); sizeStrip(); fitRails(); keepHeld(); }
+  function layoutAll(){ fitName(); sizeStrip(); fitRails(); viewers.forEach(v => v.layout()); keepHeld(); }
   // Phones change their reported height as the browser bar hides while
   // scrolling; only a real width change (e.g. rotating) re-sizes the
   // strip there, so the page never jumps under your thumb.
@@ -689,7 +964,7 @@
     const widthChanged = viewW() !== lastW;
     lastW = viewW();
     fitName();
-    if (widthChanged || finePointer) sizeStrip();
+    if (widthChanged || finePointer) { sizeStrip(); viewers.forEach(v => v.layout()); }   // the spread slider too
     fitRails();
   });
   layoutAll();

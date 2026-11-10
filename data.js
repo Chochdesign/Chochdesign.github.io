@@ -47,6 +47,17 @@
                   called "small" next to it. Phones, smaller screens and
                   the opening strip use those, so the page loads faster
                   and uses less data. Used by Dozer.
+                  "slider" (optional): true shows the spreads one at a
+                  time instead of one under another, each as big as fits
+                  the screen, with a slider bar under it that runs
+                  through every spread: drag along it to go through
+                  them. The arrows under it (or clicking the right or
+                  left half of the spread, or swiping it) go one spread
+                  at a time. Good for a long publication. Used by Dozer.
+                  "flatplan" (optional, with slider): one image of every
+                  spread side by side, in order, used as the slider bar,
+                  so you can see the whole issue along it. Each spread
+                  (or cover) takes an equal share of its width.
     - "birds"     runs of spreads, each under its bird's name:
                   {name, status, spreads}. A bird with status
                   "in-progress" is greyed out and labelled "Work in
@@ -127,15 +138,16 @@ const PORTFOLIO_DATA = {
       },
       spreadsLabel: "Inside the book",
       aspect: 1.412,
+      smallCopies: true,
       spreads: [
-        "images/arsvita/spread-01.jpg","images/arsvita/spread-02.jpg","images/arsvita/spread-03.jpg",
-        "images/arsvita/spread-04.jpg","images/arsvita/spread-05.jpg","images/arsvita/spread-06.jpg",
-        "images/arsvita/spread-07.jpg","images/arsvita/spread-08.jpg","images/arsvita/spread-09.jpg",
-        "images/arsvita/spread-10.jpg","images/arsvita/spread-11.jpg","images/arsvita/spread-12.jpg",
-        "images/arsvita/spread-13.jpg","images/arsvita/spread-14.jpg","images/arsvita/spread-15.jpg",
-        "images/arsvita/spread-16.jpg","images/arsvita/spread-17.jpg","images/arsvita/spread-18.jpg",
-        "images/arsvita/spread-19.jpg","images/arsvita/spread-20.jpg","images/arsvita/spread-21.jpg",
-        "images/arsvita/spread-22.jpg","images/arsvita/spread-23.jpg"
+        "images/arsvita/spread-01.webp","images/arsvita/spread-02.webp","images/arsvita/spread-03.webp",
+        "images/arsvita/spread-04.webp","images/arsvita/spread-05.webp","images/arsvita/spread-06.webp",
+        "images/arsvita/spread-07.webp","images/arsvita/spread-08.webp","images/arsvita/spread-09.webp",
+        "images/arsvita/spread-10.webp","images/arsvita/spread-11.webp","images/arsvita/spread-12.webp",
+        "images/arsvita/spread-13.webp","images/arsvita/spread-14.webp","images/arsvita/spread-15.webp",
+        "images/arsvita/spread-16.webp","images/arsvita/spread-17.webp","images/arsvita/spread-18.webp",
+        "images/arsvita/spread-19.webp","images/arsvita/spread-20.webp","images/arsvita/spread-21.webp",
+        "images/arsvita/spread-22.webp","images/arsvita/spread-23.webp"
       ],
       processImages: []
     },
@@ -170,6 +182,8 @@ const PORTFOLIO_DATA = {
       spreadsLabel: "Issue 02, cover to cover",
       aspect: 1.294,
       smallCopies: true,
+      slider: true,                             // one spread at a time, with a slider bar (see the notes at the top)
+      flatplan: "images/dozer/flatplan.webp",   // the whole issue as a strip: the slider bar
       spreads: [
         "images/dozer/cover.webp","images/dozer/spread-01.webp","images/dozer/spread-02.webp",
         "images/dozer/spread-03.webp","images/dozer/spread-04.webp","images/dozer/spread-05.webp",
@@ -223,39 +237,40 @@ const PORTFOLIO_DATA = {
       },
 
       aspect: 1.333,
+      smallCopies: true,
       birds: [
         {
           name: "Marabou Stork",
           status: "complete",
           spreads: [
-            "images/pecking-order/marabou-01.jpg","images/pecking-order/marabou-02.jpg",
-            "images/pecking-order/marabou-03.jpg","images/pecking-order/marabou-04.jpg",
-            "images/pecking-order/marabou-05.jpg","images/pecking-order/marabou-06.jpg"
+            "images/pecking-order/marabou-01.webp","images/pecking-order/marabou-02.webp",
+            "images/pecking-order/marabou-03.webp","images/pecking-order/marabou-04.webp",
+            "images/pecking-order/marabou-05.webp","images/pecking-order/marabou-06.webp"
           ]
         },
         {
           name: "Shoebill",
           status: "complete",
           spreads: [
-            "images/pecking-order/shoebill-01.jpg","images/pecking-order/shoebill-02.jpg",
-            "images/pecking-order/shoebill-03.jpg","images/pecking-order/shoebill-04.jpg",
-            "images/pecking-order/shoebill-05.jpg","images/pecking-order/shoebill-06.jpg"
+            "images/pecking-order/shoebill-01.webp","images/pecking-order/shoebill-02.webp",
+            "images/pecking-order/shoebill-03.webp","images/pecking-order/shoebill-04.webp",
+            "images/pecking-order/shoebill-05.webp","images/pecking-order/shoebill-06.webp"
           ]
         },
         {
           name: "King Vulture",
           status: "complete",
           spreads: [
-            "images/pecking-order/kingvulture-01.jpg","images/pecking-order/kingvulture-02.jpg",
-            "images/pecking-order/kingvulture-03.jpg","images/pecking-order/kingvulture-04.jpg",
-            "images/pecking-order/kingvulture-05.jpg"
+            "images/pecking-order/kingvulture-01.webp","images/pecking-order/kingvulture-02.webp",
+            "images/pecking-order/kingvulture-03.webp","images/pecking-order/kingvulture-04.webp",
+            "images/pecking-order/kingvulture-05.webp"
           ]
         },
         {
           name: "Hoatzin",
           status: "in-progress",
           spreads: [
-            "images/pecking-order/hoatzin-01.jpg"
+            "images/pecking-order/hoatzin-01.webp"
           ]
         }
       ],
